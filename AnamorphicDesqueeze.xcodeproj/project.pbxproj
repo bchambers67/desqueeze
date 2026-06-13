@@ -1,0 +1,373 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		CL000001 /* AnamorphicDesqueezeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100001 /* AnamorphicDesqueezeApp.swift */; };
+		CL000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100002 /* ContentView.swift */; };
+		CL000003 /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100003 /* BrandTheme.swift */; };
+		CL000004 /* DesqueezeProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100004 /* DesqueezeProcessor.swift */; };
+		CL000005 /* DropZoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100005 /* DropZoneView.swift */; };
+		CL000006 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100006 /* PreviewView.swift */; };
+		CL000007 /* ControlsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100007 /* ControlsPanel.swift */; };
+		CL000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CL100008 /* Assets.xcassets */; };
+		D3F766AD2FDD0B080094B480 /* SqueezeEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766AC2FDD0B080094B480 /* SqueezeEstimator.swift */; };
+		D3F766AF2FDD0D550094B480 /* BatchProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766AE2FDD0D550094B480 /* BatchProcessor.swift */; };
+		D3F766B12FDD0D750094B480 /* BatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766B02FDD0D750094B480 /* BatchView.swift */; };
+		D3F766B32FDD0D910094B480 /* BatchControlsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766B22FDD0D910094B480 /* BatchControlsPanel.swift */; };
+		D3F766B52FDD78BB0094B480 /* AppIconLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766B42FDD78BB0094B480 /* AppIconLogo.swift */; };
+		D3F766B72FDD79E30094B480 /* ExternalEditState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766B62FDD79E30094B480 /* ExternalEditState.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		CL100000 /* AnamorphicDesqueeze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AnamorphicDesqueeze.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CL100001 /* AnamorphicDesqueezeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnamorphicDesqueezeApp.swift; sourceTree = "<group>"; };
+		CL100002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CL100003 /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
+		CL100004 /* DesqueezeProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeProcessor.swift; sourceTree = "<group>"; };
+		CL100005 /* DropZoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropZoneView.swift; sourceTree = "<group>"; };
+		CL100006 /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
+		CL100007 /* ControlsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsPanel.swift; sourceTree = "<group>"; };
+		CL100008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CL100009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CL100010 /* AnamorphicDesqueeze.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AnamorphicDesqueeze.entitlements; sourceTree = "<group>"; };
+		D3F766AC2FDD0B080094B480 /* SqueezeEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqueezeEstimator.swift; sourceTree = "<group>"; };
+		D3F766AE2FDD0D550094B480 /* BatchProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchProcessor.swift; sourceTree = "<group>"; };
+		D3F766B02FDD0D750094B480 /* BatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchView.swift; sourceTree = "<group>"; };
+		D3F766B22FDD0D910094B480 /* BatchControlsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchControlsPanel.swift; sourceTree = "<group>"; };
+		D3F766B42FDD78BB0094B480 /* AppIconLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconLogo.swift; sourceTree = "<group>"; };
+		D3F766B62FDD79E30094B480 /* ExternalEditState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalEditState.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CL200001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CL300000 = {
+			isa = PBXGroup;
+			children = (
+				CL300001 /* AnamorphicDesqueeze */,
+				CL300002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CL300001 /* AnamorphicDesqueeze */ = {
+			isa = PBXGroup;
+			children = (
+				CL100001 /* AnamorphicDesqueezeApp.swift */,
+				CL100002 /* ContentView.swift */,
+				CL100003 /* BrandTheme.swift */,
+				CL100004 /* DesqueezeProcessor.swift */,
+				CL100005 /* DropZoneView.swift */,
+				CL100006 /* PreviewView.swift */,
+				CL100007 /* ControlsPanel.swift */,
+				CL100008 /* Assets.xcassets */,
+				CL100009 /* Info.plist */,
+				CL100010 /* AnamorphicDesqueeze.entitlements */,
+				D3F766AC2FDD0B080094B480 /* SqueezeEstimator.swift */,
+				D3F766AE2FDD0D550094B480 /* BatchProcessor.swift */,
+				D3F766B02FDD0D750094B480 /* BatchView.swift */,
+				D3F766B22FDD0D910094B480 /* BatchControlsPanel.swift */,
+				D3F766B42FDD78BB0094B480 /* AppIconLogo.swift */,
+				D3F766B62FDD79E30094B480 /* ExternalEditState.swift */,
+			);
+			path = AnamorphicDesqueeze;
+			sourceTree = "<group>";
+		};
+		CL300002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CL100000 /* AnamorphicDesqueeze.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CL400000 /* AnamorphicDesqueeze */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CL500000 /* Build configuration list for PBXNativeTarget "AnamorphicDesqueeze" */;
+			buildPhases = (
+				CL200000 /* Sources */,
+				CL200001 /* Frameworks */,
+				CL200002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AnamorphicDesqueeze;
+			productName = AnamorphicDesqueeze;
+			productReference = CL100000 /* AnamorphicDesqueeze.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CL600000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					CL400000 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = CL500001 /* Build configuration list for PBXProject "AnamorphicDesqueeze" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = CL300000;
+			productRefGroup = CL300002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CL400000 /* AnamorphicDesqueeze */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CL200002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CL000008 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CL200000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CL000001 /* AnamorphicDesqueezeApp.swift in Sources */,
+				CL000002 /* ContentView.swift in Sources */,
+				CL000003 /* BrandTheme.swift in Sources */,
+				D3F766B52FDD78BB0094B480 /* AppIconLogo.swift in Sources */,
+				D3F766AD2FDD0B080094B480 /* SqueezeEstimator.swift in Sources */,
+				D3F766AF2FDD0D550094B480 /* BatchProcessor.swift in Sources */,
+				D3F766B12FDD0D750094B480 /* BatchView.swift in Sources */,
+				CL000004 /* DesqueezeProcessor.swift in Sources */,
+				CL000005 /* DropZoneView.swift in Sources */,
+				CL000006 /* PreviewView.swift in Sources */,
+				CL000007 /* ControlsPanel.swift in Sources */,
+				D3F766B72FDD79E30094B480 /* ExternalEditState.swift in Sources */,
+				D3F766B32FDD0D910094B480 /* BatchControlsPanel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		CL700000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CL700001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		CL700002 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				AUTOMATION_APPLE_EVENTS = NO;
+				CODE_SIGN_ENTITLEMENTS = AnamorphicDesqueeze/AnamorphicDesqueeze.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FZ6W4MM7UN;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AnamorphicDesqueeze/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chambersandlight.desqueeze;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		CL700003 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				AUTOMATION_APPLE_EVENTS = NO;
+				CODE_SIGN_ENTITLEMENTS = AnamorphicDesqueeze/AnamorphicDesqueeze.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = FZ6W4MM7UN;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_FILE_ACCESS_PICTURE_FOLDER = readwrite;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AnamorphicDesqueeze/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chambersandlight.desqueeze;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CL500000 /* Build configuration list for PBXNativeTarget "AnamorphicDesqueeze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CL700002 /* Debug */,
+				CL700003 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CL500001 /* Build configuration list for PBXProject "AnamorphicDesqueeze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CL700000 /* Debug */,
+				CL700001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CL600000 /* Project object */;
+}
