@@ -151,10 +151,6 @@ struct ControlsPanel: View {
                 Spacer()
                 if processor.suggestedPreset == preset {
                     recommendedBadge
-                } else {
-                    Text(lensHint(preset))
-                        .font(.system(size: 10))
-                        .foregroundColor(Brand.textTertiary)
                 }
             }
             .padding(.horizontal, Brand.spacingMD)
@@ -237,15 +233,6 @@ struct ControlsPanel: View {
             if on {
                 Circle().fill(Brand.accent).frame(width: 8, height: 8)
             }
-        }
-    }
-
-    private func lensHint(_ preset: SqueezePreset) -> String {
-        switch preset {
-        case .x133:  return "Hawk · Lomo"
-        case .x150:  return "SLR Magic"
-        case .x200:  return "Full 2× glass"
-        default:     return ""
         }
     }
 
@@ -410,7 +397,7 @@ struct ControlsPanel: View {
 
     private var exportButtonTitle: String {
         if processor.isProcessing { return "Processing…" }
-        return processor.isRoundTrip ? "Save Back to Host" : "Export De-squeezed"
+        return processor.isRoundTrip ? "Return Desqueezed Image to Lightroom" : "Export De-squeezed"
     }
 
     private var exportIconName: String {
@@ -420,7 +407,7 @@ struct ControlsPanel: View {
     private func export() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.jpeg, .png, .tiff]
-        panel.nameFieldStringValue = "desqueezed"
+        panel.nameFieldStringValue = processor.suggestedExportName
         panel.canCreateDirectories = true
         guard panel.runModal() == .OK, let url = panel.url else { return }
         Task {

@@ -1,6 +1,7 @@
 import AppKit
 import CoreGraphics
 import Foundation
+import UniformTypeIdentifiers
 
 /// One file in a batch. Owns its detected factor and any manual override.
 @MainActor
@@ -251,28 +252,19 @@ final class BatchProcessor: ObservableObject {
             let base = (displayName as NSString).deletingPathExtension
             let outURL = folder.appendingPathComponent("\(base)_desqueezed.\(ext)")
 
-            let fileType: NSBitmapImageRep.FileType = {
-                switch ext.lowercased() {
-                case "png":           return .png
-                case "tif", "tiff":   return .tiff
-                default:              return .jpeg
-                }
-            }()
-            let props: [NSBitmapImageRep.PropertyKey: Any] =
-                fileType == .jpeg ? [.compressionFactor: 0.92] : [:]
+            let utType = ImageWriter.fileType(forExtension: ext)
+            let jpegQuality: CGFloat? = utType == .jpeg ? 0.92 : nil
+            // Carry the source's metadata (capture date, camera, lens, GPS…)
+            // onto the desqueezed output.
+            let sourceProps = ImageWriter.readProperties(from: sourceURL)
 
-            let bmp = NSBitmapImageRep(cgImage: stretched)
-            guard let data = bmp.representation(using: fileType, properties: props) else {
+            guard ImageWriter.write(stretched, to: outURL, utType: utType,
+                                    sourceProperties: sourceProps, jpegQuality: jpegQuality)
+            else {
                 return Outcome(status: .failed("Could not encode image"),
                                error: "Could not encode image")
             }
-            do {
-                try data.write(to: outURL)
-                return Outcome(status: .completed(outURL), error: nil)
-            } catch {
-                return Outcome(status: .failed(error.localizedDescription),
-                               error: error.localizedDescription)
-            }
+            return Outcome(status: .completed(outURL), error: nil)
         }.value
     }
 }

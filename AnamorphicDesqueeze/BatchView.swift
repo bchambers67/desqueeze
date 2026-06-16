@@ -191,10 +191,9 @@ private struct BatchItemRow: View {
     private var factorControls: some View {
         HStack(spacing: Brand.spacingXS) {
             Picker("", selection: $item.selectedPreset) {
-                Text("1.33×").tag(SqueezePreset.x133)
-                Text("1.50×").tag(SqueezePreset.x150)
-                Text("2.00×").tag(SqueezePreset.x200)
-                Text("Custom").tag(SqueezePreset.custom)
+                ForEach(SqueezePreset.allCases) { preset in
+                    Text(preset.rawValue).tag(preset)
+                }
             }
             .pickerStyle(.menu)
             .labelsHidden()

@@ -33,7 +33,7 @@ struct ContentView: View {
                     .frame(minWidth: 240, idealWidth: 260, maxWidth: 300)
             }
         }
-        .frame(minWidth: 800, minHeight: 560)
+        .frame(minWidth: 800, idealWidth: 1600, minHeight: 600, idealHeight: 940)
         .preferredColorScheme(.dark)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -48,7 +48,7 @@ struct ContentView: View {
             }
         }
         .onAppear { consumePendingExternalEdit() }
-        .onChange(of: externalEdit.pendingURL) { _ in
+        .onChange(of: externalEdit.pendingURL) {
             consumePendingExternalEdit()
         }
     }

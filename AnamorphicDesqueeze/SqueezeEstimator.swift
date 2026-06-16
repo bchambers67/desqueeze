@@ -33,9 +33,9 @@ enum SqueezeEstimator {
     /// returning `.custom` if the factor is far from every preset.
     static func suggestedPreset(for factor: CGFloat) -> SqueezePreset {
         let tolerance: CGFloat = 0.08
-        let presets: [(SqueezePreset, CGFloat)] = [
-            (.x133, 1.33), (.x150, 1.50), (.x200, 2.00),
-        ]
+        let presets: [(SqueezePreset, CGFloat)] = SqueezePreset.allCases.compactMap { preset in
+            preset.factor.map { (preset, $0) }
+        }
         let nearest = presets.min { abs($0.1 - factor) < abs($1.1 - factor) }
         if let nearest, abs(nearest.1 - factor) <= tolerance {
             return nearest.0
