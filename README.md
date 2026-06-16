@@ -4,13 +4,15 @@ A native macOS app for correcting horizontally-squeezed anamorphic photographs f
 
 ## Features
 
-- **Three preset squeeze factors**: 1.33× (Hawk/Lomo), 1.50× (SLR Magic), 2.00× (full 2× glass)
-- **Custom factor** — type any value you need
-- **Side-by-side / single preview** with live toggle
+- **Automatic squeeze detection** — Vision's on-device face detector measures face geometry to suggest the squeeze factor for each image
+- **Nine preset factors** — 1.25×, 1.33×, 1.50×, 1.55×, 1.60×, 1.65×, 1.75×, 1.80×, 2.00×, plus a **Custom** field for any value
+- **Batch mode** — drop a whole folder of images, auto-detect each one, override individually or apply a factor in bulk, then export them all to a destination folder
+- **Side-by-side / single preview** with a live toggle
 - **Drag-and-drop** or file-browser import (JPEG, TIFF, PNG, HEIC, RAW)
-- **One-click export** as JPEG or PNG
-- Background processing with a progress indicator
-- Output dimensions and aspect ratio displayed in real time
+- **External editor round-trip** — open from Lightroom CC/Classic "Edit In…" or Finder "Open With" and save the desqueezed result straight back to the host
+- **Metadata preserved** — capture date, camera, lens, GPS, and EXIF are carried onto the exported image (pixel-dimension tags updated to match)
+- **One-click export** as JPEG, PNG, or TIFF
+- Background processing with progress indication and live output dimensions / aspect ratio
 
 ## Requirements
 
@@ -20,9 +22,20 @@ A native macOS app for correcting horizontally-squeezed anamorphic photographs f
 ## Building
 
 1. Clone this repository
-2. Open `desqueeze/AnamorphicDesqueeze.xcodeproj` in Xcode
+2. Open `AnamorphicDesqueeze/AnamorphicDesqueeze.xcodeproj` in Xcode
 3. Set your Development Team in *Signing & Capabilities*
 4. Press **⌘R** to build and run
+
+## How auto-detection works
+
+Faces in un-squeezed photographs have a fairly stable bounding-box width-to-height
+ratio. When an image is captured with an anamorphic lens and shown un-desqueezed,
+faces appear vertically elongated by the squeeze factor. `SqueezeEstimator` runs
+Vision's neural face detector, compares the observed face aspect against a
+calibrated reference, and recovers the factor (clamped to a plausible 1.10–2.30
+range). The measured value is snapped to the nearest preset when it's close, or
+offered as a Custom value otherwise. You always stay in control — every suggestion
+can be overridden.
 
 ## Brand
 
@@ -40,15 +53,21 @@ Typography: SF Pro (system) for UI, Georgia Serif for the app wordmark.
 
 ## Architecture
 
-| File                       | Responsibility                                      |
-|----------------------------|-----------------------------------------------------|
-| `AnamorphicDesqueezeApp`   | App entry point, window scene                       |
-| `ContentView`              | Root layout — HSplitView                            |
-| `DropZoneView`             | Drag-and-drop / file-browser import                 |
-| `PreviewView`              | Side-by-side and single-image preview modes         |
-| `ControlsPanel`            | Factor selection, output info, export               |
-| `DesqueezeProcessor`       | Core image scaling via `CGContext`, file I/O        |
-| `BrandTheme`               | Design tokens (colors, spacing, typography)         |
+| File                       | Responsibility                                              |
+|----------------------------|-------------------------------------------------------------|
+| `AnamorphicDesqueezeApp`   | App entry point, window scene, app delegate wiring          |
+| `ContentView`              | Root layout — HSplitView, single/batch mode switching       |
+| `DropZoneView`             | Drag-and-drop / file-browser import                         |
+| `PreviewView`              | Side-by-side and single-image preview modes                 |
+| `ControlsPanel`            | Factor selection, suggestion, output info, export           |
+| `DesqueezeProcessor`       | Core image scaling via `CGContext`, round-trip, file I/O    |
+| `ImageWriter`              | Metadata-preserving encode through ImageIO                  |
+| `SqueezeEstimator`         | Vision-based automatic squeeze-factor detection             |
+| `BatchProcessor` / `BatchItem` | Multi-file batch detection, override, and export        |
+| `BatchView` / `BatchControlsPanel` | Batch list UI and bulk controls                     |
+| `ExternalEditState` / `AppDelegate` | Receives "Edit In…" / "Open With" file events      |
+| `BrandTheme`               | Design tokens (colors, spacing, typography)                 |
+| `AppIconLogo`              | Wordmark / app-icon vector drawing                          |
 
 ## License
 
