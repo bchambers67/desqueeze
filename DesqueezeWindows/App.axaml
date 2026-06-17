@@ -1,0 +1,17 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="DesqueezeWindows.App"
+             RequestedThemeVariant="Dark">
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+    <Application.Resources>
+        <SolidColorBrush x:Key="AppBg"        Color="#0D0D0D"/>
+        <SolidColorBrush x:Key="AppSurface"   Color="#242424"/>
+        <SolidColorBrush x:Key="AppGold"      Color="#C9A84C"/>
+        <SolidColorBrush x:Key="AppTextPri"   Color="#F5F0E8"/>
+        <SolidColorBrush x:Key="AppTextSec"   Color="#8A8580"/>
+        <SolidColorBrush x:Key="AppBorder"    Color="#333333"/>
+        <SolidColorBrush x:Key="AppDropHover" Color="#1A1600"/>
+    </Application.Resources>
+</Application>
