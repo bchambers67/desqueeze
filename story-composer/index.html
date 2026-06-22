@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Story Composer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f0f0f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      gap: 24px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    /* Drop zone grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .slot {
+      aspect-ratio: 1;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.15s, background 0.15s;
+      user-select: none;
+    }
+
+    .slot:hover { border-color: #888; background: #fafafa; }
+    .slot.drag-over { border-color: #4a90e2; background: #eaf2ff; }
+    .slot.filled { border-style: solid; border-color: #ddd; }
+
+    .slot img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .slot-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: #bbb;
+      position: absolute;
+      top: 6px;
+      left: 8px;
+      z-index: 1;
+    }
+
+    .slot-icon {
+      font-size: 24px;
+      color: #ccc;
+    }
+
+    .slot .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      border: none;
+      font-size: 14px;
+      line-height: 22px;
+      text-align: center;
+      cursor: pointer;
+      z-index: 2;
+      display: none;
+    }
+
+    .slot.filled .remove-btn { display: block; }
+
+    input[type="file"] { display: none; }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    label.setting {
+      flex: 1;
+      font-size: 13px;
+      color: #444;
+    }
+
+    select, input[type="range"] {
+      flex: 1;
+    }
+
+    select {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    input[type="range"] {
+      accent-color: #4a90e2;
+    }
+
+    .range-val {
+      font-size: 12px;
+      color: #666;
+      width: 36px;
+      text-align: right;
+    }
+
+    /* Preview */
+    .preview-wrap {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .preview-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    canvas#preview {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      display: block;
+      background: #fff;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.4; cursor: default; }
+
+    .btn-primary {
+      background: #111;
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: #333; }
+  </style>
+</head>
+<body>
+
+<div>
+  <h1>Story Composer</h1>
+  <p class="subtitle">Add 1–6 photos · exports 1080×1920 for Instagram Stories</p>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="controls">
+  <div class="row">
+    <label class="setting">Photo fit</label>
+    <select id="fitMode">
+      <option value="cover">Fill (crop to fit)</option>
+      <option value="contain">Fit (show full photo)</option>
+    </select>
+  </div>
+  <div class="row">
+    <label class="setting">Gap between photos</label>
+    <input type="range" id="gapSlider" min="0" max="60" value="12" step="2" />
+    <span class="range-val" id="gapVal">12px</span>
+  </div>
+  <div class="row">
+    <label class="setting">Padding around edge</label>
+    <input type="range" id="padSlider" min="0" max="120" value="24" step="4" />
+    <span class="range-val" id="padVal">24px</span>
+  </div>
+</div>
+
+<div class="preview-wrap">
+  <div class="preview-label">Preview</div>
+  <canvas id="preview"></canvas>
+</div>
+
+<button class="btn btn-primary" id="downloadBtn" disabled>Download Story Image</button>
+
+<input type="file" id="fileInput" accept="image/*" multiple />
+
+<script>
+  const CANVAS_W = 1080;
+  const CANVAS_H = 1920;
+  const MAX_SLOTS = 6;
+
+  const grid = document.getElementById('grid');
+  const fileInput = document.getElementById('fileInput');
+  const previewCanvas = document.getElementById('preview');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const fitMode = document.getElementById('fitMode');
+  const gapSlider = document.getElementById('gapSlider');
+  const padSlider = document.getElementById('padSlider');
+  const gapVal = document.getElementById('gapVal');
+  const padVal = document.getElementById('padVal');
+
+  // State
+  const slots = Array(MAX_SLOTS).fill(null); // each: { img: HTMLImageElement, file: File }
+  let activeSlot = -1;
+
+  // Build slot UI
+  for (let i = 0; i < MAX_SLOTS; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    slot.dataset.index = i;
+    slot.innerHTML = `
+      <span class="slot-num">${i + 1}</span>
+      <span class="slot-icon">＋</span>
+      <button class="remove-btn" title="Remove">✕</button>
+    `;
+
+    slot.addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove-btn')) return;
+      activeSlot = i;
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    slot.querySelector('.remove-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearSlot(i);
+    });
+
+    // Drag and drop
+    slot.addEventListener('dragover', (e) => { e.preventDefault(); slot.classList.add('drag-over'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+    slot.addEventListener('drop', (e) => {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) loadImageIntoSlot(i, file);
+    });
+
+    grid.appendChild(slot);
+  }
+
+  fileInput.addEventListener('change', () => {
+    const files = Array.from(fileInput.files);
+    files.forEach((file, offset) => {
+      const idx = activeSlot + offset;
+      if (idx < MAX_SLOTS) loadImageIntoSlot(idx, file);
+    });
+  });
+
+  function loadImageIntoSlot(idx, file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        slots[idx] = { img, file };
+        updateSlotUI(idx);
+        renderPreview();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearSlot(idx) {
+    slots[idx] = null;
+    updateSlotUI(idx);
+    renderPreview();
+  }
+
+  function updateSlotUI(idx) {
+    const slot = grid.children[idx];
+    const icon = slot.querySelector('.slot-icon');
+    let img = slot.querySelector('img');
+
+    if (slots[idx]) {
+      slot.classList.add('filled');
+      icon.style.display = 'none';
+      if (!img) {
+        img = document.createElement('img');
+        slot.insertBefore(img, slot.querySelector('.remove-btn'));
+      }
+      img.src = slots[idx].img.src;
+    } else {
+      slot.classList.remove('filled');
+      icon.style.display = '';
+      if (img) img.remove();
+    }
+  }
+
+  // Settings listeners
+  [fitMode, gapSlider, padSlider].forEach(el => el.addEventListener('input', () => {
+    gapVal.textContent = gapSlider.value + 'px';
+    padVal.textContent = padSlider.value + 'px';
+    renderPreview();
+  }));
+
+  function getActiveImages() {
+    return slots.filter(Boolean);
+  }
+
+  function renderPreview() {
+    const images = getActiveImages();
+    downloadBtn.disabled = images.length === 0;
+
+    const ctx = previewCanvas.getContext('2d');
+    previewCanvas.width = CANVAS_W;
+    previewCanvas.height = CANVAS_H;
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    if (images.length === 0) return;
+
+    const gap = parseInt(gapSlider.value);
+    const pad = parseInt(padSlider.value);
+    const fit = fitMode.value;
+
+    const availH = CANVAS_H - pad * 2 - gap * (images.length - 1);
+    const slotH = Math.floor(availH / images.length);
+    const slotW = CANVAS_W - pad * 2;
+
+    images.forEach((entry, i) => {
+      const x = pad;
+      const y = pad + i * (slotH + gap);
+      drawImageFitted(ctx, entry.img, x, y, slotW, slotH, fit);
+    });
+  }
+
+  function drawImageFitted(ctx, img, x, y, w, h, mode) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    let sx = 0, sy = 0, sw = iw, sh = ih;
+    let dx = x, dy = y, dw = w, dh = h;
+
+    if (mode === 'cover') {
+      const scale = Math.max(w / iw, h / ih);
+      dw = iw * scale;
+      dh = ih * scale;
+      dx = x + (w - dw) / 2;
+      dy = y + (h - dh) / 2;
+    } else {
+      // contain
+      const scale = Math.min(w / iw, h / ih);
+      dw = iw * scale;
+      dh = ih * scale;
+      dx = x + (w - dw) / 2;
+      dy = y + (h - dh) / 2;
+    }
+
+    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.restore();
+  }
+
+  downloadBtn.addEventListener('click', () => {
+    renderPreview();
+    const link = document.createElement('a');
+    link.download = 'instagram-story.png';
+    link.href = previewCanvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // Initial render
+  renderPreview();
+</script>
+</body>
+</html>
