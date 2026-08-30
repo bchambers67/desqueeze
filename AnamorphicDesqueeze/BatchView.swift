@@ -23,7 +23,7 @@ struct BatchView: View {
     private var header: some View {
         HStack(spacing: Brand.spacingSM) {
             Text("\(processor.items.count) IMAGE\(processor.items.count == 1 ? "" : "S")")
-                .font(.system(size: 9, weight: .semibold))
+                .font(Brand.grotesk(9, weight: .semibold))
                 .tracking(1.8)
                 .foregroundColor(Brand.textTertiary)
 
@@ -38,7 +38,7 @@ struct BatchView: View {
             Spacer()
 
             Text("Drag more files here to add")
-                .font(.system(size: 10))
+                .font(Brand.grotesk(10))
                 .foregroundColor(Brand.textTertiary)
         }
         .padding(.horizontal, Brand.spacingLG)
@@ -162,7 +162,7 @@ private struct BatchItemRow: View {
     private var detectionLabel: some View {
         if !item.detectionDone {
             Text("Analyzing…")
-                .font(.system(size: 10))
+                .font(Brand.grotesk(10))
                 .foregroundColor(Brand.textTertiary)
         } else if let detected = item.detectedFactor {
             HStack(spacing: 4) {
@@ -170,20 +170,20 @@ private struct BatchItemRow: View {
                     .font(.system(size: 9))
                     .foregroundColor(Brand.accent)
                 Text(String(format: "Auto: %.2f×", detected))
-                    .font(.system(size: 10))
+                    .font(Brand.grotesk(10))
                     .foregroundColor(item.isOverridden ? Brand.textTertiary : Brand.accent)
                 if item.isOverridden {
                     Text("·")
                         .foregroundColor(Brand.textTertiary)
                     Button("Reset") { item.resetToAutoDetected() }
                         .buttonStyle(.plain)
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(Brand.grotesk(10, weight: .semibold))
                         .foregroundColor(Brand.accent)
                 }
             }
         } else {
             Text("No recommendation — set factor manually")
-                .font(.system(size: 10))
+                .font(Brand.grotesk(10))
                 .foregroundColor(Brand.textTertiary)
         }
     }

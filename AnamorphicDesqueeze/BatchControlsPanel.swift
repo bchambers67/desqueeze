@@ -27,11 +27,11 @@ struct BatchControlsPanel: View {
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text("CHAMBERS & LIGHT")
-                        .font(.system(size: 8, weight: .semibold))
+                        .font(Brand.grotesk(8, weight: .semibold))
                         .tracking(2.5)
                         .foregroundColor(Brand.accent)
                     Text("Batch")
-                        .font(.system(size: 18, weight: .light, design: .serif))
+                        .font(Brand.display(18))
                         .foregroundColor(Brand.textPrimary)
                 }
             }
@@ -106,7 +106,7 @@ struct BatchControlsPanel: View {
                     Image(systemName: "sparkles")
                         .font(.system(size: 10))
                     Text("Reset All to Auto-detected")
-                        .font(.system(size: 10))
+                        .font(Brand.grotesk(10))
                 }
                 .foregroundColor(Brand.accent)
                 .frame(maxWidth: .infinity)
@@ -154,7 +154,7 @@ struct BatchControlsPanel: View {
             .disabled(processor.isExporting)
 
             Text("Saves <original>_desqueezed.<ext> into the chosen folder.")
-                .font(.system(size: 10))
+                .font(Brand.grotesk(10))
                 .foregroundColor(Brand.textTertiary)
         }
     }
@@ -168,7 +168,7 @@ struct BatchControlsPanel: View {
                 Spacer()
                 Button("Cancel") { processor.cancelExport() }
                     .buttonStyle(.plain)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(Brand.grotesk(11, weight: .semibold))
                     .foregroundColor(Brand.danger)
             }
             ProgressView(
@@ -232,7 +232,7 @@ struct BatchControlsPanel: View {
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 9, weight: .semibold))
+            .font(Brand.grotesk(9, weight: .semibold))
             .tracking(1.8)
             .foregroundColor(Brand.textTertiary)
     }
