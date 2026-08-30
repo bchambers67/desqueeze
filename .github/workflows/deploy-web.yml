@@ -73,7 +73,7 @@ jobs:
 
   deploy:
     needs: check
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && vars.AWS_UTILITY_ROLE_ARN != ''
     runs-on: ubuntu-latest
     permissions:
       id-token: write # GitHub OIDC → the IAM role. No long-lived AWS keys.
