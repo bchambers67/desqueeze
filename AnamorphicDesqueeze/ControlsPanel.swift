@@ -30,11 +30,11 @@ struct ControlsPanel: View {
 
                 VStack(alignment: .leading, spacing: 1) {
                     Text("CHAMBERS & LIGHT")
-                        .font(.system(size: 8, weight: .semibold))
+                        .font(Brand.grotesk(8, weight: .semibold))
                         .tracking(2.5)
                         .foregroundColor(Brand.accent)
                     Text("Desqueeze")
-                        .font(.system(size: 18, weight: .light, design: .serif))
+                        .font(Brand.display(18))
                         .foregroundColor(Brand.textPrimary)
                 }
             }
@@ -83,7 +83,7 @@ struct ControlsPanel: View {
                     .foregroundColor(Brand.textTertiary)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("NO RECOMMENDATION")
-                        .font(.system(size: 8, weight: .semibold))
+                        .font(Brand.grotesk(8, weight: .semibold))
                         .tracking(1.5)
                         .foregroundColor(Brand.textTertiary)
                     Text("Couldn't detect a face — pick a factor manually.")
@@ -108,7 +108,7 @@ struct ControlsPanel: View {
                     .foregroundColor(Brand.accent)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("RECOMMENDED")
-                        .font(.system(size: 8, weight: .semibold))
+                        .font(Brand.grotesk(8, weight: .semibold))
                         .tracking(1.5)
                         .foregroundColor(Brand.accent)
                     Text(String(format: "%.2f×  •  from face geometry", factor))
@@ -120,7 +120,7 @@ struct ControlsPanel: View {
                     processor.applySuggestion()
                 }
                 .buttonStyle(.plain)
-                .font(.system(size: 11, weight: .semibold))
+                .font(Brand.grotesk(11, weight: .semibold))
                 .foregroundColor(Brand.accent)
                 .padding(.horizontal, Brand.spacingSM)
                 .padding(.vertical, 4)
@@ -216,7 +216,7 @@ struct ControlsPanel: View {
 
     private var recommendedBadge: some View {
         Text("RECOMMENDED")
-            .font(.system(size: 8, weight: .semibold))
+            .font(Brand.grotesk(8, weight: .semibold))
             .tracking(1.2)
             .foregroundColor(Brand.accent)
             .padding(.horizontal, 6)
@@ -320,12 +320,12 @@ struct ControlsPanel: View {
             if processor.isRoundTrip {
                 Button("Export to a different file…") { export() }
                     .buttonStyle(.plain)
-                    .font(.system(size: 11))
+                    .font(Brand.grotesk(11))
                     .foregroundColor(Brand.textTertiary)
                     .frame(maxWidth: .infinity)
             } else {
                 Text("Saves as JPEG, PNG, or TIFF based on the chosen file extension.")
-                    .font(.system(size: 10))
+                    .font(Brand.grotesk(10))
                     .foregroundColor(Brand.textTertiary)
             }
         }
@@ -340,7 +340,7 @@ struct ControlsPanel: View {
                     .foregroundColor(Brand.accent)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("OPENED FROM HOST")
-                        .font(.system(size: 8, weight: .semibold))
+                        .font(Brand.grotesk(8, weight: .semibold))
                         .tracking(1.5)
                         .foregroundColor(Brand.accent)
                     Text(url.lastPathComponent)
@@ -437,7 +437,7 @@ struct ControlsPanel: View {
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 9, weight: .semibold))
+            .font(Brand.grotesk(9, weight: .semibold))
             .tracking(1.8)
             .foregroundColor(Brand.textTertiary)
     }
