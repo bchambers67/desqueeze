@@ -1,72 +1,39 @@
-using DesqueezeWindows.Models;
+using System.IO;
 
 namespace DesqueezeWindows.ViewModels;
 
-public enum BatchItemStatus { Pending, Processing, Done, Error }
+public enum BatchItemState { Pending, Working, Done, Failed }
 
 public class BatchItemViewModel : ViewModelBase
 {
-    public string FilePath { get; }
-    public string FileName => Path.GetFileName(FilePath);
+    private BatchItemState _state = BatchItemState.Pending;
+    private string? _error;
 
-    public IReadOnlyList<string> PresetLabels { get; } =
-        SqueezePresets.All.Select(x => x.Label).ToArray();
+    public BatchItemViewModel(string sourcePath) => SourcePath = sourcePath;
 
-    private int _presetIndex = 2; // 1.50× default
-    public int PresetIndex
+    public string SourcePath { get; }
+    public string FileName => Path.GetFileName(SourcePath);
+
+    public BatchItemState State
     {
-        get => _presetIndex;
-        set
-        {
-            if (!SetField(ref _presetIndex, value)) return;
-            _selectedPreset = SqueezePresets.All[value].Preset;
-            OnPropertyChanged(nameof(IsCustom));
-            OnPropertyChanged(nameof(ActiveFactor));
-        }
+        get => _state;
+        set { if (Set(ref _state, value)) { Raise(nameof(StatusLabel)); Raise(nameof(IsFailed)); } }
     }
 
-    private SqueezePreset _selectedPreset = SqueezePreset.X150;
-    public SqueezePreset SelectedPreset => _selectedPreset;
-
-    private string _customFactor = "1.50";
-    public string CustomFactor
+    public string? Error
     {
-        get => _customFactor;
-        set { SetField(ref _customFactor, value); OnPropertyChanged(nameof(ActiveFactor)); }
+        get => _error;
+        set { if (Set(ref _error, value)) Raise(nameof(StatusLabel)); }
     }
 
-    public bool IsCustom => _selectedPreset == SqueezePreset.Custom;
+    public bool IsFailed => _state == BatchItemState.Failed;
 
-    public double ActiveFactor =>
-        _selectedPreset == SqueezePreset.Custom
-            ? (double.TryParse(_customFactor, System.Globalization.NumberStyles.Any,
-                               System.Globalization.CultureInfo.InvariantCulture, out var v)
-                ? v : 1.50)
-            : SqueezePresets.FactorFor(_selectedPreset) ?? 1.50;
-
-    private BatchItemStatus _status = BatchItemStatus.Pending;
-    public BatchItemStatus Status { get => _status; set => SetField(ref _status, value); }
-
-    private string? _errorMessage;
-    public string? ErrorMessage { get => _errorMessage; set => SetField(ref _errorMessage, value); }
-
-    public string StatusText => _status switch
+    public string StatusLabel => _state switch
     {
-        BatchItemStatus.Processing => "⟳",
-        BatchItemStatus.Done       => "✓",
-        BatchItemStatus.Error      => "✗",
-        _                          => "–",
+        BatchItemState.Pending => "QUEUED",
+        BatchItemState.Working => "WORKING",
+        BatchItemState.Done    => "DONE",
+        BatchItemState.Failed  => Error is null ? "FAILED" : $"FAILED · {Error}",
+        _                      => "",
     };
-
-    public BatchItemViewModel(string filePath, int presetIndex = 2)
-    {
-        FilePath = filePath;
-        PresetIndex = presetIndex;
-    }
-
-    public void SetPresetIndex(int index)
-    {
-        PresetIndex = index;
-        OnPropertyChanged(nameof(StatusText));
-    }
 }

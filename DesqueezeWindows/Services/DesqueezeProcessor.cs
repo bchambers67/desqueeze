@@ -1,91 +1,68 @@
-using Avalonia.Media.Imaging;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.Formats.Tiff;
-using SixLabors.ImageSharp.Metadata.Profiles.Exif;
-using SixLabors.ImageSharp.Processing;
+using System.IO;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace DesqueezeWindows.Services;
 
+/// <summary>
+/// The image operation itself: widen by the squeeze factor, height untouched.
+/// Stateless, so the single-image and batch paths share one code path.
+/// </summary>
 public static class DesqueezeProcessor
 {
-    private static readonly string[] SupportedExtensions =
-        [".jpg", ".jpeg", ".png", ".tif", ".tiff", ".heic", ".bmp", ".webp"];
-
-    public static bool IsSupported(string path) =>
-        SupportedExtensions.Contains(
-            Path.GetExtension(path).ToLowerInvariant());
-
-    /// <summary>
-    /// Returns an Avalonia Bitmap for preview plus the output pixel dimensions.
-    /// </summary>
-    public static async Task<(Bitmap Preview, int Width, int Height)> ProcessForPreviewAsync(
-        string sourcePath, double factor)
+    public static BitmapSource Load(string path)
     {
-        using var source = await Image.LoadAsync(sourcePath);
-        int newW = Math.Max(1, (int)Math.Round(source.Width * factor));
-        int newH = source.Height;
-
-        using var processed = source.Clone(ctx =>
-            ctx.Resize(new ResizeOptions
-            {
-                Size = new Size(newW, newH),
-                Mode = ResizeMode.Stretch,
-                Sampler = KnownResamplers.Lanczos3,
-            }));
-
-        using var ms = new MemoryStream();
-        await processed.SaveAsPngAsync(ms);
-        ms.Position = 0;
-        return (new Bitmap(ms), newW, newH);
+        var bmp = new BitmapImage();
+        bmp.BeginInit();
+        bmp.UriSource     = new Uri(path);
+        bmp.CacheOption   = BitmapCacheOption.OnLoad;
+        bmp.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
+        bmp.EndInit();
+        bmp.Freeze();
+        return bmp;
     }
 
-    /// <summary>
-    /// Desqueezes and exports, preserving EXIF/XMP/IPTC metadata from the source.
-    /// </summary>
-    public static async Task ExportAsync(string sourcePath, string destPath, double factor)
+    /// <summary>Scales <paramref name="source"/> horizontally by <paramref name="factor"/>.</summary>
+    public static BitmapSource Desqueeze(BitmapSource source, double factor)
     {
-        using var source = await Image.LoadAsync(sourcePath);
+        int newWidth  = (int)Math.Round(source.PixelWidth * factor);
+        int newHeight = source.PixelHeight;
 
-        var exifProfile = source.Metadata.ExifProfile?.DeepClone();
-        var xmpProfile  = source.Metadata.XmpProfile;
-        var iptcProfile = source.Metadata.IptcProfile;
-
-        int newW = Math.Max(1, (int)Math.Round(source.Width * factor));
-        int newH = source.Height;
-
-        using var processed = source.Clone(ctx =>
-            ctx.Resize(new ResizeOptions
-            {
-                Size = new Size(newW, newH),
-                Mode = ResizeMode.Stretch,
-                Sampler = KnownResamplers.Lanczos3,
-            }));
-
-        // Update pixel-dimension tags so stored metadata stays consistent.
-        if (exifProfile != null)
+        var visual = new DrawingVisual();
+        RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.HighQuality);
+        using (var dc = visual.RenderOpen())
         {
-            exifProfile.SetValue(ExifTag.PixelXDimension, (uint)newW);
-            exifProfile.SetValue(ExifTag.PixelYDimension, (uint)newH);
-            processed.Metadata.ExifProfile = exifProfile;
+            dc.DrawImage(source, new Rect(0, 0, newWidth, newHeight));
         }
-        if (xmpProfile  != null) processed.Metadata.XmpProfile  = xmpProfile;
-        if (iptcProfile != null) processed.Metadata.IptcProfile = iptcProfile;
 
-        var ext = Path.GetExtension(destPath).ToLowerInvariant();
-        switch (ext)
-        {
-            case ".png":
-                await processed.SaveAsPngAsync(destPath);
-                break;
-            case ".tif":
-            case ".tiff":
-                await processed.SaveAsTiffAsync(destPath);
-                break;
-            default:
-                await processed.SaveAsJpegAsync(destPath, new JpegEncoder { Quality = 92 });
-                break;
-        }
+        var rtb = new RenderTargetBitmap(
+            newWidth, newHeight, source.DpiX, source.DpiY, PixelFormats.Pbgra32);
+        rtb.Render(visual);
+        rtb.Freeze();
+        return rtb;
     }
+
+    /// <summary>Encoder chosen from the target extension; JPEG is the fallback.</summary>
+    public static void Save(BitmapSource image, string path)
+    {
+        BitmapEncoder encoder = Path.GetExtension(path).ToLowerInvariant() switch
+        {
+            ".png"            => new PngBitmapEncoder(),
+            ".tif" or ".tiff" => new TiffBitmapEncoder(),
+            _                 => new JpegBitmapEncoder { QualityLevel = 92 },
+        };
+
+        encoder.Frames.Add(BitmapFrame.Create(image));
+
+        var dir = Path.GetDirectoryName(path);
+        if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+        using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+        encoder.Save(fs);
+    }
+
+    /// <summary>Reads, de-squeezes, and writes one file. Safe to call off the UI thread.</summary>
+    public static void ProcessFile(string sourcePath, string destPath, double factor)
+        => Save(Desqueeze(Load(sourcePath), factor), destPath);
 }
