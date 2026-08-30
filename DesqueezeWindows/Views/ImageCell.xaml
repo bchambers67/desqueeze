@@ -1,0 +1,52 @@
+<UserControl x:Class="DesqueezeWindows.ImageCell"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DesqueezeWindows">
+
+    <Grid Background="{StaticResource ChamberBrush}">
+
+        <Image x:Name="PreviewImage"
+               Stretch="Uniform"
+               RenderOptions.BitmapScalingMode="HighQuality"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Center"/>
+
+        <!-- Placeholder / processing state -->
+        <Grid x:Name="Placeholder"
+              Background="{StaticResource ChamberBrush}"
+              Visibility="Collapsed">
+            <ProgressBar x:Name="Spinner"
+                         IsIndeterminate="True"
+                         Width="72" Height="2"
+                         Background="{StaticResource PineBrush}"
+                         Foreground="{StaticResource SafelightBrush}"
+                         BorderThickness="0"/>
+            <Rectangle x:Name="EmptyDash"
+                       Width="18" Height="1"
+                       Fill="{StaticResource GrainBrush}"
+                       Opacity="0.5"
+                       Visibility="Collapsed"/>
+        </Grid>
+
+        <!-- Label badge: safelight tick + tracked caps -->
+        <Border HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="8"
+                Background="#D916110F"
+                Padding="8,5">
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Width="10" Height="2"
+                           Fill="{StaticResource SafelightBrush}"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="LabelText"
+                           FontFamily="{StaticResource GroteskFont}"
+                           FontSize="8"
+                           FontWeight="SemiBold"
+                           local:Track.Em="0.18"
+                           Foreground="{StaticResource PaperBrush}"
+                           VerticalAlignment="Center"
+                           Margin="8,0,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
