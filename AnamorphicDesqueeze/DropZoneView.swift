@@ -32,7 +32,7 @@ struct DropZoneView: View {
                 }
 
                 Text("JPEG  ·  TIFF  ·  PNG  ·  HEIC  ·  RAW")
-                    .font(.system(size: 10, weight: .regular))
+                    .font(Brand.grotesk(10, weight: .regular))
                     .tracking(0.5)
                     .foregroundColor(Brand.textTertiary)
                     .padding(.top, Brand.spacingXS)

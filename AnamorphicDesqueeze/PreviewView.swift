@@ -96,7 +96,7 @@ struct PreviewView: View {
             }
 
             Text(label)
-                .font(.system(size: 9, weight: .semibold))
+                .font(Brand.grotesk(9, weight: .semibold))
                 .tracking(1.2)
                 .foregroundColor(Brand.textSecondary)
                 .padding(.horizontal, Brand.spacingSM)
