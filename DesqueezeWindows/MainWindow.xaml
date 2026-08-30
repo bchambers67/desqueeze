@@ -1,0 +1,400 @@
+<Window x:Class="DesqueezeWindows.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:DesqueezeWindows"
+        Title="Desqueeze — Chambers &amp; Light"
+        MinWidth="880" MinHeight="600"
+        Width="1120" Height="720"
+        Background="{StaticResource ChamberBrush}"
+        WindowStyle="SingleBorderWindow"
+        AllowDrop="True"
+        Drop="Window_Drop"
+        DragOver="Window_DragOver">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <local:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="480"/>
+            <ColumnDefinition Width="1"/>
+            <ColumnDefinition Width="288" MinWidth="264" MaxWidth="340"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ══ LEFT — Drop zone / Preview ══════════════════════════════════ -->
+        <Grid Grid.Column="0" Background="{StaticResource ChamberBrush}">
+
+            <!-- Drop zone -->
+            <Border Margin="24"
+                    Background="{StaticResource ChamberBrush}"
+                    BorderBrush="{StaticResource EdgeLightBrush}"
+                    BorderThickness="1"
+                    Visibility="{Binding HasImage, Converter={StaticResource InvBoolToVis}}"
+                    Cursor="Hand"
+                    MouseLeftButtonUp="DropZone_Click">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="32">
+
+                    <!-- Anamorphic mark: the squeezed frame opening to true width -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Rectangle Width="22" Height="46"
+                                   Stroke="{StaticResource GrainBrush}" StrokeThickness="1"/>
+                        <Rectangle Width="18" Height="1" Margin="8,0"
+                                   Fill="{StaticResource SafelightBrush}"
+                                   VerticalAlignment="Center"/>
+                        <Rectangle Width="62" Height="46"
+                                   Stroke="{StaticResource HalideDeepBrush}" StrokeThickness="1"/>
+                    </StackPanel>
+
+                    <TextBlock Text="DROP AN IMAGE OR FOLDER"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="10" FontWeight="SemiBold"
+                               local:Track.Em="0.18"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,24,0,0"/>
+                    <TextBlock Text="or click to browse"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource GrainBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,4,0,0"/>
+                    <TextBlock Text="JPEG · TIFF · PNG · HEIC · BMP · WEBP"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="8"
+                               local:Track.Em="0.12"
+                               Foreground="{StaticResource GrainBrush}"
+                               HorizontalAlignment="Center"
+                               Margin="0,20,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Preview -->
+            <Grid Visibility="{Binding HasImage, Converter={StaticResource BoolToVis}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="1"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Background="{StaticResource ChamberRaisedBrush}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <RadioButton x:Name="SideBySideBtn" Content="COMPARE"
+                                     GroupName="PreviewMode"
+                                     IsChecked="True"
+                                     Style="{StaticResource PreviewModeRadio}"
+                                     Checked="PreviewMode_Changed"/>
+                        <RadioButton x:Name="OriginalBtn" Content="SOURCE"
+                                     GroupName="PreviewMode"
+                                     Style="{StaticResource PreviewModeRadio}"
+                                     Checked="PreviewMode_Changed"/>
+                        <RadioButton x:Name="ProcessedBtn" Content="CORRECTED"
+                                     GroupName="PreviewMode"
+                                     Style="{StaticResource PreviewModeRadio}"
+                                     Checked="PreviewMode_Changed"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding OutputSizeText}"
+                               FontFamily="{StaticResource MonoFont}"
+                               FontSize="11"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,16,0"/>
+                </Grid>
+
+                <Rectangle Grid.Row="1" Fill="{StaticResource EdgeLightBrush}"/>
+
+                <Grid Grid.Row="2" Background="{StaticResource ChamberBrush}">
+                    <Grid x:Name="SideBySidePanel">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <local:ImageCell Grid.Column="0"
+                                         ImageSource="{Binding SourceImage}"
+                                         Label="SOURCE"
+                                         IsProcessing="False"/>
+
+                        <Rectangle Grid.Column="1" Fill="{StaticResource EdgeLightBrush}"/>
+
+                        <local:ImageCell Grid.Column="2"
+                                         ImageSource="{Binding ProcessedImage}"
+                                         Label="CORRECTED"
+                                         IsProcessing="{Binding IsProcessing}"/>
+                    </Grid>
+
+                    <local:ImageCell x:Name="OriginalPanel"
+                                     ImageSource="{Binding SourceImage}"
+                                     Label="SOURCE"
+                                     IsProcessing="False"
+                                     Visibility="Collapsed"/>
+
+                    <local:ImageCell x:Name="ProcessedPanel"
+                                     ImageSource="{Binding ProcessedImage}"
+                                     Label="CORRECTED"
+                                     IsProcessing="{Binding IsProcessing}"
+                                     Visibility="Collapsed"/>
+                </Grid>
+
+                <!-- Batch queue strip -->
+                <Border Grid.Row="3"
+                        Background="{StaticResource ChamberRaisedBrush}"
+                        BorderBrush="{StaticResource EdgeLightBrush}"
+                        BorderThickness="0,1,0,0"
+                        MaxHeight="150"
+                        Visibility="{Binding IsBatchMode, Converter={StaticResource BoolToVis}}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding BatchItems}" Margin="12,8">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding FileName}"
+                                                   FontFamily="{StaticResource MonoFont}"
+                                                   FontSize="11"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Foreground="{StaticResource HalideDeepBrush}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding StatusLabel}"
+                                                   FontFamily="{StaticResource GroteskFont}"
+                                                   FontSize="8" FontWeight="SemiBold"
+                                                   Foreground="{StaticResource GrainBrush}"
+                                                   Margin="12,0,0,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Rectangle Grid.Column="1" Fill="{StaticResource EdgeLightBrush}"/>
+
+        <!-- ══ RIGHT — Controls ══════════════════════════════════════════ -->
+        <ScrollViewer Grid.Column="2"
+                      Background="{StaticResource ChamberRaisedBrush}"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="24">
+
+                <!-- Brand header -->
+                <StackPanel Margin="0,0,0,24">
+                    <Rectangle Width="26" Height="2"
+                               Fill="{StaticResource SafelightBrush}"
+                               HorizontalAlignment="Left"/>
+                    <TextBlock Text="CHAMBERS &amp; LIGHT"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="8" FontWeight="SemiBold"
+                               local:Track.Em="0.22"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               Margin="0,10,0,0"/>
+                    <TextBlock Text="Desqueeze"
+                               FontFamily="{StaticResource DisplayFont}"
+                               FontSize="{StaticResource FontSizeWordmark}"
+                               Foreground="{StaticResource PaperBrush}"
+                               Margin="0,2,0,0"/>
+                    <TextBlock Text="Anamorphic image correction"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource GrainBrush}"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+
+                <Rectangle Height="1" Fill="{StaticResource EdgeLightBrush}" Margin="0,0,0,24"/>
+
+                <!-- Squeeze factor -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Rectangle Width="14" Height="2" Fill="{StaticResource SafelightBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="SQUEEZE FACTOR"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="9" FontWeight="SemiBold"
+                               local:Track.Em="0.18"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <ItemsControl ItemsSource="{Binding Presets}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <RadioButton GroupName="Presets"
+                                         Content="{Binding Label}"
+                                         Tag="{Binding Hint}"
+                                         IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                         Style="{StaticResource PresetRadio}"
+                                         Click="Preset_Click"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Custom row -->
+                <Grid Margin="0,1,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <RadioButton x:Name="RadioCustom" Grid.Column="0"
+                                 GroupName="Presets"
+                                 Content="Custom"
+                                 IsChecked="{Binding IsCustom, Mode=OneWay}"
+                                 Style="{StaticResource PresetRadio}"
+                                 FontFamily="{StaticResource GroteskFont}"
+                                 Click="Custom_Click"/>
+
+                    <TextBox Grid.Column="1"
+                             Width="54"
+                             VerticalAlignment="Center"
+                             Text="{Binding CustomFactor, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource FactorTextBox}"
+                             IsEnabled="{Binding IsCustom}"
+                             KeyDown="CustomFactor_KeyDown"/>
+
+                    <TextBlock Grid.Column="2" Text="×"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource GrainBrush}"
+                               VerticalAlignment="Center"
+                               Margin="6,0,14,0"/>
+                </Grid>
+
+                <Rectangle Height="1" Fill="{StaticResource EdgeLightBrush}" Margin="0,16,0,24"/>
+
+                <!-- Output -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Rectangle Width="14" Height="2" Fill="{StaticResource SafelightBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="OUTPUT"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="9" FontWeight="SemiBold"
+                               local:Track.Em="0.18"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <local:InfoRow Label="SOURCE" Value="{Binding SourceSizeText}"/>
+                <local:InfoRow Label="OUTPUT" Value="{Binding OutputSizeText}"  Margin="0,8,0,0"/>
+                <local:InfoRow Label="FACTOR" Value="{Binding FactorText}"      Margin="0,8,0,0"/>
+                <local:InfoRow Label="ASPECT" Value="{Binding AspectRatioText}" Margin="0,8,0,0"/>
+
+                <Rectangle Height="1" Fill="{StaticResource EdgeLightBrush}" Margin="0,24,0,24"/>
+
+                <!-- Batch -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Rectangle Width="14" Height="2" Fill="{StaticResource SafelightBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="BATCH"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="9" FontWeight="SemiBold"
+                               local:Track.Em="0.18"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <local:InfoRow Label="FOLDER"   Value="{Binding BatchFolderText}"/>
+                <local:InfoRow Label="PROGRESS" Value="{Binding BatchProgressText}" Margin="0,8,0,0"/>
+
+                <Button Content="Choose folder…"
+                        Style="{StaticResource PlainButton}"
+                        Foreground="{StaticResource HalideBrush}"
+                        FontFamily="{StaticResource GroteskFont}"
+                        FontSize="{StaticResource FontSizeCaption}"
+                        Click="ChooseFolder_Click"
+                        HorizontalAlignment="Left"
+                        Margin="0,12,0,0"/>
+
+                <Button Content="PROCESS FOLDER"
+                        Style="{StaticResource SecondaryButton}"
+                        IsEnabled="{Binding CanRunBatch}"
+                        Click="RunBatch_Click"
+                        Margin="0,10,0,0"/>
+
+                <Rectangle Height="1" Fill="{StaticResource EdgeLightBrush}" Margin="0,24,0,24"/>
+
+                <!-- Export -->
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                    <Rectangle Width="14" Height="2" Fill="{StaticResource SafelightBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="EXPORT"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="9" FontWeight="SemiBold"
+                               local:Track.Em="0.18"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <Border Background="{StaticResource SafelightFaintBrush}"
+                        Padding="12,8" Margin="0,0,0,8"
+                        Visibility="{Binding HasError, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="{Binding ErrorMessage}"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource SafelightBrush}"
+                               TextWrapping="Wrap"/>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8"
+                            Visibility="{Binding HasSuccess, Converter={StaticResource BoolToVis}}">
+                    <Rectangle Width="12" Height="2" Fill="{StaticResource HalideDeepBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding SuccessMessage}"
+                               FontFamily="{StaticResource GroteskFont}"
+                               FontSize="{StaticResource FontSizeCaption}"
+                               Foreground="{StaticResource HalideDeepBrush}"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
+
+                <Button Content="EXPORT"
+                        Style="{StaticResource ExportButton}"
+                        IsEnabled="{Binding CanExport}"
+                        Click="Export_Click"/>
+
+                <TextBlock Text="JPEG, PNG, or TIFF by file extension."
+                           FontFamily="{StaticResource GroteskFont}"
+                           FontSize="10"
+                           Foreground="{StaticResource GrainBrush}"
+                           TextWrapping="Wrap"
+                           Margin="0,8,0,0"/>
+
+                <Button Content="Open different image…"
+                        Style="{StaticResource PlainButton}"
+                        Foreground="{StaticResource HalideBrush}"
+                        FontFamily="{StaticResource GroteskFont}"
+                        FontSize="{StaticResource FontSizeCaption}"
+                        IsEnabled="{Binding HasImage}"
+                        Click="OpenNew_Click"
+                        HorizontalAlignment="Left"
+                        Margin="0,20,0,0"/>
+
+                <!-- Colophon -->
+                <Rectangle Height="1" Fill="{StaticResource EdgeLightBrush}" Margin="0,24,0,0"/>
+                <TextBlock Text="CHAMBERS &amp; LIGHT LLC · BRIANTCHAMBERS.COM"
+                           FontFamily="{StaticResource GroteskFont}"
+                           FontSize="8"
+                           local:Track.Em="0.12"
+                           Foreground="{StaticResource GrainBrush}"
+                           TextWrapping="Wrap"
+                           Margin="0,10,0,0"/>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
