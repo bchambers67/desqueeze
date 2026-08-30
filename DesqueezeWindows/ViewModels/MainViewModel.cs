@@ -1,175 +1,235 @@
-using Avalonia.Media.Imaging;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Media.Imaging;
 using DesqueezeWindows.Models;
 using DesqueezeWindows.Services;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using System.Collections.ObjectModel;
-using System.Globalization;
 
 namespace DesqueezeWindows.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
-    // ── Mode ─────────────────────────────────────────────────────────────────
-    private bool _isBatchMode;
-    public bool IsBatchMode
+    // ── Single image ────────────────────────────────────────────
+
+    private BitmapSource? _sourceImage;
+    private BitmapSource? _processedImage;
+    private SqueezePreset _selectedPreset = SqueezePreset.X150;
+    private string        _customFactor   = "1.33";
+    private bool          _isProcessing;
+    private string?       _errorMessage;
+    private string?       _successMessage;
+
+    // ── Batch ─────────────────────────────────────────────────
+
+    private bool    _isBatchMode;
+    private bool    _isBatchRunning;
+    private int     _batchCompleted;
+    private string? _batchFolder;
+
+    public ObservableCollection<BatchItemViewModel> BatchItems { get; } = [];
+
+    // ── Presets ─────────────────────────────────────────────
+
+    public IReadOnlyList<SqueezePresetOption> Presets { get; } =
+        SqueezePresets.All
+            .Where(p => p.Preset != SqueezePreset.Custom)
+            .Select(p => new SqueezePresetOption(p.Preset, p.Label, p.Hint))
+            .ToList();
+
+    public MainViewModel() => SyncPresetSelection();
+
+    public SqueezePreset SelectedPreset
     {
-        get => _isBatchMode;
-        set { SetField(ref _isBatchMode, value); OnPropertyChanged(nameof(IsSingleMode)); }
-    }
-    public bool IsSingleMode => !_isBatchMode;
-
-    // ── Preset lists ─────────────────────────────────────────────────────────
-    public IReadOnlyList<string> PresetLabels { get; } =
-        SqueezePresets.All.Select(x => x.Label).ToArray();
-
-    // ── Single-image state ───────────────────────────────────────────────────
-    private string? _sourcePath;
-    public string? SourcePath { get => _sourcePath; set => SetField(ref _sourcePath, value); }
-
-    private Bitmap? _sourcePreview;
-    public Bitmap? SourcePreview
-    {
-        get => _sourcePreview;
-        set { SetField(ref _sourcePreview, value); OnPropertyChanged(nameof(HasImage)); OnPropertyChanged(nameof(NoImage)); }
-    }
-
-    private Bitmap? _processedPreview;
-    public Bitmap? ProcessedPreview
-    {
-        get => _processedPreview;
-        set => SetField(ref _processedPreview, value);
-    }
-
-    public bool HasImage => _sourcePreview != null;
-    public bool NoImage  => _sourcePreview == null;
-
-    private int _presetIndex = 2; // 1.50× default
-    public int PresetIndex
-    {
-        get => _presetIndex;
+        get => _selectedPreset;
         set
         {
-            if (!SetField(ref _presetIndex, value)) return;
-            _selectedPreset = SqueezePresets.All[value].Preset;
-            OnPropertyChanged(nameof(IsCustom));
-            OnPropertyChanged(nameof(ActiveFactor));
+            if (!Set(ref _selectedPreset, value)) return;
+            SyncPresetSelection();
+            Raise(nameof(ActiveFactor));
+            Raise(nameof(FactorText));
+            Raise(nameof(IsCustom));
+            Raise(nameof(AspectRatioText));
+            _ = ProcessAsync();
         }
     }
 
-    private SqueezePreset _selectedPreset = SqueezePreset.X150;
+    /// <summary>Mirrors <see cref="SelectedPreset"/> onto the bound option rows.</summary>
+    private void SyncPresetSelection()
+    {
+        foreach (var opt in Presets) opt.IsSelected = opt.Preset == _selectedPreset;
+    }
 
-    private string _customFactor = "1.50";
     public string CustomFactor
     {
         get => _customFactor;
-        set { SetField(ref _customFactor, value); OnPropertyChanged(nameof(ActiveFactor)); }
-    }
-
-    public bool IsCustom => _selectedPreset == SqueezePreset.Custom;
-
-    public double ActiveFactor =>
-        _selectedPreset == SqueezePreset.Custom
-            ? (double.TryParse(_customFactor, NumberStyles.Any,
-                               CultureInfo.InvariantCulture, out var v) ? v : 1.50)
-            : SqueezePresets.FactorFor(_selectedPreset) ?? 1.50;
-
-    private bool _isProcessing;
-    public bool IsProcessing { get => _isProcessing; set { SetField(ref _isProcessing, value); OnPropertyChanged(nameof(IsIdle)); } }
-    public bool IsIdle => !_isProcessing;
-
-    private string? _errorMessage;
-    public string? ErrorMessage { get => _errorMessage; set => SetField(ref _errorMessage, value); }
-
-    private int _outputWidth;
-    public int OutputWidth  { get => _outputWidth;  set { SetField(ref _outputWidth, value);  OnPropertyChanged(nameof(OutputInfo)); } }
-
-    private int _outputHeight;
-    public int OutputHeight { get => _outputHeight; set { SetField(ref _outputHeight, value); OnPropertyChanged(nameof(OutputInfo)); } }
-
-    public string OutputInfo =>
-        _outputWidth > 0 ? $"{_outputWidth} × {_outputHeight} px" : "";
-
-    // ── Batch state ───────────────────────────────────────────────────────────
-    public ObservableCollection<BatchItemViewModel> BatchItems { get; } = new();
-
-    private int _bulkPresetIndex = 2; // 1.50×
-    public int BulkPresetIndex
-    {
-        get => _bulkPresetIndex;
         set
         {
-            if (!SetField(ref _bulkPresetIndex, value)) return;
-            _bulkPreset = SqueezePresets.All[value].Preset;
-            OnPropertyChanged(nameof(IsBulkCustom));
+            if (!Set(ref _customFactor, value)) return;
+            Raise(nameof(ActiveFactor));
+            Raise(nameof(FactorText));
+            Raise(nameof(AspectRatioText));
         }
     }
-    private SqueezePreset _bulkPreset = SqueezePreset.X150;
 
-    private string _bulkCustomFactor = "1.50";
-    public string BulkCustomFactor { get => _bulkCustomFactor; set => SetField(ref _bulkCustomFactor, value); }
-    public bool IsBulkCustom => _bulkPreset == SqueezePreset.Custom;
+    public bool IsCustom => SelectedPreset == SqueezePreset.Custom;
 
-    private bool _isBatchProcessing;
-    public bool IsBatchProcessing { get => _isBatchProcessing; set { SetField(ref _isBatchProcessing, value); OnPropertyChanged(nameof(IsBatchIdle)); } }
-    public bool IsBatchIdle => !_isBatchProcessing;
+    public double ActiveFactor =>
+        SqueezePresets.FactorFor(SelectedPreset)
+        ?? (double.TryParse(CustomFactor, out var v) && v > 0 ? v : 1.33);
 
-    private int _batchProgress;
-    public int BatchProgress { get => _batchProgress; set => SetField(ref _batchProgress, value); }
+    // ── Single-image state ──────────────────────────────────────
 
-    private string? _batchStatus;
-    public string? BatchStatus { get => _batchStatus; set => SetField(ref _batchStatus, value); }
-
-    // ── Single-mode operations ────────────────────────────────────────────────
-    public async Task LoadImageAsync(string path)
+    public BitmapSource? SourceImage
     {
-        SourcePath = path;
-        ErrorMessage = null;
+        get => _sourceImage;
+        private set
+        {
+            if (!Set(ref _sourceImage, value)) return;
+            Raise(nameof(HasImage));
+            Raise(nameof(SourceSizeText));
+            Raise(nameof(AspectRatioText));
+        }
+    }
+
+    public BitmapSource? ProcessedImage
+    {
+        get => _processedImage;
+        private set
+        {
+            if (!Set(ref _processedImage, value)) return;
+            Raise(nameof(OutputSizeText));
+            Raise(nameof(CanExport));
+        }
+    }
+
+    public bool HasImage => _sourceImage is not null;
+
+    public bool IsProcessing
+    {
+        get => _isProcessing;
+        private set { if (Set(ref _isProcessing, value)) Raise(nameof(CanExport)); }
+    }
+
+    public string? ErrorMessage
+    {
+        get => _errorMessage;
+        private set { if (Set(ref _errorMessage, value)) Raise(nameof(HasError)); }
+    }
+
+    public bool HasError => !string.IsNullOrEmpty(_errorMessage);
+
+    public string? SuccessMessage
+    {
+        get => _successMessage;
+        private set { if (Set(ref _successMessage, value)) Raise(nameof(HasSuccess)); }
+    }
+
+    public bool HasSuccess => !string.IsNullOrEmpty(_successMessage);
+
+    public bool CanExport => ProcessedImage is not null && !IsProcessing;
+
+    // ── Readouts ────────────────────────────────────────────
+
+    public string SourceSizeText => SourceImage is null
+        ? "—" : $"{SourceImage.PixelWidth} × {SourceImage.PixelHeight}";
+
+    public string OutputSizeText => ProcessedImage is null
+        ? "—" : $"{ProcessedImage.PixelWidth} × {ProcessedImage.PixelHeight}";
+
+    public string FactorText => $"{ActiveFactor:F2}×";
+
+    public string AspectRatioText => SourceImage is null
+        ? "—"
+        : $"{(SourceImage.PixelWidth * ActiveFactor) / SourceImage.PixelHeight:F2} : 1";
+
+    // ── Batch state ───────────────────────────────────────────
+
+    public bool IsBatchMode
+    {
+        get => _isBatchMode;
+        set => Set(ref _isBatchMode, value);
+    }
+
+    public bool IsBatchRunning
+    {
+        get => _isBatchRunning;
+        private set { if (Set(ref _isBatchRunning, value)) Raise(nameof(CanRunBatch)); }
+    }
+
+    public int BatchCompleted
+    {
+        get => _batchCompleted;
+        private set { if (Set(ref _batchCompleted, value)) Raise(nameof(BatchProgressText)); }
+    }
+
+    public string? BatchFolder
+    {
+        get => _batchFolder;
+        private set { if (Set(ref _batchFolder, value)) Raise(nameof(BatchFolderText)); }
+    }
+
+    public string BatchFolderText => BatchFolder is null ? "—" : Path.GetFileName(BatchFolder);
+
+    public string BatchProgressText => BatchItems.Count == 0
+        ? "—" : $"{BatchCompleted} / {BatchItems.Count}";
+
+    public bool CanRunBatch => BatchItems.Count > 0 && !IsBatchRunning;
+
+    // ── Load ────────────────────────────────────────────────
+
+    public void LoadFromPath(string path)
+    {
+        try
+        {
+            SourceImage  = DesqueezeProcessor.Load(path);
+            ErrorMessage = null;
+            _ = ProcessAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not load image: {ex.Message}";
+        }
+    }
+
+    public void LoadBatchFolder(string folder)
+    {
+        try
+        {
+            BatchItems.Clear();
+            foreach (var f in BatchProcessor.GetImageFiles(folder))
+                BatchItems.Add(new BatchItemViewModel(f));
+
+            BatchFolder    = folder;
+            BatchCompleted = 0;
+            ErrorMessage   = BatchItems.Count == 0 ? "No supported images in that folder." : null;
+
+            Raise(nameof(BatchProgressText));
+            Raise(nameof(CanRunBatch));
+
+            // Preview the first frame so the factor can be judged before running.
+            if (BatchItems.Count > 0) LoadFromPath(BatchItems[0].SourcePath);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not read folder: {ex.Message}";
+        }
+    }
+
+    // ── Process ─────────────────────────────────────────────
+
+    public async Task ProcessAsync()
+    {
+        if (SourceImage is null) return;
+
         IsProcessing = true;
-        ProcessedPreview = null;
-        OutputWidth = 0;
-        OutputHeight = 0;
+        ErrorMessage = null;
+
+        var src    = SourceImage;
+        var factor = ActiveFactor;
 
         try
         {
-            // Load a preview-size Bitmap directly (Avalonia handles common formats)
-            SourcePreview = new Bitmap(path);
-        }
-        catch
-        {
-            // Fallback: decode via ImageSharp and render to PNG in memory
-            try
-            {
-                using var img = await SixLabors.ImageSharp.Image.LoadAsync(path);
-                using var ms  = new MemoryStream();
-                await img.SaveAsPngAsync(ms);
-                ms.Position   = 0;
-                SourcePreview = new Bitmap(ms);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage  = $"Could not load image: {ex.Message}";
-                IsProcessing  = false;
-                return;
-            }
-        }
-
-        await ProcessPreviewAsync();
-    }
-
-    public async Task ProcessPreviewAsync()
-    {
-        if (_sourcePath == null) return;
-        IsProcessing = true;
-        ErrorMessage = null;
-
-        try
-        {
-            var (preview, w, h) = await DesqueezeProcessor.ProcessForPreviewAsync(
-                _sourcePath, ActiveFactor);
-            ProcessedPreview = preview;
-            OutputWidth      = w;
-            OutputHeight     = h;
+            ProcessedImage = await Task.Run(() => DesqueezeProcessor.Desqueeze(src, factor));
         }
         catch (Exception ex)
         {
@@ -181,85 +241,107 @@ public class MainViewModel : ViewModelBase
         }
     }
 
-    public void ClearImage()
-    {
-        SourcePath       = null;
-        SourcePreview?.Dispose();
-        ProcessedPreview?.Dispose();
-        SourcePreview    = null;
-        ProcessedPreview = null;
-        ErrorMessage     = null;
-        OutputWidth      = 0;
-        OutputHeight     = 0;
-    }
+    // ── Export ─────────────────────────────────────────────
 
-    // ── Batch operations ──────────────────────────────────────────────────────
-    public void AddBatchFiles(IEnumerable<string> paths)
+    public bool Export(string path)
     {
-        foreach (var path in paths)
+        if (ProcessedImage is null) return false;
+        try
         {
-            if (!DesqueezeProcessor.IsSupported(path)) continue;
-            if (BatchItems.Any(x => x.FilePath == path)) continue;
-            BatchItems.Add(new BatchItemViewModel(path, _bulkPresetIndex)
-            {
-                CustomFactor = _bulkCustomFactor
-            });
+            DesqueezeProcessor.Save(ProcessedImage, path);
+            Flash("Saved");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Export failed: {ex.Message}";
+            return false;
         }
     }
 
-    public void AddBatchFolder(string folder) =>
-        AddBatchFiles(BatchProcessor.GetImageFiles(folder));
-
-    public void ApplyBulkFactor()
+    /// <summary>
+    /// De-squeezes every queued file into <paramref name="destFolder"/>, one at a
+    /// time so a large queue cannot exhaust memory. Per-item failures are recorded
+    /// on the item and do not stop the run.
+    /// </summary>
+    public async Task RunBatchAsync(string destFolder, string extension = ".jpg")
     {
-        foreach (var item in BatchItems)
-        {
-            item.PresetIndex  = _bulkPresetIndex;
-            item.CustomFactor = _bulkCustomFactor;
-        }
-    }
+        if (BatchItems.Count == 0 || IsBatchRunning) return;
 
-    public void ClearBatch()
-    {
-        BatchItems.Clear();
-        BatchStatus   = null;
-        BatchProgress = 0;
-    }
+        IsBatchRunning = true;
+        BatchCompleted = 0;
+        ErrorMessage   = null;
 
-    public async Task ExportBatchAsync(string outputFolder)
-    {
-        if (BatchItems.Count == 0) return;
-
-        Directory.CreateDirectory(outputFolder);
-        IsBatchProcessing = true;
-        BatchProgress     = 0;
-        BatchStatus       = "Exporting…";
-
-        int total     = BatchItems.Count;
-        int completed = 0;
+        var factor = ActiveFactor;
 
         foreach (var item in BatchItems)
         {
-            item.Status = BatchItemStatus.Processing;
+            item.State = BatchItemState.Working;
+            item.Error = null;
+
             try
             {
-                var ext      = Path.GetExtension(item.FilePath);
-                var baseName = Path.GetFileNameWithoutExtension(item.FilePath);
-                var dest     = Path.Combine(outputFolder, $"{baseName}_desqueezed{ext}");
-                await DesqueezeProcessor.ExportAsync(item.FilePath, dest, item.ActiveFactor);
-                item.Status = BatchItemStatus.Done;
+                var name = Path.GetFileNameWithoutExtension(item.SourcePath);
+                var dest = Path.Combine(destFolder, $"{name}_desqueezed{extension}");
+                var src  = item.SourcePath;
+
+                await Task.Run(() => DesqueezeProcessor.ProcessFile(src, dest, factor));
+                item.State = BatchItemState.Done;
             }
             catch (Exception ex)
             {
-                item.Status       = BatchItemStatus.Error;
-                item.ErrorMessage = ex.Message;
+                item.State = BatchItemState.Failed;
+                item.Error = ex.Message;
             }
-            completed++;
-            BatchProgress = (int)(100.0 * completed / total);
-            BatchStatus   = $"{completed} / {total} exported";
+
+            BatchCompleted++;
         }
 
-        BatchStatus       = $"Done — {completed} file{(completed == 1 ? "" : "s")} exported.";
-        IsBatchProcessing = false;
+        IsBatchRunning = false;
+
+        int failed = BatchItems.Count(i => i.IsFailed);
+        if (failed == 0) Flash($"Batch complete — {BatchItems.Count} images");
+        else ErrorMessage = $"{failed} of {BatchItems.Count} images failed.";
+    }
+
+    // ── Helpers ────────────────────────────────────────────
+
+    private void Flash(string message)
+    {
+        SuccessMessage = message;
+        Task.Delay(3000).ContinueWith(_ =>
+            Application.Current?.Dispatcher.Invoke(() =>
+            {
+                if (SuccessMessage == message) SuccessMessage = null;
+            }));
+    }
+
+    public void Reset()
+    {
+        SourceImage    = null;
+        ProcessedImage = null;
+        ErrorMessage   = null;
+        SuccessMessage = null;
+        BatchItems.Clear();
+        BatchFolder    = null;
+        BatchCompleted = 0;
+        Raise(nameof(BatchProgressText));
+        Raise(nameof(CanRunBatch));
+    }
+}
+
+/// <summary>One selectable preset row, bound by the preset list in the view.</summary>
+public class SqueezePresetOption(SqueezePreset preset, string label, string hint) : ViewModelBase
+{
+    private bool _isSelected;
+
+    public SqueezePreset Preset { get; } = preset;
+    public string Label { get; } = label;
+    public string Hint  { get; } = hint;
+
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => Set(ref _isSelected, value);
     }
 }
