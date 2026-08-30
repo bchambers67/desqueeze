@@ -13,7 +13,7 @@
  * this inside the utilities CSP (script-src 'self').
  */
 (function () {
-  'use strict';
+  "use strict";
 
   var MAX_FILES = 36;
   // Canvas dimension ceilings vary by browser and a canvas over the limit
@@ -24,15 +24,15 @@
 
   // Kept in lockstep with Models/SqueezePreset.cs.
   var PRESETS = [
-    { label: '1.25×', factor: 1.25, glass: 'ULTRA STARLESS' },
-    { label: '1.33×', factor: 1.33, glass: 'HAWK · LOMO' },
-    { label: '1.50×', factor: 1.5, glass: 'SLR MAGIC' },
-    { label: '1.55×', factor: 1.55, glass: 'IRON GLASS' },
-    { label: '1.60×', factor: 1.6, glass: 'VAZEN' },
-    { label: '1.65×', factor: 1.65, glass: 'COOKE SF' },
-    { label: '1.75×', factor: 1.75, glass: 'ATLAS MERCURY' },
-    { label: '1.80×', factor: 1.8, glass: 'KOWA · ISCO' },
-    { label: '2.00×', factor: 2.0, glass: 'FULL 2× GLASS' }
+    { label: "1.25×", factor: 1.25, glass: "ULTRA STARLESS" },
+    { label: "1.33×", factor: 1.33, glass: "HAWK · LOMO" },
+    { label: "1.50×", factor: 1.5, glass: "SLR MAGIC" },
+    { label: "1.55×", factor: 1.55, glass: "IRON GLASS" },
+    { label: "1.60×", factor: 1.6, glass: "VAZEN" },
+    { label: "1.65×", factor: 1.65, glass: "COOKE SF" },
+    { label: "1.75×", factor: 1.75, glass: "ATLAS MERCURY" },
+    { label: "1.80×", factor: 1.8, glass: "KOWA · ISCO" },
+    { label: "2.00×", factor: 2.0, glass: "FULL 2× GLASS" },
   ];
 
   var $ = function (id) {
@@ -47,24 +47,24 @@
   // ---------------------------------------------------------------- helpers
 
   function fmtDims(w, h) {
-    return w + '×' + h;
+    return w + "×" + h;
   }
 
   function ratio(w, h) {
-    return (w / h).toFixed(2) + ':1';
+    return (w / h).toFixed(2) + ":1";
   }
 
   function baseName(name) {
-    var i = name.lastIndexOf('.');
+    var i = name.lastIndexOf(".");
     return i > 0 ? name.slice(0, i) : name;
   }
 
   function outName(name, factor, mime) {
-    var ext = mime === 'image/png' ? 'png' : 'jpg';
+    var ext = mime === "image/png" ? "png" : "jpg";
     // 1.50 → "1_50x", so the factor survives in the filename without a dot
     // that would confuse the extension.
-    var tag = factor.toFixed(2).replace('.', '_');
-    return baseName(name) + '_desqueeze_' + tag + 'x.' + ext;
+    var tag = factor.toFixed(2).replace(".", "_");
+    return baseName(name) + "_desqueeze_" + tag + "x." + ext;
   }
 
   function revoke(item) {
@@ -84,7 +84,7 @@
 
   function setMsg(el, text, isError) {
     el.textContent = text;
-    el.className = 'msg' + (isError ? ' error' : '');
+    el.className = "msg" + (isError ? " error" : "");
   }
 
   /** Yield to the event loop so the grid repaints between images. */
@@ -137,7 +137,8 @@
       if (app1.length < 20) return app1;
       var hdr = 4 + 6;
       for (var i = 0; i < 6; i++) {
-        if (app1[4 + i] !== [0x45, 0x78, 0x69, 0x66, 0x00, 0x00][i]) return app1;
+        if (app1[4 + i] !== [0x45, 0x78, 0x69, 0x66, 0x00, 0x00][i])
+          return app1;
       }
       var out = new Uint8Array(app1); // copy — never mutate the source block
       var dv = new DataView(out.buffer, out.byteOffset, out.byteLength);
@@ -224,15 +225,24 @@
 
   function crc32(bytes) {
     var c = 0xffffffff;
-    for (var i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
+    for (var i = 0; i < bytes.length; i++)
+      c = CRC_TABLE[(c ^ bytes[i]) & 0xff] ^ (c >>> 8);
     return (c ^ 0xffffffff) >>> 0;
   }
 
   function dosTime(d) {
-    return ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() / 2)) & 0xffff;
+    return (
+      ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() / 2)) &
+      0xffff
+    );
   }
   function dosDate(d) {
-    return (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xffff;
+    return (
+      (((d.getFullYear() - 1980) << 9) |
+        ((d.getMonth() + 1) << 5) |
+        d.getDate()) &
+      0xffff
+    );
   }
 
   /** @param {{name: string, bytes: Uint8Array}[]} files */
@@ -299,14 +309,14 @@
     ev.setUint32(12, centralSize, true);
     ev.setUint32(16, offset, true);
 
-    return new Blob(chunks.concat(central, [end]), { type: 'application/zip' });
+    return new Blob(chunks.concat(central, [end]), { type: "application/zip" });
   }
 
   // --------------------------------------------------------------- pipeline
 
   function saveBlob(blob, filename) {
     var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
+    var a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -326,33 +336,47 @@
       var h = bitmap.height;
 
       if (w > MAX_DIM || h > MAX_DIM) {
-        throw new Error('Result would be ' + fmtDims(w, h) + ' — over this browser’s canvas limit');
+        throw new Error(
+          "Result would be " +
+            fmtDims(w, h) +
+            " — over this browser’s canvas limit",
+        );
       }
 
-      var canvas = document.createElement('canvas');
+      var canvas = document.createElement("canvas");
       canvas.width = w;
       canvas.height = h;
-      var ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Could not get a 2D context');
+      var ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not get a 2D context");
       ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high'; // matches BitmapScalingMode.HighQuality
+      ctx.imageSmoothingQuality = "high"; // matches BitmapScalingMode.HighQuality
       ctx.drawImage(bitmap, 0, 0, w, h);
 
       var blob = await new Promise(function (resolve) {
-        canvas.toBlob(resolve, mime, mime === 'image/jpeg' ? JPEG_QUALITY : undefined);
+        canvas.toBlob(
+          resolve,
+          mime,
+          mime === "image/jpeg" ? JPEG_QUALITY : undefined,
+        );
       });
       // Release the backing store immediately; 36 large canvases otherwise sit
       // in memory until GC decides otherwise.
       canvas.width = canvas.height = 0;
-      if (!blob) throw new Error('Encoding failed — the image may exceed a browser limit');
+      if (!blob)
+        throw new Error(
+          "Encoding failed — the image may exceed a browser limit",
+        );
 
-      if (mime === 'image/jpeg') {
+      if (mime === "image/jpeg") {
         var srcBytes = new Uint8Array(await item.file.arrayBuffer());
         var app1 = findAPP1(srcBytes);
         if (app1) {
           var fixed = patchPixelDims(app1, w, h);
-          var outBytes = spliceAPP1(new Uint8Array(await blob.arrayBuffer()), fixed);
-          blob = new Blob([outBytes], { type: 'image/jpeg' });
+          var outBytes = spliceAPP1(
+            new Uint8Array(await blob.arrayBuffer()),
+            fixed,
+          );
+          blob = new Blob([outBytes], { type: "image/jpeg" });
         }
       }
 
@@ -360,7 +384,7 @@
       item.outW = w;
       item.outH = h;
       item.usedFactor = factor;
-      item.state = 'done';
+      item.state = "done";
       item.error = null;
       // Preview the real result, not the source. Without this the card shows
       // the squeezed original and there is no way to see what the tool did.
@@ -374,79 +398,83 @@
   // ----------------------------------------------------------------- render
 
   function render() {
-    var grid = $('grid');
-    grid.textContent = '';
+    var grid = $("grid");
+    grid.textContent = "";
 
     items.forEach(function (item) {
-      var li = document.createElement('li');
-      li.className = 'card';
+      var li = document.createElement("li");
+      li.className = "card";
 
-      var thumb = document.createElement('div');
-      thumb.className = 'thumb';
+      var thumb = document.createElement("div");
+      thumb.className = "thumb";
       if (item.outUrl || item.url) {
-        var img = document.createElement('img');
-        img.alt = '';
+        var img = document.createElement("img");
+        img.alt = "";
         if (item.outUrl) {
           // Finished: this file is already the right shape, so let it be.
           img.src = item.outUrl;
-          img.style.objectFit = 'contain';
+          img.style.objectFit = "contain";
         } else {
           // Pending: stretch the source into a box of the target aspect, which
           // is exactly the correction about to be applied. `fill` is the point
           // here — `contain` would letterbox and show no change at all.
           var f = item.factor || globalFactor;
           img.src = item.url;
-          img.style.aspectRatio = item.w * f + ' / ' + item.h;
-          img.style.width = '100%';
-          img.style.objectFit = 'fill';
+          img.style.aspectRatio = item.w * f + " / " + item.h;
+          img.style.width = "100%";
+          img.style.objectFit = "fill";
         }
         thumb.appendChild(img);
       }
       li.appendChild(thumb);
 
-      var body = document.createElement('div');
-      body.className = 'card-body';
+      var body = document.createElement("div");
+      body.className = "card-body";
 
-      var name = document.createElement('p');
-      name.className = 'name';
+      var name = document.createElement("p");
+      name.className = "name";
       name.textContent = item.name;
       body.appendChild(name);
 
-      var dims = document.createElement('p');
-      dims.className = 'dims';
-      if (item.state === 'done') {
-        dims.innerHTML = '';
-        dims.appendChild(document.createTextNode(fmtDims(item.w, item.h) + '  →  '));
-        var out = document.createElement('span');
-        out.className = 'out';
-        out.textContent = fmtDims(item.outW, item.outH) + '  ' + ratio(item.outW, item.outH);
+      var dims = document.createElement("p");
+      dims.className = "dims";
+      if (item.state === "done") {
+        dims.innerHTML = "";
+        dims.appendChild(
+          document.createTextNode(fmtDims(item.w, item.h) + "  →  "),
+        );
+        var out = document.createElement("span");
+        out.className = "out";
+        out.textContent =
+          fmtDims(item.outW, item.outH) + "  " + ratio(item.outW, item.outH);
         dims.appendChild(out);
       } else {
-        dims.textContent = fmtDims(item.w, item.h) + '  ' + ratio(item.w, item.h);
+        dims.textContent =
+          fmtDims(item.w, item.h) + "  " + ratio(item.w, item.h);
       }
       body.appendChild(dims);
 
-      var foot = document.createElement('div');
-      foot.className = 'card-foot';
+      var foot = document.createElement("div");
+      foot.className = "card-foot";
 
       // Per-image override, as the native batch mode offers.
-      var sel = document.createElement('select');
-      sel.setAttribute('aria-label', 'Factor for ' + item.name);
-      var optDefault = document.createElement('option');
-      optDefault.value = '';
-      optDefault.textContent = 'Batch';
+      var sel = document.createElement("select");
+      sel.setAttribute("aria-label", "Factor for " + item.name);
+      var optDefault = document.createElement("option");
+      optDefault.value = "";
+      optDefault.textContent = "Batch";
       sel.appendChild(optDefault);
       PRESETS.forEach(function (p) {
-        var o = document.createElement('option');
+        var o = document.createElement("option");
         o.value = String(p.factor);
         o.textContent = p.label;
         sel.appendChild(o);
       });
-      sel.value = item.factor ? String(item.factor) : '';
-      sel.addEventListener('change', function () {
+      sel.value = item.factor ? String(item.factor) : "";
+      sel.addEventListener("change", function () {
         item.factor = sel.value ? parseFloat(sel.value) : null;
-        if (item.state === 'done') {
-          item.state = 'ready';
+        if (item.state === "done") {
+          item.state = "ready";
           item.blob = null;
           revokeOut(item);
         }
@@ -455,30 +483,37 @@
       });
       foot.appendChild(sel);
 
-      if (item.state === 'done') {
-        var dl = document.createElement('button');
-        dl.type = 'button';
-        dl.className = 'dl';
-        dl.textContent = 'Download';
-        dl.addEventListener('click', function () {
-          saveBlob(item.blob, outName(item.name, item.usedFactor, item.blob.type));
+      if (item.state === "done") {
+        var dl = document.createElement("button");
+        dl.type = "button";
+        dl.className = "dl";
+        dl.textContent = "Download";
+        dl.addEventListener("click", function () {
+          saveBlob(
+            item.blob,
+            outName(item.name, item.usedFactor, item.blob.type),
+          );
         });
         foot.appendChild(dl);
       } else {
-        var state = document.createElement('span');
-        state.className = 'state' + (item.state === 'error' ? ' error' : '');
+        var state = document.createElement("span");
+        state.className = "state" + (item.state === "error" ? " error" : "");
         state.textContent =
-          item.state === 'error' ? 'Failed' : item.state === 'working' ? 'Working…' : 'Ready';
-        state.title = item.error || '';
+          item.state === "error"
+            ? "Failed"
+            : item.state === "working"
+              ? "Working…"
+              : "Ready";
+        state.title = item.error || "";
         foot.appendChild(state);
       }
 
-      var rm = document.createElement('button');
-      rm.type = 'button';
-      rm.className = 'remove';
-      rm.setAttribute('aria-label', 'Remove ' + item.name);
-      rm.textContent = '×';
-      rm.addEventListener('click', function () {
+      var rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "remove";
+      rm.setAttribute("aria-label", "Remove " + item.name);
+      rm.textContent = "×";
+      rm.addEventListener("click", function () {
         revoke(item);
         items = items.filter(function (x) {
           return x.id !== item.id;
@@ -490,10 +525,10 @@
 
       body.appendChild(foot);
 
-      if (item.state === 'error' && item.error) {
-        var err = document.createElement('p');
-        err.className = 'dims';
-        err.style.color = 'var(--safelight)';
+      if (item.state === "error" && item.error) {
+        var err = document.createElement("p");
+        err.className = "dims";
+        err.style.color = "var(--safelight)";
         err.textContent = item.error;
         body.appendChild(err);
       }
@@ -505,27 +540,32 @@
 
   function refreshControls() {
     var has = items.length > 0;
-    $('controls').classList.toggle('hidden', !has);
-    $('run-section').classList.toggle('hidden', !has);
+    $("controls").classList.toggle("hidden", !has);
+    $("run-section").classList.toggle("hidden", !has);
     var done = items.filter(function (i) {
-      return i.state === 'done';
+      return i.state === "done";
     });
-    $('download-all').disabled = done.length === 0 || running;
-    $('run').disabled = running || items.length === 0;
-    $('download-all').textContent =
-      done.length > 1 ? 'Download all (' + done.length + ') .zip' : 'Download all (.zip)';
+    $("download-all").disabled = done.length === 0 || running;
+    $("run").disabled = running || items.length === 0;
+    $("download-all").textContent =
+      done.length > 1
+        ? "Download all (" + done.length + ") .zip"
+        : "Download all (.zip)";
   }
 
   // ------------------------------------------------------------------ input
 
   async function addFiles(fileList) {
     var incoming = Array.prototype.slice.call(fileList).filter(function (f) {
-      return f.type.indexOf('image/') === 0 || /\.(hei[cf]|avif|jpe?g|png|webp)$/i.test(f.name);
+      return (
+        f.type.indexOf("image/") === 0 ||
+        /\.(hei[cf]|avif|jpe?g|png|webp)$/i.test(f.name)
+      );
     });
 
-    var msgEl = $('add-msg');
+    var msgEl = $("add-msg");
     if (incoming.length === 0) {
-      setMsg(msgEl, 'No images in that selection.', true);
+      setMsg(msgEl, "No images in that selection.", true);
       return;
     }
 
@@ -547,8 +587,8 @@
         factor: null,
         blob: null,
         url: null,
-        state: 'ready',
-        error: null
+        state: "ready",
+        error: null,
       };
       try {
         var bmp = await createImageBitmap(file);
@@ -558,8 +598,8 @@
         item.url = URL.createObjectURL(file);
         items.push(item);
       } catch (e) {
-        item.state = 'error';
-        item.error = 'Could not read this file';
+        item.state = "error";
+        item.error = "Could not read this file";
         items.push(item);
       }
     }
@@ -567,17 +607,17 @@
     if (rejected > 0) {
       setMsg(
         msgEl,
-        'Added ' +
+        "Added " +
           incoming.length +
-          '. ' +
+          ". " +
           rejected +
-          ' not added — ' +
+          " not added — " +
           MAX_FILES +
-          ' images is the limit.',
-        true
+          " images is the limit.",
+        true,
       );
     } else {
-      setMsg(msgEl, items.length + ' of ' + MAX_FILES + ' loaded.', false);
+      setMsg(msgEl, items.length + " of " + MAX_FILES + " loaded.", false);
     }
 
     render();
@@ -591,23 +631,27 @@
     running = true;
     refreshControls();
 
-    var mime = $('fmt').value;
+    var mime = $("fmt").value;
     var pending = items.filter(function (i) {
-      return i.state !== 'done' && i.state !== 'error';
+      return i.state !== "done" && i.state !== "error";
     });
     var failures = 0;
 
     for (var i = 0; i < pending.length; i++) {
       var item = pending[i];
-      item.state = 'working';
+      item.state = "working";
       render();
-      setMsg($('progress'), 'Desqueezing ' + (i + 1) + ' of ' + pending.length + '…', false);
+      setMsg(
+        $("progress"),
+        "Desqueezing " + (i + 1) + " of " + pending.length + "…",
+        false,
+      );
       await breathe();
       try {
         await processOne(item, mime);
       } catch (e) {
-        item.state = 'error';
-        item.error = e && e.message ? e.message : 'Failed';
+        item.state = "error";
+        item.error = e && e.message ? e.message : "Failed";
         failures++;
       }
       render();
@@ -616,28 +660,31 @@
 
     running = false;
     var done = items.filter(function (i) {
-      return i.state === 'done';
+      return i.state === "done";
     }).length;
     setMsg(
-      $('progress'),
+      $("progress"),
       failures
-        ? done + ' done, ' + failures + ' failed — see the cards below.'
-        : done + ' image' + (done === 1 ? '' : 's') + ' desqueezed.',
-      failures > 0
+        ? done + " done, " + failures + " failed — see the cards below."
+        : done + " image" + (done === 1 ? "" : "s") + " desqueezed.",
+      failures > 0,
     );
     refreshControls();
   }
 
   async function downloadAll() {
     var done = items.filter(function (i) {
-      return i.state === 'done';
+      return i.state === "done";
     });
     if (done.length === 0) return;
     if (done.length === 1) {
-      saveBlob(done[0].blob, outName(done[0].name, done[0].usedFactor, done[0].blob.type));
+      saveBlob(
+        done[0].blob,
+        outName(done[0].name, done[0].usedFactor, done[0].blob.type),
+      );
       return;
     }
-    setMsg($('progress'), 'Packing ' + done.length + ' images…', false);
+    setMsg($("progress"), "Packing " + done.length + " images…", false);
     await breathe();
 
     var used = Object.create(null);
@@ -647,15 +694,18 @@
       var name = outName(item.name, item.usedFactor, item.blob.type);
       // Two sources can share a filename; a zip with duplicates is a bad zip.
       if (used[name]) {
-        var dot = name.lastIndexOf('.');
-        name = name.slice(0, dot) + '_' + used[name] + name.slice(dot);
+        var dot = name.lastIndexOf(".");
+        name = name.slice(0, dot) + "_" + used[name] + name.slice(dot);
       }
       used[name] = (used[name] || 0) + 1;
-      files.push({ name: name, bytes: new Uint8Array(await item.blob.arrayBuffer()) });
+      files.push({
+        name: name,
+        bytes: new Uint8Array(await item.blob.arrayBuffer()),
+      });
     }
 
-    saveBlob(makeZip(files), 'desqueezed.zip');
-    setMsg($('progress'), done.length + ' images packed.', false);
+    saveBlob(makeZip(files), "desqueezed.zip");
+    setMsg($("progress"), done.length + " images packed.", false);
   }
 
   function clearAll() {
@@ -663,30 +713,30 @@
     items = [];
     render();
     refreshControls();
-    setMsg($('add-msg'), '', false);
-    setMsg($('progress'), '', false);
-    $('file-input').value = '';
+    setMsg($("add-msg"), "", false);
+    setMsg($("progress"), "", false);
+    $("file-input").value = "";
   }
 
   // ------------------------------------------------------------------- init
 
   function buildPresets() {
-    var box = $('presets');
+    var box = $("presets");
     PRESETS.forEach(function (p) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'preset';
-      b.setAttribute('role', 'radio');
-      b.setAttribute('aria-checked', String(p.factor === globalFactor));
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "preset";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", String(p.factor === globalFactor));
       b.dataset.factor = String(p.factor);
       b.appendChild(document.createTextNode(p.label));
-      var g = document.createElement('span');
-      g.className = 'glass';
+      var g = document.createElement("span");
+      g.className = "glass";
       g.textContent = p.glass;
       b.appendChild(g);
-      b.addEventListener('click', function () {
+      b.addEventListener("click", function () {
         globalFactor = p.factor;
-        $('custom-factor').value = '';
+        $("custom-factor").value = "";
         syncPresets();
         invalidateDone();
       });
@@ -695,9 +745,12 @@
   }
 
   function syncPresets() {
-    var buttons = $('presets').querySelectorAll('.preset');
+    var buttons = $("presets").querySelectorAll(".preset");
     Array.prototype.forEach.call(buttons, function (b) {
-      b.setAttribute('aria-checked', String(parseFloat(b.dataset.factor) === globalFactor));
+      b.setAttribute(
+        "aria-checked",
+        String(parseFloat(b.dataset.factor) === globalFactor),
+      );
     });
   }
 
@@ -706,14 +759,14 @@
   function invalidateDone() {
     var changed = false;
     items.forEach(function (i) {
-      if (i.state === 'done' && !i.factor) {
-        i.state = 'ready';
+      if (i.state === "done" && !i.factor) {
+        i.state = "ready";
         i.blob = null;
         revokeOut(i);
         changed = true;
       }
     });
-    if (changed) setMsg($('progress'), 'Factor changed — run again.', false);
+    if (changed) setMsg($("progress"), "Factor changed — run again.", false);
     render();
     refreshControls();
   }
@@ -721,49 +774,50 @@
   function init() {
     buildPresets();
 
-    var drop = $('drop');
-    var input = $('file-input');
+    var drop = $("drop");
+    var input = $("file-input");
 
-    drop.addEventListener('click', function () {
+    drop.addEventListener("click", function () {
       input.click();
     });
-    drop.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
+    drop.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         input.click();
       }
     });
-    input.addEventListener('change', function () {
+    input.addEventListener("change", function () {
       addFiles(input.files);
-      input.value = ''; // so re-picking the same file fires change again
+      input.value = ""; // so re-picking the same file fires change again
     });
 
-    ['dragenter', 'dragover'].forEach(function (ev) {
+    ["dragenter", "dragover"].forEach(function (ev) {
       drop.addEventListener(ev, function (e) {
         e.preventDefault();
-        drop.classList.add('over');
+        drop.classList.add("over");
       });
     });
-    ['dragleave', 'drop'].forEach(function (ev) {
+    ["dragleave", "drop"].forEach(function (ev) {
       drop.addEventListener(ev, function (e) {
         e.preventDefault();
-        if (ev === 'dragleave' && drop.contains(e.relatedTarget)) return;
-        drop.classList.remove('over');
+        if (ev === "dragleave" && drop.contains(e.relatedTarget)) return;
+        drop.classList.remove("over");
       });
     });
-    drop.addEventListener('drop', function (e) {
-      if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+    drop.addEventListener("drop", function (e) {
+      if (e.dataTransfer && e.dataTransfer.files)
+        addFiles(e.dataTransfer.files);
     });
     // A file dropped anywhere else would otherwise navigate away from the app,
     // losing the queue.
-    window.addEventListener('dragover', function (e) {
+    window.addEventListener("dragover", function (e) {
       e.preventDefault();
     });
-    window.addEventListener('drop', function (e) {
+    window.addEventListener("drop", function (e) {
       e.preventDefault();
     });
 
-    $('custom-factor').addEventListener('input', function (e) {
+    $("custom-factor").addEventListener("input", function (e) {
       var v = parseFloat(e.target.value);
       if (!isNaN(v) && v >= 1.01 && v <= 3) {
         globalFactor = v;
@@ -772,28 +826,28 @@
       }
     });
 
-    $('fmt').addEventListener('change', function () {
-      $('exif-note').textContent =
-        $('fmt').value === 'image/jpeg'
-          ? 'EXIF — capture date, camera, lens — is carried across on JPEG output.'
-          : 'PNG output carries no EXIF. Choose JPEG to keep capture metadata.';
+    $("fmt").addEventListener("change", function () {
+      $("exif-note").textContent =
+        $("fmt").value === "image/jpeg"
+          ? "EXIF Data, including capture date, camera, lens, is passed non destructively to output files."
+          : "PNG output carries no EXIF. Choose JPEG to keep capture metadata.";
       invalidateDone();
     });
 
-    $('run').addEventListener('click', runAll);
-    $('download-all').addEventListener('click', downloadAll);
-    $('clear').addEventListener('click', clearAll);
+    $("run").addEventListener("click", runAll);
+    $("download-all").addEventListener("click", downloadAll);
+    $("clear").addEventListener("click", clearAll);
 
     // Nothing survives the tab, by design.
-    window.addEventListener('pagehide', function () {
+    window.addEventListener("pagehide", function () {
       items.forEach(revoke);
     });
 
     refreshControls();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
   }
