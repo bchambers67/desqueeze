@@ -1,22 +1,104 @@
 import SwiftUI
+import AppKit
 
+/// Chambers & Light brand system.
+///
+/// Tokens mirror the authoritative definitions published at chambersandlight.com
+/// (`:root` custom properties). The palette follows a darkroom metaphor: the
+/// `chamber` holds the image, `paper` receives it, `halide` is the light‑sensitive
+/// layer, `grain` the texture, and `safelight` the only illumination safe to work by.
 enum Brand {
-    static let backgroundPrimary  = Color(hex: "#0D0D0D")
-    static let backgroundSecondary = Color(hex: "#1A1A1A")
-    static let surface             = Color(hex: "#242424")
-    static let surfaceElevated     = Color(hex: "#2E2E2E")
-    static let accent              = Color(hex: "#C9A84C")
-    static let textPrimary         = Color(hex: "#F5F0E8")
-    static let textSecondary       = Color(hex: "#8A8580")
-    static let textTertiary        = Color(hex: "#4A4845")
-    static let border              = Color(hex: "#333330")
-    static let success             = Color(hex: "#5A9E6A")
-    static let danger              = Color(hex: "#C9504C")
 
-    static let fontHeading  = Font.system(size: 13, weight: .semibold)
-    static let fontBody     = Font.system(size: 13, weight: .regular)
-    static let fontCaption  = Font.system(size: 11, weight: .regular)
-    static let fontMono     = Font.system(size: 12, weight: .regular, design: .monospaced)
+    // MARK: - Palette
+
+    /// `--chamber` · warm near‑black. Primary background.
+    static let chamber       = Color(hex: "#16110F")
+    /// `--pine` · deep green‑black. Raised surfaces and panels.
+    static let pine          = Color(hex: "#1C2723")
+    /// `--paper` · warm bone. Primary text.
+    static let paper         = Color(hex: "#ECEAE1")
+    /// `--halide` · pale mint. Highlights and active text.
+    static let halide        = Color(hex: "#C7D9CE")
+    /// `--halide-deep` · sage. Secondary text.
+    static let halideDeep    = Color(hex: "#98B1A3")
+    /// `--grain` · warm mid grey. Tertiary text and disabled states.
+    static let grain         = Color(hex: "#6E665F")
+    /// `--safelight` · darkroom red. Primary accent and calls to action.
+    static let safelight     = Color(hex: "#E63E2D")
+    /// `--safelight-deep` · deeper red. Pressed and hover states.
+    static let safelightDeep = Color(hex: "#C22E1F")
+
+    /// `--edge-light` · hairline rule on dark ground.
+    static let edgeLight     = Color(white: 0.925, opacity: 0.16)
+    /// `--edge` · hairline rule on paper ground.
+    static let edge          = Color(hex: "#16110F").opacity(0.14)
+
+    // MARK: - Semantic aliases
+
+    static let backgroundPrimary   = chamber
+    static let backgroundSecondary = Color(hex: "#1A1512")   // chamber, one step raised
+    static let surface             = pine
+    static let surfaceElevated     = Color(hex: "#243029")   // pine, one step raised
+    static let accent              = safelight
+    static let textPrimary         = paper
+    static let textSecondary       = halideDeep
+    static let textTertiary        = grain
+    static let border              = edgeLight
+    static let success             = halideDeep
+    static let danger              = safelight
+
+    // MARK: - Typography
+
+    /// `--f-display` · Bodoni Moda / Didot. Wordmark and display copy only.
+    private static let displayStack = ["Bodoni Moda", "Bodoni 72", "Didot", "Georgia"]
+    /// `--f-grotesk` · Archivo. All interface copy.
+    private static let groteskStack = ["Archivo", "Helvetica Neue"]
+    /// `--f-mono` · Space Mono. Numeric and technical readouts.
+    private static let monoStack    = ["Space Mono", "Menlo", "SF Mono"]
+
+    /// Returns the first installed face in `names`, falling back to the system face.
+    private static func resolve(_ names: [String],
+                                size: CGFloat,
+                                weight: Font.Weight,
+                                fallback design: Font.Design) -> Font {
+        for name in names where NSFont(name: name, size: size) != nil {
+            return .custom(name, fixedSize: size).weight(weight)
+        }
+        return .system(size: size, weight: weight, design: design)
+    }
+
+    static func display(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        resolve(displayStack, size: size, weight: weight, fallback: .serif)
+    }
+
+    static func grotesk(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        resolve(groteskStack, size: size, weight: weight, fallback: .default)
+    }
+
+    static func mono(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        resolve(monoStack, size: size, weight: weight, fallback: .monospaced)
+    }
+
+    // Convenience roles
+    static let fontWordmark = display(20, weight: .regular)
+    static let fontHeading  = grotesk(13, weight: .semibold)
+    static let fontBody     = grotesk(13)
+    static let fontCaption  = grotesk(11)
+    static let fontMicro    = grotesk(9,  weight: .semibold)
+    static let fontMono     = mono(12)
+
+    // MARK: - Tracking
+    //
+    // The brand sets uppercase labels between .1em and .22em. SwiftUI tracking is
+    // absolute, so these are expressed as a multiple of the type size at call sites.
+
+    static func tracking(_ em: CGFloat, at size: CGFloat) -> CGFloat { em * size }
+
+    static let trackWordmark: CGFloat = 0.22   // em — the C H A M B E R S lockup
+    static let trackLabel:    CGFloat = 0.18   // em — section labels
+    static let trackMeta:     CGFloat = 0.12   // em — metadata rows
+
+    // MARK: - Metrics
 
     static let spacingXS: CGFloat = 4
     static let spacingSM: CGFloat = 8
@@ -24,9 +106,13 @@ enum Brand {
     static let spacingLG: CGFloat = 24
     static let spacingXL: CGFloat = 32
 
-    static let radiusSM: CGFloat = 4
-    static let radiusMD: CGFloat = 8
-    static let radiusLG: CGFloat = 12
+    /// The brand uses hairlines and square corners; radii stay tight.
+    static let radiusSM: CGFloat = 2
+    static let radiusMD: CGFloat = 3
+    static let radiusLG: CGFloat = 4
+
+    /// `--ratio-pano` · 65 : 24, the house panoramic crop.
+    static let ratioPano: CGFloat = 65.0 / 24.0
 }
 
 extension Color {
@@ -46,5 +132,40 @@ extension Color {
                   green:   Double(g) / 255,
                   blue:    Double(b) / 255,
                   opacity: Double(a) / 255)
+    }
+}
+
+// MARK: - Brand devices
+
+/// The safelight rule — a 26 × 2 pt bar used to open sections, per the site's
+/// section-heading treatment.
+struct SafelightRule: View {
+    var width: CGFloat = 26
+    var body: some View {
+        Rectangle()
+            .fill(Brand.safelight)
+            .frame(width: width, height: 2)
+    }
+}
+
+/// The safelight dot — an 8 pt indicator marking a live or active state.
+struct SafelightDot: View {
+    var size: CGFloat = 8
+    var body: some View {
+        Circle()
+            .fill(Brand.safelight)
+            .frame(width: size, height: size)
+    }
+}
+
+/// The letter-spaced house lockup: C H A M B E R S  &  L I G H T
+struct Wordmark: View {
+    var size: CGFloat = 8
+    var color: Color = Brand.halideDeep
+    var body: some View {
+        Text("CHAMBERS & LIGHT")
+            .font(Brand.grotesk(size, weight: .semibold))
+            .tracking(Brand.tracking(Brand.trackWordmark, at: size))
+            .foregroundColor(color)
     }
 }
