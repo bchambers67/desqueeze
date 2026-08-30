@@ -1,0 +1,102 @@
+# Checks DesqueezeWeb/ on every pull request, and publishes it to
+# https://chambersandlight.com/u/desqueeze/ on merge to main.
+#
+# There is no build step. The web client is plain HTML, CSS and JavaScript with
+# no dependencies, which is deliberate: the utilities CSP allows no external
+# hosts and `script-src 'self'`, so a bundler would add risk and buy nothing.
+#
+# The guards run on pull requests as well as on merge. They are the two
+# failures that would otherwise reach production silently — an absolute asset
+# path serves a blank page under the /u/desqueeze/ prefix, and an external
+# reference is refused by the CSP with nothing but a console line to show for
+# it. Catching them after merge, at deploy time, is too late to be useful.
+#
+# Contract and CSP: docs/UTILITIES.md in bchambers67/briantchambers.com
+
+name: Web client
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'DesqueezeWeb/**'
+      - '.github/workflows/deploy-web.yml'
+  pull_request:
+    paths:
+      - 'DesqueezeWeb/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Files are present
+        run: |
+          set -euo pipefail
+          test -f DesqueezeWeb/index.html
+          test -f DesqueezeWeb/assets/app.js
+          test -f DesqueezeWeb/assets/app.css
+
+      # Absolute asset paths resolve against the domain root, not the
+      # /u/desqueeze/ prefix, so the page loads and every asset 404s.
+      - name: No absolute asset paths
+        run: |
+          set -euo pipefail
+          if grep -nE '(src|href)="/[^/]' DesqueezeWeb/index.html; then
+            echo "::error::absolute asset path — use ./relative paths"
+            exit 1
+          fi
+
+      # The utilities CSP permits no third-party origins at all.
+      - name: Self-contained
+        run: |
+          set -euo pipefail
+          if grep -nE '(src|href)="https?://' DesqueezeWeb/index.html \
+             | grep -v 'chambersandlight.com' | grep -v 'www.w3.org'; then
+            echo "::error::external resource — utilities must be self-contained"
+            exit 1
+          fi
+
+      # A syntax error here is a blank tool, and there is no bundler to catch it.
+      - name: JavaScript parses
+        run: node --check DesqueezeWeb/assets/app.js
+
+  deploy:
+    needs: check
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # GitHub OIDC → the IAM role. No long-lived AWS keys.
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_UTILITY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      # Note the "u/" in the S3 path: CloudFront forwards the full request URI
+      # to the origin, so /u/desqueeze/app.js fetches key u/desqueeze/app.js.
+      # The deploy role can write nothing outside that prefix.
+      - name: Sync
+        run: |
+          aws s3 sync ./DesqueezeWeb "s3://chambersandlight-utilities/u/desqueeze/" \
+            --delete \
+            --exclude "*.md"
+
+      - name: Invalidate
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E2HWCW4W3NVYJ9 \
+            --paths "/u/desqueeze/*"
