@@ -34,23 +34,31 @@
     <main id="main" class="wrap">
       <h1>Anamorphic desqueeze.</h1>
       <p class="lede">
-        Anamorphic glass records a horizontally compressed frame. This restores the true geometry —
-        widening by the squeeze factor, leaving height untouched. Up to
-        <strong>36 images</strong> at a time.
+        Anamorphic images need to be &lsquo;desqueezed&rsquo; to reflect
+        accurate geometry. This tool allows you to desqueeze images while
+        you&rsquo;re away from your primary editing tools. Upload a video, a
+        still, or a whole roll of shots (up to <strong>36</strong>)
       </p>
       <p class="privacy">
         <span class="mono-label">Private by construction</span>
-        Your photographs are never uploaded. Every step runs in this browser, nothing is written to
-        storage, and closing the tab discards everything.
+        Your photographs are never saved in this utility
       </p>
 
       <!-- ---------- 1. choose files ---------- -->
       <section aria-labelledby="s-add">
         <h2 id="s-add" class="step">1 — Add images</h2>
 
-        <div id="drop" class="drop" tabindex="0" role="button" aria-describedby="drop-help">
+        <div
+          id="drop"
+          class="drop"
+          tabindex="0"
+          role="button"
+          aria-describedby="drop-help"
+        >
           <p class="drop-main">Drop images here</p>
-          <p id="drop-help" class="drop-sub">or click to choose · JPEG, PNG, WebP, AVIF, HEIC</p>
+          <p id="drop-help" class="drop-sub">
+            or click to choose · JPEG, PNG, WebP, AVIF, HEIC
+          </p>
           <input
             id="file-input"
             class="visually-hidden"
@@ -67,7 +75,12 @@
       <section id="controls" class="hidden" aria-labelledby="s-factor">
         <h2 id="s-factor" class="step">2 — Squeeze factor</h2>
 
-        <div id="presets" class="presets" role="radiogroup" aria-label="Squeeze factor"></div>
+        <div
+          id="presets"
+          class="presets"
+          role="radiogroup"
+          aria-label="Squeeze factor"
+        ></div>
 
         <div class="custom-row">
           <label for="custom-factor" class="mono-label">Custom</label>
@@ -81,7 +94,9 @@
             placeholder="1.50"
             aria-describedby="custom-help"
           />
-          <span id="custom-help" class="hint">×&nbsp; between 1.01 and 3.00</span>
+          <span id="custom-help" class="hint"
+            >×&nbsp; between 1.01 and 3.00</span
+          >
         </div>
 
         <div class="opts">
@@ -93,7 +108,8 @@
             </select>
           </div>
           <p class="hint exif-note" id="exif-note">
-            EXIF — capture date, camera, lens — is carried across on JPEG output.
+            EXIF Data, including capture date, camera, lens, is passed non
+            destructively to output files.
           </p>
         </div>
       </section>
@@ -102,8 +118,12 @@
       <section id="run-section" class="hidden" aria-labelledby="s-run">
         <h2 id="s-run" class="step">3 — Desqueeze</h2>
         <div class="actions">
-          <button id="run" type="button" class="btn primary">Desqueeze all</button>
-          <button id="download-all" type="button" class="btn" disabled>Download all (.zip)</button>
+          <button id="run" type="button" class="btn primary">
+            Desqueeze all
+          </button>
+          <button id="download-all" type="button" class="btn" disabled>
+            Download all (.zip)
+          </button>
           <button id="clear" type="button" class="btn quiet">Clear</button>
         </div>
         <p id="progress" class="msg" role="status" aria-live="polite"></p>
@@ -119,9 +139,9 @@
           <a href="https://chambersandlight.com/utilities/">More utilities</a>
         </p>
         <p class="hint">
-          Runs offline once loaded. No account, no upload, no tracking. Automatic factor detection
-          from the macOS app is not available here — it uses on-device Vision APIs the browser has
-          no equivalent for.
+          Runs offline once loaded. No account, no upload, no tracking.
+          Automatic factor detection from the macOS app is not available here —
+          it uses on-device Vision APIs the browser has no equivalent for.
         </p>
       </div>
     </footer>
