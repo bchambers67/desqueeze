@@ -1,0 +1,73 @@
+# Publishes DesqueezeWeb/ to https://chambersandlight.com/u/desqueeze/
+#
+# There is no build step. The web client is plain HTML, CSS and JavaScript with
+# no dependencies, which is deliberate: the utilities CSP allows no external
+# hosts and `script-src 'self'`, so a bundler would add risk and buy nothing.
+#
+# Contract and CSP: docs/UTILITIES.md in bchambers67/briantchambers.com
+
+name: Deploy web client
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'DesqueezeWeb/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web
+  cancel-in-progress: true
+
+permissions:
+  id-token: write # GitHub OIDC → the IAM role. No long-lived AWS keys.
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cheap guards. A broken path or a stray external reference is far easier
+      # to catch here than from a CSP violation in someone's console.
+      - name: Sanity checks
+        run: |
+          set -euo pipefail
+          test -f DesqueezeWeb/index.html
+          test -f DesqueezeWeb/assets/app.js
+          test -f DesqueezeWeb/assets/app.css
+
+          # Absolute asset paths break under the /u/desqueeze/ prefix.
+          if grep -nE '(src|href)="/[^/]' DesqueezeWeb/index.html; then
+            echo "::error::absolute asset path found — use ./relative paths"
+            exit 1
+          fi
+
+          # The CSP permits no third-party origins at all.
+          if grep -nE '(src|href)="https?://' DesqueezeWeb/index.html \
+             | grep -v 'chambersandlight.com' | grep -v 'www.w3.org'; then
+            echo "::error::external resource referenced — utilities must be self-contained"
+            exit 1
+          fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_UTILITY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      # Note the "u/" in the S3 path: CloudFront forwards the full request URI
+      # to the origin, so /u/desqueeze/app.js fetches key u/desqueeze/app.js.
+      # The deploy role can write nothing outside that prefix.
+      - name: Sync
+        run: |
+          aws s3 sync ./DesqueezeWeb "s3://chambersandlight-utilities/u/desqueeze/" \
+            --delete \
+            --exclude "*.md"
+
+      - name: Invalidate
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E2HWCW4W3NVYJ9 \
+            --paths "/u/desqueeze/*"

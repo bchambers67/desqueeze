@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Desqueeze — Chambers &amp; Light</title>
+    <meta
+      name="description"
+      content="Correct horizontally-squeezed anamorphic photographs. Up to 36 at a time, entirely in your browser — nothing is uploaded."
+    />
+    <meta name="robots" content="index, follow" />
+    <!-- The safelight dot, inline so the app makes no extra request and the
+         browser stops asking for /favicon.ico. data: is permitted by img-src. -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2316110F'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23E63E2D'/%3E%3C/svg%3E"
+    />
+    <!-- Relative, so the app works unchanged at /u/desqueeze/ or anywhere else. -->
+    <link rel="stylesheet" href="./assets/app.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="bar">
+      <div class="wrap bar-inner">
+        <a class="home" href="https://chambersandlight.com/utilities/">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="mark">C&amp;L</span>
+        </a>
+        <span class="tool">Desqueeze</span>
+      </div>
+    </header>
+
+    <main id="main" class="wrap">
+      <h1>Anamorphic desqueeze.</h1>
+      <p class="lede">
+        Anamorphic glass records a horizontally compressed frame. This restores the true geometry —
+        widening by the squeeze factor, leaving height untouched. Up to
+        <strong>36 images</strong> at a time.
+      </p>
+      <p class="privacy">
+        <span class="mono-label">Private by construction</span>
+        Your photographs are never uploaded. Every step runs in this browser, nothing is written to
+        storage, and closing the tab discards everything.
+      </p>
+
+      <!-- ---------- 1. choose files ---------- -->
+      <section aria-labelledby="s-add">
+        <h2 id="s-add" class="step">1 — Add images</h2>
+
+        <div id="drop" class="drop" tabindex="0" role="button" aria-describedby="drop-help">
+          <p class="drop-main">Drop images here</p>
+          <p id="drop-help" class="drop-sub">or click to choose · JPEG, PNG, WebP, AVIF, HEIC</p>
+          <input
+            id="file-input"
+            class="visually-hidden"
+            type="file"
+            accept="image/*"
+            multiple
+            tabindex="-1"
+          />
+        </div>
+        <p id="add-msg" class="msg" role="status" aria-live="polite"></p>
+      </section>
+
+      <!-- ---------- 2. factor ---------- -->
+      <section id="controls" class="hidden" aria-labelledby="s-factor">
+        <h2 id="s-factor" class="step">2 — Squeeze factor</h2>
+
+        <div id="presets" class="presets" role="radiogroup" aria-label="Squeeze factor"></div>
+
+        <div class="custom-row">
+          <label for="custom-factor" class="mono-label">Custom</label>
+          <input
+            id="custom-factor"
+            type="number"
+            min="1.01"
+            max="3"
+            step="0.01"
+            inputmode="decimal"
+            placeholder="1.50"
+            aria-describedby="custom-help"
+          />
+          <span id="custom-help" class="hint">×&nbsp; between 1.01 and 3.00</span>
+        </div>
+
+        <div class="opts">
+          <div class="opt">
+            <label for="fmt" class="mono-label">Output</label>
+            <select id="fmt">
+              <option value="image/jpeg">JPEG · quality 92</option>
+              <option value="image/png">PNG · lossless</option>
+            </select>
+          </div>
+          <p class="hint exif-note" id="exif-note">
+            EXIF — capture date, camera, lens — is carried across on JPEG output.
+          </p>
+        </div>
+      </section>
+
+      <!-- ---------- 3. run ---------- -->
+      <section id="run-section" class="hidden" aria-labelledby="s-run">
+        <h2 id="s-run" class="step">3 — Desqueeze</h2>
+        <div class="actions">
+          <button id="run" type="button" class="btn primary">Desqueeze all</button>
+          <button id="download-all" type="button" class="btn" disabled>Download all (.zip)</button>
+          <button id="clear" type="button" class="btn quiet">Clear</button>
+        </div>
+        <p id="progress" class="msg" role="status" aria-live="polite"></p>
+      </section>
+
+      <ul id="grid" class="grid" aria-label="Images"></ul>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <p class="mono-label">
+          Chambers <span class="amp">&amp;</span> Light — a free tool ·
+          <a href="https://chambersandlight.com/utilities/">More utilities</a>
+        </p>
+        <p class="hint">
+          Runs offline once loaded. No account, no upload, no tracking. Automatic factor detection
+          from the macOS app is not available here — it uses on-device Vision APIs the browser has
+          no equivalent for.
+        </p>
+      </div>
+    </footer>
+
+    <script src="./assets/app.js"></script>
+  </body>
+</html>
