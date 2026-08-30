@@ -1,0 +1,305 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:DesqueezeWindows"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!--
+        Chambers & Light brand system.
+        Tokens mirror the authoritative :root custom properties published at
+        chambersandlight.com. The palette follows a darkroom metaphor: the
+        chamber holds the image, paper receives it, halide is the light-sensitive
+        layer, grain the texture, and safelight the only illumination safe to
+        work by.
+    -->
+
+    <!-- ── Palette ──────────────────────────────────────────── -->
+    <Color x:Key="ChamberColor">#FF16110F</Color>       <!-- --chamber        -->
+    <Color x:Key="PineColor">#FF1C2723</Color>          <!-- --pine           -->
+    <Color x:Key="PaperColor">#FFECEAE1</Color>         <!-- --paper          -->
+    <Color x:Key="HalideColor">#FFC7D9CE</Color>        <!-- --halide         -->
+    <Color x:Key="HalideDeepColor">#FF98B1A3</Color>    <!-- --halide-deep    -->
+    <Color x:Key="GrainColor">#FF6E665F</Color>         <!-- --grain          -->
+    <Color x:Key="SafelightColor">#FFE63E2D</Color>     <!-- --safelight      -->
+    <Color x:Key="SafelightDeepColor">#FFC22E1F</Color> <!-- --safelight-deep -->
+
+    <!-- Raised steps derived from chamber / pine -->
+    <Color x:Key="ChamberRaisedColor">#FF1A1512</Color>
+    <Color x:Key="PineRaisedColor">#FF243029</Color>
+
+    <SolidColorBrush x:Key="ChamberBrush"       Color="{StaticResource ChamberColor}"/>
+    <SolidColorBrush x:Key="ChamberRaisedBrush" Color="{StaticResource ChamberRaisedColor}"/>
+    <SolidColorBrush x:Key="PineBrush"          Color="{StaticResource PineColor}"/>
+    <SolidColorBrush x:Key="PineRaisedBrush"    Color="{StaticResource PineRaisedColor}"/>
+    <SolidColorBrush x:Key="PaperBrush"         Color="{StaticResource PaperColor}"/>
+    <SolidColorBrush x:Key="HalideBrush"        Color="{StaticResource HalideColor}"/>
+    <SolidColorBrush x:Key="HalideDeepBrush"    Color="{StaticResource HalideDeepColor}"/>
+    <SolidColorBrush x:Key="GrainBrush"         Color="{StaticResource GrainColor}"/>
+    <SolidColorBrush x:Key="SafelightBrush"     Color="{StaticResource SafelightColor}"/>
+    <SolidColorBrush x:Key="SafelightDeepBrush" Color="{StaticResource SafelightDeepColor}"/>
+
+    <!-- --edge-light : hairline rule on dark ground -->
+    <SolidColorBrush x:Key="EdgeLightBrush"     Color="#29ECEAE1"/>
+    <SolidColorBrush x:Key="SafelightFaintBrush" Color="#14E63E2D"/>
+
+    <!-- ── Typography ──────────────────────────────────────── -->
+    <!-- Fallback chains match the brand's font stacks; WPF resolves the
+         first installed family in the comma-separated list. -->
+    <FontFamily x:Key="DisplayFont">Bodoni Moda, Bodoni MT, Didot, Georgia, serif</FontFamily>
+    <FontFamily x:Key="GroteskFont">Archivo, Segoe UI, Arial, sans-serif</FontFamily>
+    <FontFamily x:Key="MonoFont">Space Mono, Cascadia Mono, Consolas, monospace</FontFamily>
+
+    <sys:Double x:Key="FontSizeCaption">11</sys:Double>
+    <sys:Double x:Key="FontSizeBody">13</sys:Double>
+    <sys:Double x:Key="FontSizeMono">12</sys:Double>
+    <sys:Double x:Key="FontSizeWordmark">26</sys:Double>
+
+    <!-- Tracking is applied through the local:Track.Em attached property in
+         Tracking.cs, in em units matching the brand (.12 / .18 / .22).
+         WPF has no letter-spacing primitive, so there is no double to declare
+         here — see Tracking.cs for why. -->
+
+    <!-- The brand uses hairlines and square corners throughout; there are no
+         corner-radius tokens because nothing in the system is rounded. -->
+
+    <!-- ── Button base ─────────────────────────────────────── -->
+    <Style x:Key="PlainButton" TargetType="Button">
+        <Setter Property="Background"      Value="Transparent"/>
+        <Setter Property="BorderBrush"     Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor"          Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="0">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Opacity" Value="0.85"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter Property="Opacity" Value="0.70"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Safelight export button ──────────────────────────────── -->
+    <Style x:Key="ExportButton" TargetType="Button" BasedOn="{StaticResource PlainButton}">
+        <Setter Property="Background"       Value="{StaticResource SafelightBrush}"/>
+        <Setter Property="Foreground"       Value="{StaticResource PaperBrush}"/>
+        <Setter Property="FontFamily"       Value="{StaticResource GroteskFont}"/>
+        <Setter Property="FontWeight"       Value="SemiBold"/>
+        <Setter Property="FontSize"         Value="10"/>
+        <Setter Property="Padding"          Value="0,14"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Face"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="0">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Face" Property="Background"
+                                    Value="{StaticResource SafelightDeepBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Face" Property="Background"
+                                    Value="{StaticResource PineBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource GrainBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Secondary (batch) button ────────────────────────────── -->
+    <!-- Same geometry as the export button, but reading as pine rather than
+         safelight: batch is a bulk operation, not the primary action. -->
+    <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource PlainButton}">
+        <Setter Property="Background"  Value="{StaticResource PineRaisedBrush}"/>
+        <Setter Property="Foreground"  Value="{StaticResource HalideBrush}"/>
+        <Setter Property="FontFamily"  Value="{StaticResource GroteskFont}"/>
+        <Setter Property="FontWeight"  Value="SemiBold"/>
+        <Setter Property="FontSize"    Value="10"/>
+        <Setter Property="Padding"     Value="0,12"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Face"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{StaticResource EdgeLightBrush}"
+                            BorderThickness="1"
+                            CornerRadius="0">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Face" Property="Background"
+                                    Value="{StaticResource PineBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Face" Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="{StaticResource GrainBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── TextBox ────────────────────────────────────────── -->
+    <Style x:Key="FactorTextBox" TargetType="TextBox">
+        <Setter Property="Background"      Value="{StaticResource ChamberBrush}"/>
+        <Setter Property="Foreground"      Value="{StaticResource PaperBrush}"/>
+        <Setter Property="CaretBrush"      Value="{StaticResource SafelightBrush}"/>
+        <Setter Property="BorderBrush"     Value="{StaticResource EdgeLightBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FontFamily"      Value="{StaticResource MonoFont}"/>
+        <Setter Property="FontSize"        Value="{StaticResource FontSizeMono}"/>
+        <Setter Property="Padding"         Value="6,4"/>
+        <Setter Property="TextAlignment"   Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="0">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource SafelightBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ── Preset row radio ─────────────────────────────────── -->
+    <!-- Selection reads as a safelight dot plus a 2px safelight edge, matching
+         the site's active-state treatment rather than a system radio. -->
+    <Style x:Key="PresetRadio" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{StaticResource HalideDeepBrush}"/>
+        <Setter Property="FontFamily" Value="{StaticResource MonoFont}"/>
+        <Setter Property="FontSize"   Value="{StaticResource FontSizeBody}"/>
+        <Setter Property="Cursor"     Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="RowBorder" Background="Transparent" CornerRadius="0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Safelight active edge -->
+                            <Rectangle x:Name="ActiveEdge"
+                                       Grid.Column="0"
+                                       Fill="Transparent"
+                                       Width="2"
+                                       HorizontalAlignment="Left"/>
+
+                            <!-- Selector dot -->
+                            <Grid Grid.Column="1" Margin="14,11,10,11" VerticalAlignment="Center">
+                                <Ellipse x:Name="OuterRing"
+                                         Width="14" Height="14"
+                                         Stroke="{StaticResource GrainBrush}"
+                                         StrokeThickness="1"
+                                         Fill="Transparent"/>
+                                <Ellipse x:Name="InnerDot"
+                                         Width="6" Height="6"
+                                         Fill="{StaticResource SafelightBrush}"
+                                         Visibility="Collapsed"/>
+                            </Grid>
+
+                            <ContentPresenter Grid.Column="2"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"/>
+
+                            <TextBlock Grid.Column="3"
+                                       Text="{TemplateBinding Tag}"
+                                       FontFamily="{StaticResource GroteskFont}"
+                                       FontSize="9"
+                                       Foreground="{StaticResource GrainBrush}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,14,0"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="OuterRing"  Property="Stroke"     Value="{StaticResource SafelightBrush}"/>
+                            <Setter TargetName="InnerDot"   Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="ActiveEdge" Property="Fill"       Value="{StaticResource SafelightBrush}"/>
+                            <Setter TargetName="RowBorder"  Property="Background" Value="{StaticResource PineBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource PaperBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RowBorder" Property="Background" Value="{StaticResource PineRaisedBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ── Preview mode tab ─────────────────────────────────── -->
+    <Style x:Key="PreviewModeRadio" TargetType="RadioButton">
+        <Setter Property="Background"  Value="Transparent"/>
+        <Setter Property="Foreground"  Value="{StaticResource GrainBrush}"/>
+        <Setter Property="FontFamily"  Value="{StaticResource GroteskFont}"/>
+        <Setter Property="FontSize"    Value="9"/>
+        <Setter Property="FontWeight"  Value="SemiBold"/>
+        <Setter Property="Cursor"      Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="2"/>
+                        </Grid.RowDefinitions>
+                        <Border x:Name="Tab" Grid.Row="0"
+                                Background="Transparent"
+                                Padding="16,9">
+                            <ContentPresenter VerticalAlignment="Center"/>
+                        </Border>
+                        <Rectangle x:Name="Underline" Grid.Row="1" Fill="Transparent"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Tab"       Property="Background" Value="{StaticResource PineBrush}"/>
+                            <Setter TargetName="Underline" Property="Fill"       Value="{StaticResource SafelightBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource PaperBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Tab" Property="Background" Value="{StaticResource PineRaisedBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
