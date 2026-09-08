@@ -71,6 +71,36 @@ jobs:
       - name: JavaScript parses
         run: node --check DesqueezeWeb/assets/app.js
 
+      # A font file referenced by app.css but missing from the repo 404s and the
+      # page silently renders in the fallback stack — which is exactly the state
+      # bundling the faces was meant to end, and it looks like nothing is wrong.
+      # Checks both directions: every url() resolves, and nothing unreferenced
+      # is being shipped.
+      - name: Every referenced font is present
+        run: |
+          set -euo pipefail
+          cd DesqueezeWeb/assets
+          refs=$(grep -oE 'url\(\./fonts/[^)]+\)' app.css \
+                 | sed -E 's|url\(\./||; s|\)||' | sort -u)
+          test -n "$refs" || { echo "::error::no @font-face url() found in app.css"; exit 1; }
+          status=0
+          while read -r f; do
+            if [ ! -f "$f" ]; then
+              echo "::error::app.css references $f, which is not in the repo"
+              status=1
+            fi
+          done <<< "$refs"
+          # `find | sort` rather than `ls`, so a filename with a space cannot
+          # split into two entries and silently pass.
+          on_disk=$(find fonts -type f -name '*.woff2' | sort)
+          orphans=$(comm -13 <(echo "$refs") <(echo "$on_disk") || true)
+          if [ -n "$orphans" ]; then
+            echo "::error::shipped but never referenced by app.css:"
+            echo "$orphans"
+            status=1
+          fi
+          exit $status
+
   deploy:
     needs: check
     if: github.event_name != 'pull_request' && vars.AWS_UTILITY_ROLE_ARN != ''

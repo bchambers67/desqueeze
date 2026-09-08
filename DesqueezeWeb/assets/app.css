@@ -1,8 +1,13 @@
 /* Chambers & Light — Desqueeze (web)
  *
  * Tokens copied from the brand system, matching BrandTheme.xaml and the site's
- * tokens.css. No font files are shipped: the site itself resolves these faces
- * locally and falls back, so the stacks here are identical to stay in step.
+ * tokens.css. The stacks are identical to the site's, and so are the faces: the
+ * five woff2 files in assets/fonts/ are the same @fontsource subsets the site
+ * bundles. Shipping them was not optional — the site self-hosts its fonts
+ * rather than relying on the reader having them, so a tool that only named the
+ * families rendered in Didot, system-ui and Menlo. The fallbacks are still in
+ * the stacks and still correct; they are now the fallback rather than the
+ * result.
  *
  * Brand rule: safelight red is punctuation — dots, rules, small labels, the
  * ampersand. Never a fill, never a background.
@@ -10,6 +15,77 @@
  * The surface is dark on purpose. Both native clients are, and a dark ground is
  * the honest one to judge a photograph against.
  */
+
+/* ---------- faces ----------
+ *
+ * Only what this page actually asks for: Archivo 400 (body) and 500 (the lede's
+ * strong), Bodoni Moda 400 upright (h1, the drop target's headline) and 400
+ * italic (the ampersand), Space Mono 400 (every label, step and caption). Five
+ * files, ~75KB. The site bundles more weights because it uses more; adding one
+ * here means adding the file too, not just the declaration.
+ *
+ * woff2 only, with no woff twin. Every browser that can run this tool — it
+ * needs canvas, Blob and async/await — has supported woff2 for a decade, and
+ * the twin would double the directory for nobody.
+ *
+ * Relative paths, like every other asset here: the page is served from
+ * /u/desqueeze/, so a leading slash would resolve to the domain root and 404.
+ * `font-src 'self'` in the utilities CSP already permits these; no infra change.
+ *
+ * unicode-range is the latin subset's, copied from @fontsource. A character
+ * outside it falls through to the next family in the stack, which is what the
+ * stack is for.
+ */
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./fonts/archivo-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(./fonts/archivo-latin-500-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./fonts/bodoni-moda-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Bodoni Moda';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./fonts/bodoni-moda-latin-400-italic.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./fonts/space-mono-latin-400-normal.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --chamber: #16110f;
