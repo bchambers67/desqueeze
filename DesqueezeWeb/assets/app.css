@@ -154,46 +154,10 @@ body {
   white-space: nowrap;
 }
 
-/* ---------- header ---------- */
-
-.bar {
-  border-bottom: 1px solid var(--edge-light);
-  background: var(--chamber);
-  position: sticky;
-  top: 0;
-  z-index: 5;
-}
-.bar-inner {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  height: 56px;
-}
-.home {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  text-decoration: none;
-}
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--safelight);
-}
-.mark {
-  font-family: var(--f-mono);
-  font-size: 13px;
-  letter-spacing: 0.18em;
-  color: var(--paper);
-}
-.tool {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--halide-deep);
-}
+/* ---------- header ----------
+ *
+ * The site's header, in assets/site-header.css — a copy of the site's own,
+ * scoped under .site-header. Nothing here. */
 
 /* ---------- type ---------- */
 

@@ -22,7 +22,9 @@ Every path is relative, so it works from any prefix without configuration.
 
 The utilities CSP allows **no external origins** and `script-src 'self'`. Plain
 files satisfy that by construction — nothing to audit, nothing to pin, no lockfile
-to keep current. The whole client is three files.
+to keep current. The whole client is a handful of plain files: the app's
+three, and the site's header (a copy of the site's own — see `docs/UTILITIES.md`
+in `bchambers67/briantchambers.com`).
 
 ## What it does that the native apps do
 

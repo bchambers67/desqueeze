@@ -1,0 +1,210 @@
+/* The site's header, as on every page of chambersandlight.com.
+ *
+ * A copy, not an import: the utilities CSP allows no external origins and the
+ * site is a separate build, so the tool carries its own copy of the header's
+ * styles. The source of truth is site/src/components/SiteHeader.astro in
+ * bchambers67/briantchambers.com — when that changes, this is updated by hand
+ * (docs/UTILITIES.md there records the contract). The tokens it reads come
+ * from app.css, which already carries the site's.
+ *
+ * Every selector is scoped under .site-header so nothing here can reach the
+ * tool's own markup (its image grid is a <ul>, for one). The two exceptions
+ * are the custom properties on :root, which the site also sets there.
+ */
+
+:root {
+  /* Height of the bar, excluding the status-bar inset; the no-JS sheet sets
+     the taller wrapped-row case. */
+  --header-h: 56px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  /* Runs under the status bar and pads its own row clear of it. */
+  padding-top: var(--safe-top);
+  background: rgba(22, 17, 15, 0.94);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--edge-light);
+}
+.site-header .bar {
+  display: flex;
+  align-items: center;
+  height: var(--header-h);
+  /* The dropped panel positions against the bar, not the page. */
+  position: relative;
+}
+.site-header .home {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  /* Everything after it sits at the far end. */
+  margin-right: auto;
+}
+.site-header .home .mono {
+  font-family: var(--f-mono);
+  color: var(--paper);
+  font-size: 13px;
+  letter-spacing: 0.18em;
+}
+.site-header .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--safelight);
+  flex: 0 0 auto;
+}
+.site-header ul {
+  display: flex;
+  gap: 26px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-header nav a {
+  color: var(--halide);
+  text-decoration: none;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  transition:
+    opacity 0.2s,
+    color 0.2s;
+}
+.site-header nav a:hover,
+.site-header nav a[aria-current='page'] {
+  opacity: 1;
+  color: var(--paper);
+}
+
+/* The button. Hidden above the phone breakpoint; below it, a 44px square
+   hit area (the smallest a thumb is happy with) drawn as three paper lines
+   that fold into a cross when open. The lines are paper, not safelight:
+   red is punctuation, and a control is not punctuation. */
+.site-header .menu-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  margin-right: -12px; /* the lines, not the hit area, sit on the gutter */
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  position: relative;
+}
+.site-header .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.site-header .line {
+  position: absolute;
+  left: 13px;
+  width: 18px;
+  height: 2px;
+  background: var(--paper);
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+}
+.site-header .line:nth-child(2) {
+  top: 15px;
+}
+.site-header .line:nth-child(3) {
+  top: 21px;
+}
+.site-header .line:nth-child(4) {
+  top: 27px;
+}
+.site-header.menu-open .line:nth-child(2) {
+  transform: translateY(6px) rotate(45deg);
+}
+.site-header.menu-open .line:nth-child(3) {
+  opacity: 0;
+}
+.site-header.menu-open .line:nth-child(4) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+.site-header .menu-toggle:focus-visible {
+  outline: 2px solid var(--halide);
+  outline-offset: 2px;
+}
+.site-header nav a:focus-visible,
+.site-header .home:focus-visible {
+  outline: 2px solid var(--safelight);
+  outline-offset: 3px;
+}
+
+/* Five items in a 700px bar overflow at the desktop gap and tracking, and a
+   header that pushes the page sideways is worse than slightly tighter type. */
+@media (max-width: 700px) {
+  .site-header ul {
+    gap: 12px;
+  }
+  .site-header nav a {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+}
+
+/* The phone layout. The bar stays one row at --header-h and the items live
+   in a panel beneath it, shown only while the header carries .menu-open.
+   The panel is absolutely positioned under the bar rather than in flow, so
+   opening it does not push the page down. Same breakpoint as the script's
+   matchMedia; they have to move together. */
+@media (max-width: 620px) {
+  .site-header .menu-toggle {
+    display: block;
+  }
+  .site-header nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(22, 17, 15, 0.98);
+    border-bottom: 1px solid var(--edge-light);
+    /* The bar is the .wrap, so its gutter is the page's; the panel
+       re-applies it because it spans the full width. */
+    padding: 4px max(20px, var(--safe-right)) 14px max(20px, var(--safe-left));
+  }
+  .site-header.menu-open nav {
+    display: block;
+  }
+  .site-header ul {
+    flex-direction: column;
+    gap: 0;
+  }
+  .site-header li + li {
+    border-top: 1px solid var(--edge-light);
+  }
+  /* A row each, tall enough to hit and set at the size the bar's own links
+     use on a desktop — there is room for it here. */
+  .site-header nav a {
+    display: block;
+    padding: 15px 0;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+}
+/* The narrowest phones still in use: a tighter header gutter only. */
+@media (max-width: 360px) {
+  .site-header .bar {
+    padding-left: max(14px, var(--safe-left));
+    padding-right: max(14px, var(--safe-right));
+  }
+  .site-header nav {
+    padding-left: max(14px, var(--safe-left));
+    padding-right: max(14px, var(--safe-right));
+  }
+}

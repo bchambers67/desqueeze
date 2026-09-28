@@ -46,6 +46,9 @@ jobs:
           test -f DesqueezeWeb/index.html
           test -f DesqueezeWeb/assets/app.js
           test -f DesqueezeWeb/assets/app.css
+          test -f DesqueezeWeb/assets/site-header.css
+          test -f DesqueezeWeb/assets/site-header.js
+          test -f DesqueezeWeb/assets/nojs-nav.css
 
       # Absolute asset paths resolve against the domain root, not the
       # /u/desqueeze/ prefix, so the page loads and every asset 404s.
@@ -69,7 +72,26 @@ jobs:
 
       # A syntax error here is a blank tool, and there is no bundler to catch it.
       - name: JavaScript parses
-        run: node --check DesqueezeWeb/assets/app.js
+        run: |
+          node --check DesqueezeWeb/assets/app.js
+          node --check DesqueezeWeb/assets/site-header.js
+
+      # The site header carries the five items every page of the site has,
+      # with Tools current, and its script is the site's. Losing an item, or
+      # the aria wiring between the button and the panel, is silent.
+      - name: Site header is the site's
+        run: |
+          set -euo pipefail
+          for item in work offerings journal tools about; do
+            grep -q "href=\"https://chambersandlight.com/$item/\"" DesqueezeWeb/index.html \
+              || { echo "::error::the header lost its $item item"; exit 1; }
+          done
+          grep -q 'aria-current="page">Tools' DesqueezeWeb/index.html \
+            || { echo "::error::Tools is no longer marked current"; exit 1; }
+          grep -q 'aria-controls="site-nav"' DesqueezeWeb/index.html \
+            || { echo "::error::the menu button no longer names the nav"; exit 1; }
+          grep -q '<nav id="site-nav"' DesqueezeWeb/index.html \
+            || { echo "::error::the nav lost its id"; exit 1; }
 
       # A font file referenced by app.css but missing from the repo 404s and the
       # page silently renders in the fallback stack — which is exactly the state
