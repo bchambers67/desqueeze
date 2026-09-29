@@ -1,0 +1,51 @@
+/* Loaded only from <noscript> in SiteHeader.astro, so it applies to visitors
+   with JavaScript off and to nobody else.
+
+   The header's phone layout collapses the nav behind a button that a script
+   toggles. Without the script the button would open nothing, so this sheet
+   puts the older layout back: the nav wraps to its own row under the wordmark,
+   the button is hidden, and the header is the taller 92px it used to be —
+   which --header-h has to say too, because the home page pins its hero and
+   its sticky card to that variable.
+
+   An external file rather than an inline <style> because the CSP has no
+   'unsafe-inline' for styles. The breakpoint is the header's; they move
+   together. */
+@media (max-width: 620px) {
+  :root {
+    --header-h: 92px;
+  }
+  .site-header .menu-toggle {
+    display: none !important;
+  }
+  .site-header .bar {
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 6px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .site-header nav {
+    display: block !important;
+    position: static !important;
+    width: 100%;
+    padding: 0 !important;
+    border-bottom: 0 !important;
+    background: none !important;
+  }
+  .site-header nav ul {
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 16px !important;
+    row-gap: 6px !important;
+  }
+  .site-header nav li + li {
+    border-top: 0 !important;
+  }
+  .site-header nav a {
+    display: inline !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    letter-spacing: 0.06em !important;
+  }
+}
