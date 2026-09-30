@@ -76,13 +76,13 @@ jobs:
           node --check DesqueezeWeb/assets/app.js
           node --check DesqueezeWeb/assets/site-header.js
 
-      # The site header carries the five items every page of the site has,
+      # The site header carries the six items every page of the site has,
       # with Tools current, and its script is the site's. Losing an item, or
       # the aria wiring between the button and the panel, is silent.
       - name: Site header is the site's
         run: |
           set -euo pipefail
-          for item in work offerings journal tools about; do
+          for item in work exhibitions offerings journal tools about; do
             grep -q "href=\"https://chambersandlight.com/$item/\"" DesqueezeWeb/index.html \
               || { echo "::error::the header lost its $item item"; exit 1; }
           done
