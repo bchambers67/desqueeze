@@ -1,0 +1,297 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		IO000001 /* DesqueezeApp.swift in Sources */       = {isa = PBXBuildFile; fileRef = IO100001 /* DesqueezeApp.swift */; };
+		IO000002 /* BrandTheme.swift in Sources */         = {isa = PBXBuildFile; fileRef = IO100002 /* BrandTheme.swift */; };
+		IO000003 /* SqueezePreset.swift in Sources */      = {isa = PBXBuildFile; fileRef = IO100003 /* SqueezePreset.swift */; };
+		IO000004 /* EditorModel.swift in Sources */        = {isa = PBXBuildFile; fileRef = IO100004 /* EditorModel.swift */; };
+		IO000005 /* DesqueezeService.swift in Sources */   = {isa = PBXBuildFile; fileRef = IO100005 /* DesqueezeService.swift */; };
+		IO000006 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = IO100006 /* PhotoLibraryWriter.swift */; };
+		IO000007 /* RootView.swift in Sources */           = {isa = PBXBuildFile; fileRef = IO100007 /* RootView.swift */; };
+		IO000008 /* PreviewPane.swift in Sources */        = {isa = PBXBuildFile; fileRef = IO100008 /* PreviewPane.swift */; };
+		IO000009 /* ControlsPane.swift in Sources */       = {isa = PBXBuildFile; fileRef = IO100009 /* ControlsPane.swift */; };
+		IO000010 /* Assets.xcassets in Resources */        = {isa = PBXBuildFile; fileRef = IO100010 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		IO100000 /* Desqueeze.app */             = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Desqueeze.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		IO100001 /* DesqueezeApp.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
+		IO100002 /* BrandTheme.swift */          = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
+		IO100003 /* SqueezePreset.swift */       = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqueezePreset.swift; sourceTree = "<group>"; };
+		IO100004 /* EditorModel.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorModel.swift; sourceTree = "<group>"; };
+		IO100005 /* DesqueezeService.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeService.swift; sourceTree = "<group>"; };
+		IO100006 /* PhotoLibraryWriter.swift */  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
+		IO100007 /* RootView.swift */            = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		IO100008 /* PreviewPane.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
+		IO100009 /* ControlsPane.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsPane.swift; sourceTree = "<group>"; };
+		IO100010 /* Assets.xcassets */           = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		IO100011 /* Info.plist */                = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		IO200001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		IO300000 = {
+			isa = PBXGroup;
+			children = (
+				IO300001 /* Desqueeze */,
+				IO300002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		IO300001 /* Desqueeze */ = {
+			isa = PBXGroup;
+			children = (
+				IO100001 /* DesqueezeApp.swift */,
+				IO300003 /* Brand */,
+				IO300004 /* Models */,
+				IO300005 /* Services */,
+				IO300006 /* Views */,
+				IO100010 /* Assets.xcassets */,
+				IO100011 /* Info.plist */,
+			);
+			path = Desqueeze;
+			sourceTree = "<group>";
+		};
+		IO300002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				IO100000 /* Desqueeze.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		IO300003 /* Brand */ = {
+			isa = PBXGroup;
+			children = (
+				IO100002 /* BrandTheme.swift */,
+			);
+			path = Brand;
+			sourceTree = "<group>";
+		};
+		IO300004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				IO100003 /* SqueezePreset.swift */,
+				IO100004 /* EditorModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		IO300005 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				IO100005 /* DesqueezeService.swift */,
+				IO100006 /* PhotoLibraryWriter.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		IO300006 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				IO100007 /* RootView.swift */,
+				IO100008 /* PreviewPane.swift */,
+				IO100009 /* ControlsPane.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		IO400000 /* Desqueeze */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = IO500000 /* Build configuration list for PBXNativeTarget "Desqueeze" */;
+			buildPhases = (
+				IO200000 /* Sources */,
+				IO200001 /* Frameworks */,
+				IO200002 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = Desqueeze;
+			productName = Desqueeze;
+			productReference = IO100000 /* Desqueeze.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		IO600000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					IO400000 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = IO500001 /* Build configuration list for PBXProject "Desqueeze" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = IO300000;
+			productRefGroup = IO300002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (IO400000 /* Desqueeze */);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		IO200002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				IO000010 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		IO200000 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				IO000001 /* DesqueezeApp.swift in Sources */,
+				IO000002 /* BrandTheme.swift in Sources */,
+				IO000003 /* SqueezePreset.swift in Sources */,
+				IO000004 /* EditorModel.swift in Sources */,
+				IO000005 /* DesqueezeService.swift in Sources */,
+				IO000006 /* PhotoLibraryWriter.swift in Sources */,
+				IO000007 /* RootView.swift in Sources */,
+				IO000008 /* PreviewPane.swift in Sources */,
+				IO000009 /* ControlsPane.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		IO700000 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		IO700001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		IO700002 /* Debug - Target */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Desqueeze/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chambersandlight.desqueeze;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		IO700003 /* Release - Target */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Desqueeze/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
+				MARKETING_VERSION = 0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chambersandlight.desqueeze;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		IO500000 /* Build configuration list for PBXNativeTarget "Desqueeze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (IO700002 /* Debug */, IO700003 /* Release */);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		IO500001 /* Build configuration list for PBXProject "Desqueeze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (IO700000 /* Debug */, IO700001 /* Release */);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = IO600000 /* Project object */;
+}
