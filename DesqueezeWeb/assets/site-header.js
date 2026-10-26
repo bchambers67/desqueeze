@@ -28,6 +28,16 @@
   wide.addEventListener("change", function () {
     if (wide.matches && nav.matches(":popover-open")) nav.hidePopover();
   });
+  // iOS Safari keeps a fast path for a page with no touch or pointer
+  // listeners: the tap is recognised in the browser's own process and a
+  // click is synthesised from there, and the popover's light dismiss, which
+  // rides on pointerdown and pointerup, never ran on it (WebKit bug 267688,
+  // fixed in Safari 18.3 — by adding exactly this kind of listener, reports
+  // said). A listener on the document, doing nothing, takes the page off
+  // that path everywhere, so a tap on the cross or on the shifted page is
+  // the same sequence of events it is on a mouse.
+  document.addEventListener("pointerdown", function () {}, { passive: true });
+
   var aside = document.querySelectorAll(".skip, main, footer, .site-header .bar > .home");
   nav.addEventListener("toggle", function (e) {
     var open = e.newState === "open";
