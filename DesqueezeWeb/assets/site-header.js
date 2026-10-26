@@ -38,6 +38,64 @@
   // the same sequence of events it is on a mouse.
   document.addEventListener("pointerdown", function () {}, { passive: true });
 
+  // A swipe in from the right edge opens the drawer, as the button does: a
+  // touch that starts within 32px of the edge and travels 48px leftward,
+  // more across than along. The very edge is the browser's own — its
+  // back-and-forward swipe — so the band sits inside it. Touch events, not
+  // pointer: once the page scrolls, iOS turns a pointer sequence into a
+  // pointercancel, and this only watches. Passive throughout, so the page
+  // scrolls as it did. A strip that scrolls across under the finger keeps
+  // its own swipe, and a dialog keeps its gestures.
+  function scrollsAcross(from) {
+    for (var el = from; el && el !== document.body; el = el.parentElement) {
+      var overflowX = getComputedStyle(el).overflowX;
+      if ((overflowX === "auto" || overflowX === "scroll") && el.scrollWidth > el.clientWidth) {
+        return true;
+      }
+    }
+    return false;
+  }
+  var swipe = null;
+  document.addEventListener(
+    "touchstart",
+    function (e) {
+      swipe = null;
+      if (wide.matches || nav.matches(":popover-open") || e.touches.length !== 1) return;
+      var t = e.touches[0];
+      if (t.clientX < innerWidth - 32) return;
+      var target = e.target instanceof Element ? e.target : null;
+      if ((target && target.closest("dialog")) || scrollsAcross(target)) return;
+      swipe = { x: t.clientX, y: t.clientY };
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    "touchmove",
+    function (e) {
+      if (!swipe) return;
+      var t = e.touches[0];
+      var dx = swipe.x - t.clientX;
+      var dy = Math.abs(t.clientY - swipe.y);
+      // Along more than across: a scroll. Let it be one.
+      if (dy > 24 && dy > dx) {
+        swipe = null;
+        return;
+      }
+      if (dx >= 48 && dx > dy * 1.5) {
+        swipe = null;
+        nav.showPopover();
+      }
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    "touchend",
+    function () {
+      swipe = null;
+    },
+    { passive: true }
+  );
+
   var aside = document.querySelectorAll(".skip, main, footer, .site-header .bar > .home");
   nav.addEventListener("toggle", function (e) {
     var open = e.newState === "open";
