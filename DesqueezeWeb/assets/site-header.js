@@ -106,8 +106,19 @@
   );
   document.addEventListener(
     "touchend",
-    function () {
-      if (swipe && swipe.open && !wide.matches && !nav.matches(":popover-open")) {
+    function (e) {
+      // The distance from the lift's own position: the last move can be
+      // folded into the lift, and then the moves alone would say the finger
+      // was still out.
+      var t = e.changedTouches[0];
+      if (
+        swipe &&
+        swipe.open &&
+        t &&
+        swipe.x - t.clientX >= 48 &&
+        !wide.matches &&
+        !nav.matches(":popover-open")
+      ) {
         nav.showPopover();
       }
       swipe = null;
