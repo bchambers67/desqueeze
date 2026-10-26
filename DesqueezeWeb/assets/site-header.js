@@ -11,9 +11,15 @@
 // tech — with or without JavaScript. The one thing left to a script is
 // closing the drawer when the viewport grows past the phone breakpoint,
 // where the nav is the inline row again and an open popover would otherwise
-// stay in the top layer over the page. Same breakpoint as the stylesheet.
-// They have to move together. (The site's second script, for the header
-// over the home page's hero, has no counterpart here: the tool has no hero.)
+// stay in the top layer over the page — same breakpoint as the stylesheet,
+// they have to move together — and, while the drawer is open, putting the
+// page out of play for everyone, not only the pointer: inert on everything
+// but the drawer and its button, so Tab from the last item comes back to the
+// button rather than going on to the shifted page, and assistive tech reads
+// the drawer alone. The stylesheet's pointer-events rule is the floor
+// without this. Never on body: the drawer and the button are inside it.
+// (The site's script for the header over the home page's hero has no
+// counterpart here: the tool has no hero.)
 (function () {
   "use strict";
   var nav = document.getElementById("site-nav");
@@ -21,5 +27,12 @@
   var wide = matchMedia("(min-width: 621px)");
   wide.addEventListener("change", function () {
     if (wide.matches && nav.matches(":popover-open")) nav.hidePopover();
+  });
+  var aside = document.querySelectorAll(".skip, main, footer, .site-header .home");
+  nav.addEventListener("toggle", function (e) {
+    var open = e.newState === "open";
+    aside.forEach(function (el) {
+      el.inert = open;
+    });
   });
 })();
