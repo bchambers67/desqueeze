@@ -323,6 +323,15 @@ body {
     overflow: hidden;
     pointer-events: none;
   }
+  /* Except the button, now the cross that closes the drawer: it keeps its
+     pointer, the one thing on the shifted page that does. The popover's
+     light dismiss leaves its own invoker alone, so a tap on it is one
+     toggle — shut — not a dismiss and a reopening. Without this, iOS Safari
+     let a tap on the cross through to nothing; the drawer closed only on a
+     swipe across the page, which is the light dismiss, and that still works. */
+  .site-header:has(nav:popover-open) .menu-toggle {
+    pointer-events: auto;
+  }
 }
 /* The narrowest phones still in use: a tighter header gutter only. */
 @media (max-width: 360px) {
