@@ -27,9 +27,12 @@
          because this page is served under /u/desqueeze/ and a leading slash
          is what the deploy guard forbids for assets; the site's own origin is
          the one external host that guard allows. Markup mirrors
-         site/src/components/SiteHeader.astro in the site repo. -->
+         site/src/components/SiteHeader.astro in the site repo: the nav is a
+         popover and the button its invoker, so the browser owns the toggle,
+         Escape, the tap outside and the expanded state, script or no script.
+         On a phone it is a drawer from the right edge; on a wide landscape
+         screen the whole header is a rail down the right edge. -->
     <header class="site-header">
-      <noscript><link rel="stylesheet" href="./assets/nojs-nav.css" /></noscript>
       <div class="wrap bar">
         <a
           class="home"
@@ -39,18 +42,13 @@
           <span class="dot" aria-hidden="true"></span>
           <span class="mono">C&amp;L</span>
         </a>
-        <button
-          class="menu-toggle"
-          type="button"
-          aria-expanded="false"
-          aria-controls="site-nav"
-        >
+        <button class="menu-toggle" type="button" popovertarget="site-nav">
           <span class="sr-only">Menu</span>
           <span class="line" aria-hidden="true"></span>
           <span class="line" aria-hidden="true"></span>
           <span class="line" aria-hidden="true"></span>
         </button>
-        <nav id="site-nav" aria-label="Primary">
+        <nav id="site-nav" aria-label="Primary" popover>
           <ul>
             <li><a href="https://chambersandlight.com/work/">Work</a></li>
             <li><a href="https://chambersandlight.com/offerings/">Offerings</a></li>
