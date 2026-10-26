@@ -39,19 +39,36 @@
   document.addEventListener("pointerdown", function () {}, { passive: true });
 
   // A swipe in from the right edge opens the drawer, as the button does: a
-  // touch that starts within 32px of the edge and travels 48px leftward,
-  // more across than along. The very edge is the browser's own — its
-  // back-and-forward swipe — so the band sits inside it. Touch events, not
-  // pointer: once the page scrolls, iOS turns a pointer sequence into a
-  // pointercancel, and this only watches. Passive throughout, so the page
-  // scrolls as it did. A strip that scrolls across under the finger keeps
-  // its own swipe, and a dialog keeps its gestures.
-  function scrollsAcross(from) {
+  // touch that starts in the last 64px, edge included, crosses 48px
+  // leftward more across than along, and is still 48px out when it lifts.
+  // The outer part of that band is often the system's — Android's back
+  // gesture takes about 30dp from the edge (up to 40 at its high setting),
+  // Safari's forward swipe takes the edge when there is a page to go
+  // forward to — and a start it claims arrives here as a touchstart and
+  // then a touchcancel; the band reaches past it so a thumb still has
+  // room. Opened at the lift, not during the move: a pointerup that
+  // outlives the move (under a touch-action that keeps the pointer alive)
+  // comes before touchend and would light-dismiss a drawer opened on the
+  // move. Touch events, not pointer: once the page scrolls, iOS turns a
+  // pointer sequence into a pointercancel, and this only watches. Passive
+  // throughout, so the page scrolls as it did. A strip that scrolls across
+  // under the finger, or has claimed the sideways move with touch-action,
+  // keeps its own swipe, and a dialog keeps its gestures; the walk stops
+  // below body, so a touch-action on the page root leaves the swipe
+  // alone. (The tool has no strip or dialog; the walk is the site's, kept
+  // in step.)
+  function ownsAcross(from) {
     for (var el = from; el && el !== document.body; el = el.parentElement) {
-      var overflowX = getComputedStyle(el).overflowX;
-      if ((overflowX === "auto" || overflowX === "scroll") && el.scrollWidth > el.clientWidth) {
-        return true;
-      }
+      var style = getComputedStyle(el);
+      var overflowX = style.overflowX;
+      var touchAction = style.touchAction;
+      var scrolls =
+        (overflowX === "auto" || overflowX === "scroll") && el.scrollWidth > el.clientWidth;
+      var claims =
+        touchAction !== "auto" &&
+        touchAction !== "manipulation" &&
+        !/pan-(x|left|right)/.test(touchAction);
+      if (scrolls || claims) return true;
     }
     return false;
   }
@@ -62,10 +79,10 @@
       swipe = null;
       if (wide.matches || nav.matches(":popover-open") || e.touches.length !== 1) return;
       var t = e.touches[0];
-      if (t.clientX < innerWidth - 32) return;
+      if (t.clientX < innerWidth - 64) return;
       var target = e.target instanceof Element ? e.target : null;
-      if ((target && target.closest("dialog")) || scrollsAcross(target)) return;
-      swipe = { x: t.clientX, y: t.clientY };
+      if ((target && target.closest("dialog")) || ownsAcross(target)) return;
+      swipe = { x: t.clientX, y: t.clientY, open: false };
     },
     { passive: true }
   );
@@ -81,15 +98,24 @@
         swipe = null;
         return;
       }
-      if (dx >= 48 && dx > dy * 1.5) {
-        swipe = null;
-        nav.showPopover();
-      }
+      // The direction is decided where the swipe crosses 48px; after that
+      // only the distance is read again, so out and back opens nothing.
+      swipe.open = dx >= 48 && (swipe.open || dx > dy * 1.5);
     },
     { passive: true }
   );
   document.addEventListener(
     "touchend",
+    function () {
+      if (swipe && swipe.open && !wide.matches && !nav.matches(":popover-open")) {
+        nav.showPopover();
+      }
+      swipe = null;
+    },
+    { passive: true }
+  );
+  document.addEventListener(
+    "touchcancel",
     function () {
       swipe = null;
     },
