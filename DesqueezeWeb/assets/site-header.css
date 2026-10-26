@@ -111,6 +111,11 @@ body {
   background: var(--safelight);
   flex: 0 0 auto;
 }
+/* The drawer's own mark: shown by the phone block while the drawer is what
+   the nav is, and by nothing else. */
+.site-header .drawer-home {
+  display: none;
+}
 /* The nav is a popover, and a browser gives a popover its own defaults —
    fixed, centred, bordered, canvas-coloured, hidden until invoked. Undone
    here, so at every width above the phone breakpoint the nav is the plain
@@ -260,8 +265,8 @@ body {
     right: 0;
     bottom: 0;
     width: var(--nav-w);
-    /* 79px is the rail's: 18 over the mark, the mark's 21, 40 under it. */
-    padding: calc(79px + var(--safe-top)) max(30px, var(--safe-right))
+    /* 18px over the mark, as the rail: the list lands at 79 under it. */
+    padding: calc(18px + var(--safe-top)) max(30px, var(--safe-right))
       calc(30px + var(--safe-bottom)) 30px;
     background: var(--chamber);
     border-left: 1px solid var(--edge-light);
@@ -298,13 +303,23 @@ body {
   .site-header nav:not(:popover-open) {
     display: none;
   }
+  /* The mark at the top of the column, as in the rail: its dot hanging 17px
+     into the margin on the current-page dot's axis, C&L on the labels' left
+     edge, 40px over the list. Whole, not dimmed: the base link rule reaches
+     it. */
+  .site-header nav a.drawer-home {
+    display: flex;
+    margin: 0 0 40px -17px;
+    padding: 0;
+    opacity: 1;
+  }
   .site-header ul {
     flex-direction: column;
     gap: 4px;
   }
   /* A row each at the bar's own size and tracking, the height a thumb wants;
      a word wider than the column wraps rather than overflows. */
-  .site-header nav a {
+  .site-header ul a {
     position: relative;
     display: block;
     padding: 12px 0;
@@ -312,7 +327,7 @@ body {
     letter-spacing: 0.12em;
     overflow-wrap: anywhere;
   }
-  .site-header nav a[aria-current='page']::before {
+  .site-header ul a[aria-current='page']::before {
     content: '';
     position: absolute;
     left: -16px;
@@ -416,7 +431,7 @@ body {
   /* A row each, 31px tall, at the bar's own size and tracking. OFFERINGS is
      79px in an 83px column: text-only zoom would push it past the rail's
      edge, so it breaks onto a second line instead. */
-  .site-header nav a {
+  .site-header ul a {
     position: relative;
     display: block;
     padding: 6px 0;
@@ -425,14 +440,14 @@ body {
   /* A touch screen that passes the query — a 3:2 Surface, a touch laptop:
      the rows take the height the drawer gives a thumb. */
   @media (pointer: coarse) {
-    .site-header nav a {
+    .site-header ul a {
       padding: 12px 0;
     }
   }
   /* The page you are on: a dot in the margin — a mark, which is what red is
      for. Drawn as a border, not a fill: forced colours (Windows high
      contrast) drop backgrounds and keep borders, so the dot stays. */
-  .site-header nav a[aria-current='page']::before {
+  .site-header ul a[aria-current='page']::before {
     content: '';
     position: absolute;
     left: -16px;
@@ -477,13 +492,13 @@ body {
       gap: 16px;
       row-gap: 6px;
     }
-    .site-header nav a {
+    .site-header ul a {
       display: inline;
       padding: 0;
       font-size: 11px;
       letter-spacing: 0.06em;
     }
-    .site-header nav a[aria-current='page']::before {
+    .site-header ul a[aria-current='page']::before {
       content: none;
     }
   }

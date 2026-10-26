@@ -28,7 +28,7 @@
   wide.addEventListener("change", function () {
     if (wide.matches && nav.matches(":popover-open")) nav.hidePopover();
   });
-  var aside = document.querySelectorAll(".skip, main, footer, .site-header .home");
+  var aside = document.querySelectorAll(".skip, main, footer, .site-header .bar > .home");
   nav.addEventListener("toggle", function (e) {
     var open = e.newState === "open";
     aside.forEach(function (el) {
