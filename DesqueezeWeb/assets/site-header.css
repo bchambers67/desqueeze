@@ -3,22 +3,73 @@
  * A copy, not an import: the utilities CSP allows no external origins and the
  * site is a separate build, so the tool carries its own copy of the header's
  * styles. The source of truth is site/src/components/SiteHeader.astro in
- * bchambers67/briantchambers.com — when that changes, this is updated by hand
+ * bchambers67/briantchambers.com, with the header's variables from
+ * site/src/styles/global.css — when either changes, this is updated by hand
  * (docs/UTILITIES.md there records the contract). The tokens it reads come
- * from app.css, which already carries the site's.
+ * from app.css, which already carries the site's. Brought up to the site's
+ * 2026-10-26 header: the Popover API menu (2026-10-05), the rail down the
+ * right edge of a wide screen and the drawer on a phone (both 2026-10-26).
+ * The site's over-hero rules are left out: the tool has no hero.
  *
  * Every selector is scoped under .site-header so nothing here can reach the
- * tool's own markup (its image grid is a <ul>, for one). The two exceptions
- * are the custom properties on :root, which the site also sets there.
+ * tool's own markup (its image grid is a <ul>, for one). The exceptions are
+ * the custom properties on :root, which the site also sets there, and two
+ * rules on body the site also carries: the padding that keeps the page clear
+ * of the rail, and the shift that makes room for the drawer.
  */
 
 :root {
-  /* Height of the bar, excluding the status-bar inset; the no-JS sheet sets
-     the taller wrapped-row case. */
+  /* Height of the bar, excluding the status-bar inset. 0 beside the rail,
+     where nothing sits across the top; 92px for a browser without the
+     Popover API on a phone, where the nav wraps under the mark. */
   --header-h: 56px;
+  /* The rule under the bar: a border, so part of the height it takes. */
+  --header-rule: 1px;
+  /* The nav column's width: the rail on a wide screen, the drawer on a
+     phone. One number, so the two are one thing. */
+  --nav-w: 144px;
+  /* The right-hand rail (below). Zero wherever the header is the bar across
+     the top, so the page pads nothing away. */
+  --rail-w: 0px;
   --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
+}
+
+/* No Popover API (iOS 16 and earlier): the phone nav wraps under the mark,
+   and the header is 92px tall. */
+@supports not selector(:popover-open) {
+  @media (max-width: 620px) {
+    :root {
+      --header-h: 92px;
+    }
+  }
+}
+
+/* The rail. On a wide landscape viewport — a desktop or laptop screen, where
+   width is in surplus and height is not — the header is a column fixed down
+   the right edge rather than a bar across the top. The page keeps clear of
+   it by padding body, so main stops at its edge and centres in what is left.
+   Nothing sits across the top any more, so the bar's height is zero.
+
+   Three conditions. The proportion, because that is what wide means. The
+   width: 900px admits the iPhone Duo's inner screen in landscape (951 wide)
+   and an iPad mini in landscape, and keeps the cover screen and every phone
+   in landscape on the bar. The height, because a phone in landscape is wide
+   and 900px across too, and 430px tall. The rail block below carries the
+   same query. They have to move together — and with the site's. */
+@media (min-width: 900px) and (min-height: 500px) and (min-aspect-ratio: 3/2) {
+  :root {
+    --header-h: 0px;
+    --header-rule: 0px;
+    --rail-w: var(--nav-w);
+  }
+}
+
+/* Clear of the rail where there is one; 0 everywhere else. */
+body {
+  padding-right: var(--rail-w);
 }
 
 .site-header {
@@ -30,13 +81,14 @@
   background: rgba(22, 17, 15, 0.94);
   backdrop-filter: blur(6px);
   border-bottom: 1px solid var(--edge-light);
+  transition:
+    background-color 0.25s,
+    border-color 0.25s;
 }
 .site-header .bar {
   display: flex;
   align-items: center;
   height: var(--header-h);
-  /* The dropped panel positions against the bar, not the page. */
-  position: relative;
 }
 .site-header .home {
   display: flex;
@@ -58,6 +110,23 @@
   border-radius: 50%;
   background: var(--safelight);
   flex: 0 0 auto;
+}
+/* The nav is a popover, and a browser gives a popover its own defaults —
+   fixed, centred, bordered, canvas-coloured, hidden until invoked. Undone
+   here, so at every width above the phone breakpoint the nav is the plain
+   inline row it always was; the phone layout below sets what it needs. */
+.site-header nav {
+  display: block;
+  position: static;
+  inset: auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: inherit;
+  background: none;
 }
 .site-header ul {
   display: flex;
@@ -86,8 +155,8 @@
 
 /* The button. Hidden above the phone breakpoint; below it, a 44px square
    hit area (the smallest a thumb is happy with) drawn as three paper lines
-   that fold into a cross when open. The lines are paper, not safelight:
-   red is punctuation, and a control is not punctuation. */
+   that fold into a cross while the drawer is open. The lines are paper, not
+   safelight: red is punctuation, and a control is not punctuation. */
 .site-header .menu-toggle {
   display: none;
   width: 44px;
@@ -126,13 +195,13 @@
 .site-header .line:nth-child(4) {
   top: 27px;
 }
-.site-header.menu-open .line:nth-child(2) {
+.site-header:has(nav:popover-open) .line:nth-child(2) {
   transform: translateY(6px) rotate(45deg);
 }
-.site-header.menu-open .line:nth-child(3) {
+.site-header:has(nav:popover-open) .line:nth-child(3) {
   opacity: 0;
 }
-.site-header.menu-open .line:nth-child(4) {
+.site-header:has(nav:popover-open) .line:nth-child(4) {
   transform: translateY(-6px) rotate(-45deg);
 }
 .site-header .menu-toggle:focus-visible {
@@ -143,6 +212,14 @@
 .site-header .home:focus-visible {
   outline: 2px solid var(--safelight);
   outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header .line,
+  .site-header,
+  .site-header nav,
+  body {
+    transition: none;
+  }
 }
 
 /* Five items in a 700px bar overflow at the desktop gap and tracking, and a
@@ -157,44 +234,103 @@
   }
 }
 
-/* The phone layout. The bar stays one row at --header-h and the items live
-   in a panel beneath it, shown only while the header carries .menu-open.
-   The panel is absolutely positioned under the bar rather than in flow, so
-   opening it does not push the page down. Same breakpoint as the script's
-   matchMedia; they have to move together. */
+/* The phone layout. The bar stays one row at --header-h, and the items live
+   in a drawer that slides in from the right edge while the popover is open:
+   the rail's column, borrowed — the same width (--nav-w), ground, hairline,
+   rows and current-page dot, the list starting where the rail's does, under
+   the mark's row — and the page slides left by the same width to make room,
+   body and all. The bar and its button go with it; the button, a cross now,
+   stays in reach.
+
+   The drawer is in the top layer, so the page's shift cannot move it: it is
+   fixed to the viewport's right edge. The header's height stays the same
+   open or shut. A tap on the shifted page closes the drawer (the popover's
+   light dismiss) and does nothing else: the page takes no pointer events
+   while the drawer is open, so the tap cannot also follow a link under it,
+   and the page cannot scroll under it either.
+
+   Same breakpoint as the script's matchMedia. They have to move together. */
 @media (max-width: 620px) {
   .site-header .menu-toggle {
     display: block;
   }
   .site-header nav {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
+    position: fixed;
+    top: 0;
     right: 0;
-    background: rgba(22, 17, 15, 0.98);
-    border-bottom: 1px solid var(--edge-light);
-    /* The bar is the .wrap, so its gutter is the page's; the panel
-       re-applies it because it spans the full width. */
-    padding: 4px max(20px, var(--safe-right)) 14px max(20px, var(--safe-left));
+    bottom: 0;
+    width: var(--nav-w);
+    /* 79px is the rail's: 18 over the mark, the mark's 21, 40 under it. */
+    padding: calc(79px + var(--safe-top)) max(30px, var(--safe-right))
+      calc(30px + var(--safe-bottom)) 30px;
+    background: var(--chamber);
+    border-left: 1px solid var(--edge-light);
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Off the right edge until open; the shift is the drawer's own width.
+       display and overlay transition discretely so the drawer slides out
+       before it goes. */
+    transform: translateX(100%);
+    transition:
+      transform 0.3s,
+      display 0.3s allow-discrete,
+      overlay 0.3s allow-discrete;
   }
-  .site-header.menu-open nav {
-    display: block;
+  .site-header nav:popover-open {
+    transform: none;
+    pointer-events: auto;
+  }
+  @starting-style {
+    .site-header nav:popover-open {
+      transform: translateX(100%);
+    }
+  }
+  .site-header nav:not(:popover-open) {
+    display: none;
   }
   .site-header ul {
     flex-direction: column;
-    gap: 0;
+    gap: 4px;
   }
-  .site-header li + li {
-    border-top: 1px solid var(--edge-light);
-  }
-  /* A row each, tall enough to hit and set at the size the bar's own links
-     use on a desktop — there is room for it here. */
+  /* A row each at the bar's own size and tracking, the height a thumb wants;
+     a word wider than the column wraps rather than overflows. */
   .site-header nav a {
+    position: relative;
     display: block;
-    padding: 15px 0;
+    padding: 12px 0;
     font-size: 12px;
     letter-spacing: 0.12em;
+    overflow-wrap: anywhere;
+  }
+  .site-header nav a[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    margin-top: -3px;
+    border: 3px solid var(--safelight);
+    border-radius: 50%;
+  }
+  /* The page, drawer open: shifted left by the drawer's width, still, and
+     deaf to the pointer. The transition runs both ways. */
+  body {
+    transition: transform 0.3s;
+  }
+  body:has(#site-nav:popover-open) {
+    transform: translateX(calc(-1 * var(--nav-w)));
+    overflow: hidden;
+    pointer-events: none;
+  }
+  /* Except the button, now the cross that closes the drawer: it keeps its
+     pointer, the one thing on the shifted page that does. The popover's
+     light dismiss leaves its own invoker alone, so a tap on it is one
+     toggle — shut — not a dismiss and a reopening. Without this, iOS Safari
+     let a tap on the cross through to nothing; the drawer closed only on a
+     swipe across the page, which is the light dismiss, and that still works. */
+  .site-header:has(nav:popover-open) .menu-toggle {
+    pointer-events: auto;
   }
 }
 /* The narrowest phones still in use: a tighter header gutter only. */
@@ -203,8 +339,130 @@
     padding-left: max(14px, var(--safe-left));
     padding-right: max(14px, var(--safe-right));
   }
-  .site-header nav {
-    padding-left: max(14px, var(--safe-left));
-    padding-right: max(14px, var(--safe-right));
+}
+
+/* The rail. On a wide landscape viewport the header is a column fixed down
+   the right edge: the mark at the top, where the bar had it, the five items
+   stacked beneath, a hairline on its left. The page stops at the column (the
+   body padding above, under the same query). The button and the drawer are
+   a phone's; the nav is the plain list it is at every width above the phone
+   breakpoint, turned to run down. Same query as above. They have to move
+   together. */
+@media (min-width: 900px) and (min-height: 500px) and (min-aspect-ratio: 3/2) {
+  .site-header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: var(--rail-w);
+    padding-top: 0;
+    background: var(--chamber);
+    backdrop-filter: none;
+    border-bottom: 0;
+    border-left: 1px solid var(--edge-light);
+    /* A window shorter than the list: the rail scrolls, the page does not
+       lose the items. Never sideways: an item wider than the column wraps
+       (below) rather than growing the rail a horizontal scrollbar. */
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .site-header .bar {
+    flex-direction: column;
+    align-items: flex-start;
+    /* Grows with the list in a window shorter than it, so the bottom padding
+       stays inside the scroll range; the full height otherwise. */
+    min-height: 100%;
+    height: auto;
+    max-width: none;
+    margin: 0;
+    /* 18px over the mark puts its centre at 28px, where the bar's was. The
+       insets: a phone on its side may carry a camera at the top or the
+       right, and the home indicator along the bottom. */
+    padding: calc(18px + var(--safe-top)) max(30px, var(--safe-right))
+      calc(30px + var(--safe-bottom)) 30px;
+  }
+  /* The mark's dot hangs in the margin, on the axis the current-page dot
+     hangs on (both centred 17px in from the hairline), and C&L sits on the
+     labels' left edge: one column of text, one column of red. */
+  .site-header .home {
+    margin: 0 0 40px -17px;
+  }
+  .site-header ul {
+    flex-direction: column;
+    gap: 4px;
+  }
+  /* A row each, 31px tall, at the bar's own size and tracking. OFFERINGS is
+     79px in an 83px column: text-only zoom would push it past the rail's
+     edge, so it breaks onto a second line instead. */
+  .site-header nav a {
+    position: relative;
+    display: block;
+    padding: 6px 0;
+    overflow-wrap: anywhere;
+  }
+  /* A touch screen that passes the query — a 3:2 Surface, a touch laptop:
+     the rows take the height the drawer gives a thumb. */
+  @media (pointer: coarse) {
+    .site-header nav a {
+      padding: 12px 0;
+    }
+  }
+  /* The page you are on: a dot in the margin — a mark, which is what red is
+     for. Drawn as a border, not a fill: forced colours (Windows high
+     contrast) drop backgrounds and keep borders, so the dot stays. */
+  .site-header nav a[aria-current='page']::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    margin-top: -3px;
+    border: 3px solid var(--safelight);
+    border-radius: 50%;
+  }
+}
+
+/* No Popover API (iOS 16 and earlier): the button would open nothing, so it
+   is hidden and the nav wraps to its own row under the mark — the layout the
+   header had before the panel. --header-h is 92px for the same case, above. */
+@supports not selector(:popover-open) {
+  @media (max-width: 620px) {
+    .site-header .menu-toggle {
+      display: none;
+    }
+    .site-header .bar {
+      flex-wrap: wrap;
+      align-content: center;
+      row-gap: 6px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+    .site-header nav {
+      position: static;
+      inset: auto;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      background: none;
+      overflow: visible;
+      transform: none;
+      transition: none;
+    }
+    .site-header ul {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 16px;
+      row-gap: 6px;
+    }
+    .site-header nav a {
+      display: inline;
+      padding: 0;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+    .site-header nav a[aria-current='page']::before {
+      content: none;
+    }
   }
 }

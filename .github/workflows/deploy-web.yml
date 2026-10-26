@@ -48,7 +48,6 @@ jobs:
           test -f DesqueezeWeb/assets/app.css
           test -f DesqueezeWeb/assets/site-header.css
           test -f DesqueezeWeb/assets/site-header.js
-          test -f DesqueezeWeb/assets/nojs-nav.css
 
       # Absolute asset paths resolve against the domain root, not the
       # /u/desqueeze/ prefix, so the page loads and every asset 404s.
@@ -78,7 +77,7 @@ jobs:
 
       # The site header carries the five items every page of the site has,
       # with Tools current, and its script is the site's. Losing an item, or
-      # the aria wiring between the button and the panel, is silent.
+      # the popover wiring between the button and the nav, is silent.
       - name: Site header is the site's
         run: |
           set -euo pipefail
@@ -88,10 +87,10 @@ jobs:
           done
           grep -q 'aria-current="page">Tools' DesqueezeWeb/index.html \
             || { echo "::error::Tools is no longer marked current"; exit 1; }
-          grep -q 'aria-controls="site-nav"' DesqueezeWeb/index.html \
-            || { echo "::error::the menu button no longer names the nav"; exit 1; }
-          grep -q '<nav id="site-nav"' DesqueezeWeb/index.html \
-            || { echo "::error::the nav lost its id"; exit 1; }
+          grep -q 'popovertarget="site-nav"' DesqueezeWeb/index.html \
+            || { echo "::error::the menu button no longer invokes the nav"; exit 1; }
+          grep -q '<nav id="site-nav" aria-label="Primary" popover>' DesqueezeWeb/index.html \
+            || { echo "::error::the nav lost its id or is no longer a popover"; exit 1; }
 
       # A font file referenced by app.css but missing from the repo 404s and the
       # page silently renders in the fallback stack — which is exactly the state
