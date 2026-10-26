@@ -243,16 +243,17 @@ body {
    in a drawer that slides in from the right edge while the popover is open:
    the rail's column, borrowed — the same width (--nav-w), ground, hairline,
    rows and current-page dot, the list starting where the rail's does, under
-   the mark's row — and the page slides left by the same width to make room,
-   body and all. The bar and its button go with it; the button, a cross now,
-   stays in reach.
+   the mark's row — and the page slides left by the same width to make room:
+   the bar's mark and its button, main and the footer, each on its own, never
+   body or the header (below says why). The button, a cross now, stays in
+   reach.
 
-   The drawer is in the top layer, so the page's shift cannot move it: it is
-   fixed to the viewport's right edge. The header's height stays the same
-   open or shut. A tap on the shifted page closes the drawer (the popover's
-   light dismiss) and does nothing else: the page takes no pointer events
-   while the drawer is open, so the tap cannot also follow a link under it,
-   and the page cannot scroll under it either.
+   The drawer is in the top layer, fixed to the viewport's right edge. The
+   header's height stays the same open or shut. A tap on the shifted page
+   closes the drawer (the popover's light dismiss) and does nothing else: the
+   shifted parts take no pointer events while the drawer is open, so the tap
+   cannot also follow a link under it, and the page cannot scroll under it
+   either.
 
    Same breakpoint as the script's matchMedia. They have to move together. */
 @media (max-width: 620px) {
@@ -339,35 +340,51 @@ body {
     border-radius: 50%;
   }
   /* The page, drawer open: shifted left by the drawer's width, still, and
-     deaf to the pointer. The shift runs both ways over 0.3s, and on the way
-     back the pointer returns only at the end of it. A touch tap outside the
-     drawer light-dismisses it on pointerup, and the click the browser
-     synthesises after that re-hit-tests the page: with its pointer back at
-     once, that click would land on whatever lies under the finger — a link
-     there, followed; or the cross, reopening the drawer it just closed.
-     Kept deaf through the exit, it lands on html. Longhands, so a browser
-     without transition-behavior drops that line alone and keeps the slide. */
-  body {
+     deaf to the pointer — part by part, never body or the header. The drawer
+     is in the top layer, but it is a descendant of both, and a transform or
+     a pointer-events on an ancestor of the drawer and its button is what iOS
+     Safari tripped on (with body shifted and deaf, a tap on the cross did
+     nothing there, even with the button given its pointer back; a swipe
+     across the page, the light dismiss, closed it). So the bar's mark and
+     its button slide, and main and the footer slide; the mark, main and the
+     footer go deaf; the button keeps its pointer, and the popover's light
+     dismiss leaves its own invoker alone, so a tap on the cross is one
+     toggle, shut. The header's own ground stays put, under the drawer's
+     edge.
+
+     The shift runs both ways over 0.3s, and on the way back the pointer
+     returns only at the end of it. A touch tap outside the drawer
+     light-dismisses it on pointerup, and the click the browser synthesises
+     after that re-hit-tests the page: with its pointer back at once, that
+     click would land on whatever lies under the finger — a link there,
+     followed. Kept deaf through the exit, it lands on the header or html.
+     Longhands, so a browser without transition-behavior drops that line
+     alone and keeps the slide. */
+  .site-header .bar > .home,
+  .site-header .menu-toggle,
+  main,
+  footer {
     transition-property: transform, pointer-events;
     transition-duration: 0.3s, 0s;
     transition-delay: 0s, 0.3s;
     transition-behavior: normal, allow-discrete;
   }
-  body:has(#site-nav:popover-open) {
+  .site-header:has(nav:popover-open) .bar > .home,
+  .site-header:has(nav:popover-open) .menu-toggle,
+  body:has(#site-nav:popover-open) > main,
+  body:has(#site-nav:popover-open) > footer {
     transform: translateX(calc(-1 * var(--nav-w)));
-    overflow: hidden;
-    pointer-events: none;
     /* No delay on the way in. */
     transition-delay: 0s, 0s;
   }
-  /* Except the button, now the cross that closes the drawer: it keeps its
-     pointer, the one thing on the shifted page that does. The popover's
-     light dismiss leaves its own invoker alone, so a tap on it is one
-     toggle — shut — not a dismiss and a reopening. Without this, iOS Safari
-     let a tap on the cross through to nothing; the drawer closed only on a
-     swipe across the page, which is the light dismiss, and that still works. */
-  .site-header:has(nav:popover-open) .menu-toggle {
-    pointer-events: auto;
+  .site-header:has(nav:popover-open) .bar > .home,
+  body:has(#site-nav:popover-open) > main,
+  body:has(#site-nav:popover-open) > footer {
+    pointer-events: none;
+  }
+  /* And the page cannot scroll under the drawer, as under the Lightbox. */
+  body:has(#site-nav:popover-open) {
+    overflow: hidden;
   }
 }
 /* The narrowest phones still in use: a tighter header gutter only. */
