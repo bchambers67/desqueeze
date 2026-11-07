@@ -47,8 +47,10 @@ in `bchambers67/briantchambers.com`).
   encoder would mean the third-party code the CSP exists to exclude.
 - **No external-editor round trip.** There is no browser equivalent of
   "Edit In…".
-- **PNG output carries no EXIF.** Canvas re-encoding drops it and PNG has no
-  APP1 equivalent. Choose JPEG to keep capture metadata.
+- **PNG output from the ordinary path carries no EXIF.** `canvas.toBlob` drops
+  it and there is no APP1 to splice. Choose JPEG to keep capture metadata on
+  images that fit in one canvas. Images too large for one canvas are written
+  by the app's own PNG encoder, which does carry it, as an `eXIf` chunk.
 
 ## Privacy
 
@@ -72,9 +74,20 @@ Verified in a real browser, not asserted: after a full 36-image run,
   dimensions are a blemish, corrupt EXIF is damage.
 - **ZIP** (`makeZip`) — store-only, no deflate. JPEG and PNG are already
   compressed, so deflating buys nothing and would mean shipping a compressor.
-- **Canvas ceiling** — a canvas over the browser limit silently yields a blank
-  bitmap rather than throwing, so a result wider than 16384px is refused with a
-  message on that card instead of producing a black frame.
+- **Canvas limits** (`probeLimits` / `renderTiled` / `encodePNG`) — browsers
+  cap canvases two ways: Chrome and Firefox by side (16384 / 32767), Safari by
+  total area (4096², or 8192² since iOS 18). An over-limit canvas does not
+  throw; it silently yields a blank bitmap. Both limits are measured at first
+  use with small probe canvases rather than assumed, and the tool uses half the
+  measured area so the source bitmap and encoder have room beside it.
+  A result that fits goes through one canvas as before. One that does not is
+  rendered in tiles, each inside the measured limits and overlapping its
+  neighbours by four source pixels so the resampler sees no edge, and the rows
+  are streamed straight into a PNG written here: IDAT is a zlib stream, which is
+  exactly what the browser's native `CompressionStream("deflate")` produces, so
+  no library is needed and the whole image is never held in one canvas. The
+  only ceiling left is memory for the encoded bytes. JPEG needs the canvas
+  encoder, so an over-limit result is saved as PNG and the card says so.
 - **Sequential processing** with a yield between images, so the grid repaints
   and progress is honest rather than a frozen tab.
 

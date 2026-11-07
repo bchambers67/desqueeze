@@ -16,10 +16,6 @@
   "use strict";
 
   var MAX_FILES = 36;
-  // Canvas dimension ceilings vary by browser and a canvas over the limit
-  // silently produces a blank bitmap rather than throwing. Refusing loudly is
-  // better than handing someone 36 black frames.
-  var MAX_DIM = 16384;
   var JPEG_QUALITY = 0.92; // matches JpegBitmapEncoder QualityLevel = 92
 
   // Kept in lockstep with Models/SqueezePreset.cs.
@@ -328,56 +324,76 @@
     }, 30000);
   }
 
+  async function renderOneCanvas(bitmap, w, h, mime) {
+    var canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not get a 2D context");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high"; // matches BitmapScalingMode.HighQuality
+    ctx.drawImage(bitmap, 0, 0, w, h);
+
+    var blob = await new Promise(function (resolve) {
+      canvas.toBlob(
+        resolve,
+        mime,
+        mime === "image/jpeg" ? JPEG_QUALITY : undefined,
+      );
+    });
+    // Release the backing store immediately; 36 large canvases otherwise sit
+    // in memory until GC decides otherwise.
+    canvas.width = canvas.height = 0;
+    if (!blob)
+      throw new Error("Encoding failed — the image may exceed a browser limit");
+    return blob;
+  }
+
   async function processOne(item, mime) {
     var factor = item.factor || globalFactor;
     var bitmap = await createImageBitmap(item.file);
     try {
       var w = Math.round(bitmap.width * factor);
       var h = bitmap.height;
+      var blob;
+      item.note = null;
 
-      if (w > MAX_DIM || h > MAX_DIM) {
-        throw new Error(
-          "Result would be " +
-            fmtDims(w, h) +
-            " — over this browser’s canvas limit",
-        );
-      }
+      if (fitsOneCanvas(w, h)) {
+        blob = await renderOneCanvas(bitmap, w, h, mime);
 
-      var canvas = document.createElement("canvas");
-      canvas.width = w;
-      canvas.height = h;
-      var ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("Could not get a 2D context");
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high"; // matches BitmapScalingMode.HighQuality
-      ctx.drawImage(bitmap, 0, 0, w, h);
-
-      var blob = await new Promise(function (resolve) {
-        canvas.toBlob(
-          resolve,
-          mime,
-          mime === "image/jpeg" ? JPEG_QUALITY : undefined,
-        );
-      });
-      // Release the backing store immediately; 36 large canvases otherwise sit
-      // in memory until GC decides otherwise.
-      canvas.width = canvas.height = 0;
-      if (!blob)
-        throw new Error(
-          "Encoding failed — the image may exceed a browser limit",
-        );
-
-      if (mime === "image/jpeg") {
-        var srcBytes = new Uint8Array(await item.file.arrayBuffer());
-        var app1 = findAPP1(srcBytes);
-        if (app1) {
-          var fixed = patchPixelDims(app1, w, h);
-          var outBytes = spliceAPP1(
-            new Uint8Array(await blob.arrayBuffer()),
-            fixed,
-          );
-          blob = new Blob([outBytes], { type: "image/jpeg" });
+        if (mime === "image/jpeg") {
+          var srcBytes = new Uint8Array(await item.file.arrayBuffer());
+          var app1 = findAPP1(srcBytes);
+          if (app1) {
+            var fixed = patchPixelDims(app1, w, h);
+            var outBytes = spliceAPP1(
+              new Uint8Array(await blob.arrayBuffer()),
+              fixed,
+            );
+            blob = new Blob([outBytes], { type: "image/jpeg" });
+          }
         }
+      } else {
+        // Over this browser's single-canvas limit. Render in tiles and write
+        // the PNG ourselves; JPEG would need the canvas encoder we cannot have.
+        // The APP1 TIFF block, dimensions corrected, rides along as eXIf.
+        var src = new Uint8Array(await item.file.arrayBuffer());
+        var a1 = findAPP1(src);
+        var exif = a1 ? patchPixelDims(a1, w, h).subarray(10) : null;
+
+        blob = await encodePNG(
+          w,
+          h,
+          function (onRow) {
+            return renderTiled(bitmap, w, h, factor, onRow);
+          },
+          exif,
+        );
+        if (mime === "image/jpeg")
+          item.note =
+            "Saved as PNG — " +
+            fmtDims(w, h) +
+            " is over this browser’s canvas limit, which JPEG encoding needs";
       }
 
       item.blob = blob;
@@ -393,6 +409,193 @@
     } finally {
       bitmap.close();
     }
+  }
+
+  // ---------------------------------------------------------- canvas limits
+
+  // Browsers cap canvases two ways, and the code used to guard only one.
+  // Chrome and Firefox cap each side (16384 / 32767). Safari caps total AREA —
+  // 4096² for years, 8192² since iOS 18 — which bites long before any side
+  // reaches 16384: a 48MP frame widened 2× is 16000×6000, under the side limit
+  // and well over Safari's area. A canvas over either limit does not throw; it
+  // silently produces a blank bitmap. So the limits are measured, not assumed.
+  var limits = null;
+
+  function canvasWorks(w, h) {
+    try {
+      var c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      var ctx = c.getContext("2d");
+      if (!ctx) return false;
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(w - 1, h - 1, 1, 1);
+      var ok = ctx.getImageData(w - 1, h - 1, 1, 1).data[3] === 255;
+      c.width = c.height = 0;
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function probeLimits() {
+    if (limits) return limits;
+    // Side limit: a 1-pixel-tall strip isolates it from the area limit.
+    var dim = 4096;
+    [8192, 16384].forEach(function (n) {
+      if (canvasWorks(n, 1)) dim = n;
+    });
+    // Area limit. 8192² is Safari's post-iOS-18 ceiling and 268 MB of RGBA;
+    // probing beyond it would risk the very out-of-memory this code exists to
+    // avoid, and a 33 MP tile is already plenty. Below it, assume 4096².
+    var area = 4096 * 4096;
+    if (dim >= 8192 && canvasWorks(8192, 8192)) area = 8192 * 8192;
+    limits = { maxDim: dim, maxArea: area };
+    return limits;
+  }
+
+  /** True when the whole result fits in one canvas with room to spare. */
+  function fitsOneCanvas(w, h) {
+    var L = probeLimits();
+    // Half the measured area: the probe only shows a canvas can exist, not
+    // that it can exist beside the decoded source bitmap and the encoder.
+    return w <= L.maxDim && h <= L.maxDim && w * h <= L.maxArea / 2;
+  }
+
+  // ------------------------------------------------------------ tiled path
+
+  // For results no single canvas can hold: render in tiles, each inside the
+  // measured limits, and stream the rows straight into a PNG encoder. The
+  // output never exists as one canvas, so the only ceiling left is memory for
+  // the encoded bytes.
+  //
+  // Tiles overlap by a few source pixels and the overlap is discarded, so the
+  // resampler sees the same neighbourhood at a tile edge that it would see in
+  // a single draw, and no seam is visible.
+  var TILE_PAD = 4;
+
+  async function renderTiled(bitmap, w, h, factor, onRow) {
+    var L = probeLimits();
+    var safeArea = L.maxArea / 2;
+    var tileW = Math.min(w, L.maxDim);
+    var bandH = Math.max(1, Math.min(h, L.maxDim, Math.floor(safeArea / tileW)));
+
+    var tile = document.createElement("canvas");
+    var ctx = tile.getContext("2d", { willReadFrequently: true });
+    if (!ctx) throw new Error("Could not get a 2D context");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    var rowBytes = w * 4;
+    var band = new Uint8ClampedArray(rowBytes * bandH);
+
+    for (var y0 = 0; y0 < h; y0 += bandH) {
+      var bh = Math.min(bandH, h - y0);
+
+      for (var x0 = 0; x0 < w; x0 += tileW) {
+        var tw = Math.min(tileW, w - x0);
+        // Pad the source rect so edge pixels resample against real neighbours.
+        var padL = x0 === 0 ? 0 : TILE_PAD;
+        var padR = x0 + tw >= w ? 0 : TILE_PAD;
+        var dw = tw + padL + padR;
+        var sx = (x0 - padL) / factor;
+        var sw = dw / factor;
+
+        tile.width = dw;
+        tile.height = bh;
+        ctx.clearRect(0, 0, dw, bh);
+        ctx.drawImage(bitmap, sx, y0, sw, bh, 0, 0, dw, bh);
+
+        var px = ctx.getImageData(padL, 0, tw, bh).data;
+        for (var r = 0; r < bh; r++) {
+          band.set(
+            px.subarray(r * tw * 4, (r + 1) * tw * 4),
+            r * rowBytes + x0 * 4,
+          );
+        }
+      }
+
+      for (var row = 0; row < bh; row++) {
+        await onRow(band.subarray(row * rowBytes, (row + 1) * rowBytes));
+      }
+      await breathe();
+    }
+
+    tile.width = tile.height = 0;
+  }
+
+  // ----------------------------------------------------------- PNG writer
+
+  // A streaming PNG encoder. IDAT is a zlib stream, which is exactly what
+  // CompressionStream("deflate") produces, so the browser does the heavy
+  // lifting natively and nothing here depends on a library. Rows arrive one at
+  // a time from the tiled renderer and go straight through the compressor;
+  // the uncompressed image is never held whole.
+  function pngChunk(type, data) {
+    var out = new Uint8Array(12 + data.length);
+    var v = new DataView(out.buffer);
+    v.setUint32(0, data.length);
+    for (var i = 0; i < 4; i++) out[4 + i] = type.charCodeAt(i);
+    out.set(data, 8);
+    v.setUint32(8 + data.length, crc32(out.subarray(4, 8 + data.length)));
+    return out;
+  }
+
+  /**
+   * @param {number} w
+   * @param {number} h
+   * @param {(onRow: (row: Uint8ClampedArray) => Promise<void>) => Promise<void>} produceRows
+   * @param {Uint8Array|null} exif  TIFF payload for an eXIf chunk, or null
+   */
+  async function encodePNG(w, h, produceRows, exif) {
+    var parts = [new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])];
+
+    var ihdr = new Uint8Array(13);
+    var iv = new DataView(ihdr.buffer);
+    iv.setUint32(0, w);
+    iv.setUint32(4, h);
+    ihdr[8] = 8; // bit depth
+    ihdr[9] = 6; // colour type: RGBA
+    parts.push(pngChunk("IHDR", ihdr));
+
+    // eXIf (PNG 1.5 / ISO 15948:2022) carries the same TIFF block that JPEG's
+    // APP1 does, so metadata survives the format change.
+    if (exif && exif.length) parts.push(pngChunk("eXIf", exif));
+
+    var cs = new CompressionStream("deflate");
+    var writer = cs.writable.getWriter();
+    var compressed = [];
+    var reading = (async function () {
+      var reader = cs.readable.getReader();
+      for (;;) {
+        var r = await reader.read();
+        if (r.done) break;
+        compressed.push(r.value);
+      }
+    })();
+
+    var filtered = new Uint8Array(1 + w * 4);
+    filtered[0] = 0; // filter type: none, per scanline
+    await produceRows(async function (row) {
+      filtered.set(row, 1);
+      await writer.write(filtered.slice());
+    });
+    await writer.close();
+    await reading;
+
+    var total = compressed.reduce(function (n, c) {
+      return n + c.length;
+    }, 0);
+    var idat = new Uint8Array(total);
+    var off = 0;
+    compressed.forEach(function (c) {
+      idat.set(c, off);
+      off += c.length;
+    });
+    parts.push(pngChunk("IDAT", idat));
+    parts.push(pngChunk("IEND", new Uint8Array(0)));
+
+    return new Blob(parts, { type: "image/png" });
   }
 
   // ----------------------------------------------------------------- render
@@ -531,6 +734,13 @@
         err.style.color = "var(--safelight)";
         err.textContent = item.error;
         body.appendChild(err);
+      }
+
+      if (item.state === "done" && item.note) {
+        var note = document.createElement("p");
+        note.className = "dims";
+        note.textContent = item.note;
+        body.appendChild(note);
       }
 
       li.appendChild(body);
