@@ -573,3 +573,168 @@ select:focus {
     transition: none !important;
   }
 }
+
+/* ---------- lightbox ---------- */
+
+/* A finished card opens full-screen for inspection. Square corners and
+   hairlines like everything else; the only colour is the stage's black, which
+   is the right ground for judging a photograph. */
+.thumb.inspect {
+  cursor: zoom-in;
+}
+.thumb.inspect:focus-visible {
+  outline: 1px solid var(--halide);
+  outline-offset: -1px;
+}
+
+body.lb-open {
+  overflow: hidden;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: rgba(22, 17, 15, 0.97);
+}
+/* .hidden alone ties this rule on specificity and loses on source order,
+   which would leave the overlay permanently covering the page. Two classes
+   make the hidden state win. */
+.lightbox.hidden {
+  display: none;
+}
+
+.lb-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--edge-light);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--halide-deep);
+  min-height: 48px;
+}
+.lb-bar .lb-name {
+  color: var(--paper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+.lb-bar .lb-meta {
+  display: flex;
+  gap: 16px;
+  white-space: nowrap;
+}
+.lb-bar .lb-zoom {
+  color: var(--paper);
+  min-width: 4.5ch;
+  text-align: right;
+}
+
+.lb-btn {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border: 1px solid var(--edge-light);
+  background: transparent;
+  color: var(--paper);
+  cursor: pointer;
+  line-height: 1;
+}
+.lb-btn:hover:not(:disabled) {
+  border-color: var(--halide);
+}
+.lb-btn:focus-visible {
+  outline: 1px solid var(--halide);
+  outline-offset: 2px;
+}
+.lb-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.lb-btn[aria-pressed="true"] {
+  border-color: var(--safelight);
+  color: var(--safelight);
+}
+.lb-btn.close {
+  font-size: 16px;
+  padding: 6px 11px;
+}
+
+.lb-stage {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: #000;
+  cursor: grab;
+  /* Without this the browser claims pinch and pan for page zoom and scroll,
+     and the stage's pointer events never see the second finger. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lb-stage:active {
+  cursor: grabbing;
+}
+
+.lb-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  max-height: none;
+  transform-origin: 0 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.lb-img.ready {
+  opacity: 1;
+}
+/* Past 1:1, smoothing the display would hide what the resampler did. */
+.lb-img.pixels {
+  image-rendering: pixelated;
+}
+
+.lb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  font-size: 22px;
+  padding: 14px 16px;
+  background: rgba(22, 17, 15, 0.7);
+}
+.lb-nav.prev {
+  left: 12px;
+}
+.lb-nav.next {
+  right: 12px;
+}
+
+.lb-hint {
+  padding: 8px 16px;
+  border-top: 1px solid var(--edge-light);
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--grain);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .lb-bar .lb-meta .lb-dims {
+    display: none;
+  }
+  .lb-hint {
+    display: none;
+  }
+}
