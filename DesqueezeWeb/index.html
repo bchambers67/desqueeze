@@ -167,6 +167,10 @@
           <button id="download-all" type="button" class="btn" disabled>
             Download all (.zip)
           </button>
+          <button id="share-all" type="button" class="btn hidden" disabled
+                  title="Opens the share sheet — on iPhone and iPad choose Save Images">
+            Save to Photos…
+          </button>
           <button id="clear" type="button" class="btn quiet">Clear</button>
         </div>
         <p id="progress" class="msg" role="status" aria-live="polite"></p>
@@ -186,6 +190,31 @@
         </p>
       </div>
     </footer>
+
+    <!-- ---------- lightbox ---------- -->
+    <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true"
+         aria-label="Inspect image">
+      <div class="lb-bar">
+        <span class="lb-name" id="lb-name"></span>
+        <span class="lb-meta">
+          <span class="lb-dims" id="lb-dims"></span>
+          <span id="lb-count"></span>
+          <span class="lb-zoom" id="lb-zoom"></span>
+        </span>
+        <button id="lb-fit" type="button" class="lb-btn" aria-pressed="false">Fit</button>
+        <button id="lb-one" type="button" class="lb-btn" aria-pressed="false"
+                title="One image pixel per screen pixel">1:1</button>
+        <button id="lb-close" type="button" class="lb-btn close" aria-label="Close">×</button>
+      </div>
+      <div class="lb-stage" id="lb-stage">
+        <button id="lb-prev" type="button" class="lb-btn lb-nav prev" aria-label="Previous">‹</button>
+        <img id="lb-img" class="lb-img" alt="" draggable="false" />
+        <button id="lb-next" type="button" class="lb-btn lb-nav next" aria-label="Next">›</button>
+      </div>
+      <p class="lb-hint">
+        scroll or pinch to zoom · drag to pan · double-click for 1:1 · ← → · esc
+      </p>
+    </div>
 
     <script src="./assets/site-header.js"></script>
     <script src="./assets/app.js"></script>

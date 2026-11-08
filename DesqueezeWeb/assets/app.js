@@ -16,6 +16,8 @@
   "use strict";
 
   var MAX_FILES = 36;
+  // Decided once: whether this browser can hand image files to a share sheet.
+  var shareSupported = canShareFiles();
   var JPEG_QUALITY = 0.92; // matches JpegBitmapEncoder QualityLevel = 92
 
   // Kept in lockstep with Models/SqueezePreset.cs.
@@ -598,6 +600,367 @@
     return new Blob(parts, { type: "image/png" });
   }
 
+  // -------------------------------------------------------------- lightbox
+
+  // Opens a finished result full-screen for inspection. The image shown is the
+  // real output blob, not the card thumbnail, so at 1:1 you are looking at the
+  // actual resampled pixels — which is the point of inspecting a de-squeeze.
+  //
+  // Zoom state is a scale (CSS px per image px) and a translate, applied as one
+  // transform from the stage's top-left. Every zoom is anchored on a point —
+  // the cursor, the pinch midpoint, or the stage centre — so the pixel under
+  // the finger stays under the finger: t' = p − (p − t)·(s'/s).
+  var lb = {
+    el: null,
+    img: null,
+    stage: null,
+    index: -1,
+    scale: 1,
+    fit: 1,
+    tx: 0,
+    ty: 0,
+    natural: { w: 0, h: 0 },
+    pointers: new Map(),
+    pinchStart: null,
+    dragStart: null,
+    opener: null,
+  };
+
+  /** Finished items, in grid order; the lightbox navigates among these. */
+  function doneItems() {
+    return items.filter(function (i) {
+      return i.state === "done" && i.outUrl;
+    });
+  }
+
+  function lbOnePixel() {
+    // One image pixel per device pixel, expressed in CSS px.
+    return 1 / (window.devicePixelRatio || 1);
+  }
+
+  function lbFitScale() {
+    var r = lb.stage.getBoundingClientRect();
+    return Math.min(r.width / lb.natural.w, r.height / lb.natural.h);
+  }
+
+  function lbMaxScale() {
+    // Far enough past 1:1 to read individual pixels, never less than 8× fit.
+    return Math.max(lb.fit * 8, lbOnePixel() * 6);
+  }
+
+  function lbApply() {
+    lb.img.style.transform =
+      "translate(" + lb.tx + "px, " + lb.ty + "px) scale(" + lb.scale + ")";
+    // Past 1:1 the question is "what did the resampler do", and smoothing the
+    // display would hide the answer.
+    lb.img.classList.toggle("pixels", lb.scale > lbOnePixel() * 1.01);
+    lbReadout();
+  }
+
+  function lbReadout() {
+    var pct = Math.round((lb.scale / lbOnePixel()) * 100);
+    $("lb-zoom").textContent = pct + "%";
+    $("lb-one").setAttribute(
+      "aria-pressed",
+      Math.abs(lb.scale - lbOnePixel()) < 1e-6 ? "true" : "false",
+    );
+    $("lb-fit").setAttribute(
+      "aria-pressed",
+      Math.abs(lb.scale - lb.fit) < 1e-6 ? "true" : "false",
+    );
+  }
+
+  /** Keep the image covering the stage when larger, centred when smaller. */
+  function lbClamp() {
+    var r = lb.stage.getBoundingClientRect();
+    var w = lb.natural.w * lb.scale;
+    var h = lb.natural.h * lb.scale;
+    if (w <= r.width) lb.tx = (r.width - w) / 2;
+    else lb.tx = Math.min(0, Math.max(r.width - w, lb.tx));
+    if (h <= r.height) lb.ty = (r.height - h) / 2;
+    else lb.ty = Math.min(0, Math.max(r.height - h, lb.ty));
+  }
+
+  /** Zoom to `s`, holding stage-relative point (px, py) fixed on screen. */
+  function lbZoomTo(s, px, py) {
+    // The floor is fit or 1:1, whichever is smaller: a small image on a 2×
+    // display has 1:1 below fit, and for a pixel-inspection tool 1:1 must
+    // always be reachable.
+    s = Math.min(lbMaxScale(), Math.max(Math.min(lb.fit, lbOnePixel()), s));
+    var k = s / lb.scale;
+    lb.tx = px - (px - lb.tx) * k;
+    lb.ty = py - (py - lb.ty) * k;
+    lb.scale = s;
+    lbClamp();
+    lbApply();
+  }
+
+  function lbCentre() {
+    var r = lb.stage.getBoundingClientRect();
+    return { x: r.width / 2, y: r.height / 2 };
+  }
+
+  function lbSetFit() {
+    lb.fit = lbFitScale();
+    lb.scale = lb.fit;
+    lbClamp();
+    lbApply();
+  }
+
+  function lbShow(index) {
+    var list = doneItems();
+    if (!list.length) return;
+    lb.index = ((index % list.length) + list.length) % list.length;
+    var item = list[lb.index];
+
+    $("lb-name").textContent = item.name;
+    $("lb-dims").textContent =
+      fmtDims(item.outW, item.outH) + "  ·  " + item.usedFactor.toFixed(2) + "×";
+    $("lb-count").textContent = lb.index + 1 + " / " + list.length;
+    $("lb-prev").disabled = $("lb-next").disabled = list.length < 2;
+
+    lb.img.classList.remove("ready");
+    lb.img.onload = function () {
+      lb.natural = { w: lb.img.naturalWidth, h: lb.img.naturalHeight };
+      lbSetFit();
+      lb.img.classList.add("ready");
+    };
+    lb.img.src = item.outUrl;
+  }
+
+  function lbOpen(index, opener) {
+    lb.opener = opener || document.activeElement;
+    lb.el.classList.remove("hidden");
+    document.body.classList.add("lb-open");
+    lbShow(index);
+    $("lb-close").focus();
+  }
+
+  function lbClose() {
+    lb.el.classList.add("hidden");
+    document.body.classList.remove("lb-open");
+    lb.img.removeAttribute("src");
+    lb.pointers.clear();
+    lb.pinchStart = lb.dragStart = null;
+    if (lb.opener && typeof lb.opener.focus === "function") lb.opener.focus();
+    lb.opener = null;
+  }
+
+  function lbStagePoint(e) {
+    var r = lb.stage.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function lbPointerDown(e) {
+    lb.stage.setPointerCapture(e.pointerId);
+    lb.pointers.set(e.pointerId, lbStagePoint(e));
+    if (lb.pointers.size === 2) {
+      var pts = Array.from(lb.pointers.values());
+      lb.pinchStart = {
+        dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y),
+        scale: lb.scale,
+      };
+      lb.dragStart = null;
+    } else if (lb.pointers.size === 1) {
+      var p = lbStagePoint(e);
+      lb.dragStart = { x: p.x, y: p.y, tx: lb.tx, ty: lb.ty };
+    }
+  }
+
+  function lbPointerMove(e) {
+    if (!lb.pointers.has(e.pointerId)) return;
+    lb.pointers.set(e.pointerId, lbStagePoint(e));
+
+    if (lb.pointers.size === 2 && lb.pinchStart) {
+      var pts = Array.from(lb.pointers.values());
+      var dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      var mid = { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
+      lbZoomTo(lb.pinchStart.scale * (dist / lb.pinchStart.dist), mid.x, mid.y);
+    } else if (lb.pointers.size === 1 && lb.dragStart) {
+      var p = lbStagePoint(e);
+      lb.tx = lb.dragStart.tx + (p.x - lb.dragStart.x);
+      lb.ty = lb.dragStart.ty + (p.y - lb.dragStart.y);
+      lbClamp();
+      lbApply();
+    }
+  }
+
+  function lbPointerUp(e) {
+    lb.pointers.delete(e.pointerId);
+    if (lb.pointers.size < 2) lb.pinchStart = null;
+    if (lb.pointers.size === 0) lb.dragStart = null;
+    else if (lb.pointers.size === 1) {
+      // Finger lifted mid-pinch: continue as a drag from the remaining one.
+      var rest = Array.from(lb.pointers.values())[0];
+      lb.dragStart = { x: rest.x, y: rest.y, tx: lb.tx, ty: lb.ty };
+    }
+  }
+
+  function lbWheel(e) {
+    e.preventDefault();
+    var p = lbStagePoint(e);
+    // Trackpad pinch arrives as ctrl+wheel with small deltas; mouse wheels
+    // are coarse. Scale the step so both feel deliberate.
+    var step = e.ctrlKey ? 0.01 : 0.0015;
+    lbZoomTo(lb.scale * Math.exp(-e.deltaY * step), p.x, p.y);
+  }
+
+  function lbDoubleTap(e) {
+    var p = lbStagePoint(e);
+    var one = lbOnePixel();
+    // Fit → 1:1 if that is a real zoom-in, else 2× fit; anything else → fit.
+    if (Math.abs(lb.scale - lb.fit) < 1e-6) {
+      lbZoomTo(one > lb.fit * 1.2 ? one : lb.fit * 2, p.x, p.y);
+    } else {
+      lbSetFit();
+    }
+  }
+
+  function lbKey(e) {
+    if (lb.el.classList.contains("hidden")) return;
+    var c = lbCentre();
+    switch (e.key) {
+      case "Escape": lbClose(); break;
+      case "ArrowRight": lbShow(lb.index + 1); break;
+      case "ArrowLeft": lbShow(lb.index - 1); break;
+      case "+": case "=": lbZoomTo(lb.scale * 1.25, c.x, c.y); break;
+      case "-": case "_": lbZoomTo(lb.scale / 1.25, c.x, c.y); break;
+      case "0": lbSetFit(); break;
+      case "1": lbZoomTo(lbOnePixel(), c.x, c.y); break;
+      case "Tab": lbTrapTab(e); return;
+      default: return;
+    }
+    e.preventDefault();
+  }
+
+  /** Keep focus inside the dialog while it is open. */
+  function lbTrapTab(e) {
+    var focusables = lb.el.querySelectorAll(
+      "button:not([disabled]), [tabindex]:not([tabindex='-1'])",
+    );
+    if (!focusables.length) return;
+    var first = focusables[0];
+    var last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  function initLightbox() {
+    lb.el = $("lightbox");
+    lb.img = $("lb-img");
+    lb.stage = $("lb-stage");
+    if (!lb.el) return;
+
+    $("lb-close").addEventListener("click", lbClose);
+    $("lb-prev").addEventListener("click", function () { lbShow(lb.index - 1); });
+    $("lb-next").addEventListener("click", function () { lbShow(lb.index + 1); });
+    $("lb-fit").addEventListener("click", lbSetFit);
+    $("lb-one").addEventListener("click", function () {
+      var c = lbCentre();
+      lbZoomTo(lbOnePixel(), c.x, c.y);
+    });
+
+    // Click on the backdrop, outside the stage and bars, closes.
+    lb.el.addEventListener("click", function (e) {
+      if (e.target === lb.el) lbClose();
+    });
+
+    lb.stage.addEventListener("pointerdown", lbPointerDown);
+    lb.stage.addEventListener("pointermove", lbPointerMove);
+    lb.stage.addEventListener("pointerup", lbPointerUp);
+    lb.stage.addEventListener("pointercancel", lbPointerUp);
+    lb.stage.addEventListener("wheel", lbWheel, { passive: false });
+    lb.stage.addEventListener("dblclick", lbDoubleTap);
+    document.addEventListener("keydown", lbKey);
+
+    // Refit on resize or rotation, holding the current zoom ratio to fit.
+    window.addEventListener("resize", function () {
+      if (lb.el.classList.contains("hidden") || !lb.natural.w) return;
+      var ratio = lb.scale / lb.fit;
+      lb.fit = lbFitScale();
+      lb.scale = lb.fit * ratio;
+      lbClamp();
+      lbApply();
+    });
+  }
+
+  // ------------------------------------------------------- save to photos
+
+  // A web page cannot write to the iOS photo library; there is no Photos API
+  // for the web, and <a download> on iOS Safari saves to Files. The one path
+  // is the Web Share API with files: navigator.share({ files }) opens the
+  // share sheet, where iOS offers "Save N Images" to Photos and macOS offers
+  // "Add to Photos". The button only appears where that is supported.
+  //
+  // share() must run inside the click's user activation, so nothing here
+  // awaits before calling it: the blobs already exist, and wrapping them in
+  // File objects is synchronous.
+  function canShareFiles() {
+    if (!navigator.canShare || !navigator.share) return false;
+    try {
+      var probe = new File([new Uint8Array([0xff, 0xd8, 0xff, 0xd9])], "p.jpg", {
+        type: "image/jpeg",
+      });
+      return navigator.canShare({ files: [probe] });
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function doneFiles() {
+    var used = Object.create(null);
+    return items
+      .filter(function (i) {
+        return i.state === "done" && i.blob;
+      })
+      .map(function (item) {
+        var name = outName(item.name, item.usedFactor, item.blob.type);
+        // The share sheet keys on filenames too; keep them unique.
+        if (used[name]) {
+          var dot = name.lastIndexOf(".");
+          name = name.slice(0, dot) + "_" + used[name] + name.slice(dot);
+        }
+        used[name] = (used[name] || 0) + 1;
+        return new File([item.blob], name, { type: item.blob.type });
+      });
+  }
+
+  async function shareAll() {
+    var files = doneFiles();
+    if (!files.length) return;
+    var msg = $("progress");
+
+    var payload = { files: files };
+    if (!navigator.canShare(payload)) {
+      setMsg(
+        msg,
+        "This browser can’t share " + files.length + " files at once — download the .zip instead.",
+        true,
+      );
+      return;
+    }
+
+    try {
+      await navigator.share(payload);
+      setMsg(msg, files.length === 1 ? "Shared." : files.length + " images shared.", false);
+    } catch (e) {
+      // Dismissing the sheet is not an error worth reporting.
+      if (e && e.name === "AbortError") return;
+      setMsg(
+        msg,
+        "Couldn’t open the share sheet" +
+          (e && e.message ? " — " + e.message : "") +
+          ". The .zip download still works.",
+        true,
+      );
+    }
+  }
+
   // ----------------------------------------------------------------- render
 
   function render() {
@@ -628,6 +991,22 @@
           img.style.objectFit = "fill";
         }
         thumb.appendChild(img);
+      }
+      if (item.state === "done" && item.outUrl) {
+        thumb.classList.add("inspect");
+        thumb.setAttribute("role", "button");
+        thumb.setAttribute("tabindex", "0");
+        thumb.setAttribute("aria-label", "Inspect " + item.name);
+        var open = function () {
+          lbOpen(doneItems().indexOf(item), thumb);
+        };
+        thumb.addEventListener("click", open);
+        thumb.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            open();
+          }
+        });
       }
       li.appendChild(thumb);
 
@@ -761,6 +1140,14 @@
       done.length > 1
         ? "Download all (" + done.length + ") .zip"
         : "Download all (.zip)";
+
+    var share = $("share-all");
+    share.classList.toggle("hidden", !shareSupported);
+    share.disabled = done.length === 0 || running;
+    share.textContent =
+      done.length > 1
+        ? "Save " + done.length + " to Photos…"
+        : "Save to Photos…";
   }
 
   // ------------------------------------------------------------------ input
@@ -1046,6 +1433,8 @@
 
     $("run").addEventListener("click", runAll);
     $("download-all").addEventListener("click", downloadAll);
+    $("share-all").addEventListener("click", shareAll);
+    initLightbox();
     $("clear").addEventListener("click", clearAll);
 
     // Nothing survives the tab, by design.
