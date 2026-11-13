@@ -26,6 +26,7 @@
 		93DA51FDFE1ACF64BA681FD6 /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */; };
 		97072BA9276C863DDD24E740 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5650F65F933ADEFD15FD877 /* AppModel.swift */; };
 		9E0C54E4573EBB5A160F5621 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */; };
+		A7A0F37949C48D046C3903BF /* PictureReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 539C97CE9D4619F7BEB4AA1D /* PictureReader.swift */; };
 		AA4AEA5C089A071C0E70ABCD /* CoreImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */; };
 		AC8CF37A617ECEE0D383139D /* PhotoEditingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2144583C39D4A7834711CEE /* PhotoEditingViewController.swift */; };
 		ACB6FD92028EBA73EF0D65BA /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07DE2EED0BF0EA4FCCDF6C6A /* ShareViewController.swift */; };
@@ -86,6 +87,7 @@
 		38A007151ABE87CC01A5B6E9 /* Desqueeze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Desqueeze.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
 		4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thumbnailer.swift; sourceTree = "<group>"; };
+		539C97CE9D4619F7BEB4AA1D /* PictureReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureReader.swift; sourceTree = "<group>"; };
 		577BC15846CD67CA3BFE4338 /* PreviewPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
 		5A686FB922363CCD771D011D /* ActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBar.swift; sourceTree = "<group>"; };
 		5E738569DF849DC1D502A13B /* Share.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Share.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -225,6 +227,7 @@
 				8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */,
 				86A8A670FF04B283780D9A67 /* FaceEstimator.swift */,
 				49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */,
+				539C97CE9D4619F7BEB4AA1D /* PictureReader.swift */,
 				6FA467A7D6E7493353C6A4AC /* RecentScanner.swift */,
 				4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */,
 			);
@@ -359,6 +362,7 @@
 				65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */,
 				4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */,
 				DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */,
+				A7A0F37949C48D046C3903BF /* PictureReader.swift in Sources */,
 				FE03BE8892831B8AF11AC534 /* RecentScanner.swift in Sources */,
 				23E29E917B353CC25AE73862 /* Thumbnailer.swift in Sources */,
 				97072BA9276C863DDD24E740 /* AppModel.swift in Sources */,

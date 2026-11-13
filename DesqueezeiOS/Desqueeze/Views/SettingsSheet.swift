@@ -30,7 +30,7 @@ struct SettingsSheet: View {
                 } header: {
                     Text("Library")
                 } footer: {
-                    Text("Checks the last two weeks of your library for photos shot through an anamorphic lens that have not been corrected, and offers to queue them. It goes by the lens the camera recorded and by the shape of faces. Your photos stay on this device.")
+                    Text("Checks the last two weeks of your library for photos shot through an anamorphic lens that have not been corrected, and offers to queue them. It goes by the lens the camera recorded, by the shape of faces, text and bodies, by the direction of fine detail, and by photos you have already corrected from the same session. Your photos stay on this device.")
                 }
             }
             .tint(Brand.accent)

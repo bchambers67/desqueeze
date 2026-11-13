@@ -191,13 +191,34 @@ weeks of the library each time it comes forward and offers to queue what it
 finds. It is off by default, because it is the one feature that reads the
 library, and turning it on is what asks for that access.
 
-`SqueezeDetector` in the core package decides, from two signs: a lens the
-camera recorded as anamorphic, which often states its factor, and faces that
-are clearly too narrow. A photo with neither is left alone. Screenshots,
-edited photos, files StillScope saved and frames already wide are skipped.
-`RecentScanner` reads the library and feeds it. Photos that were saved,
-dismissed or found ordinary are remembered and not examined again.
+`SqueezeDetector` in the core package decides. Two signs are trusted outright:
 
-Limits: a photo shot through an adapted lens with no faces in it carries
-neither sign and will not be found, and photos still in iCloud are skipped
-until they are on the device. Scanning happens only while the app is open.
+- **The lens.** A lens the camera recorded as anamorphic, which often states
+  its factor.
+- **The session.** A photo taken within ten minutes of one you corrected, at
+  the same pixel size, takes that photo's factor. Corrections are learned from
+  photos saved out of the app while the finder is on.
+
+Four more are read from the picture by `PictureReader` and `PictureSignals`:
+
+- **Faces**, from how narrow they are. Trusted alone.
+- **Text**, from the width of letters against the height of their line.
+- **Bodies**, from shoulder width against torso length, taking the widest
+  person as the one facing the camera.
+- **Detail**, from how much denser fine texture is across the frame than down.
+
+Text, bodies and detail are looser, so they only count in agreement: at least
+two readings within 0.3 of each other, with more saying squeezed than
+ordinary. Detail can support another reading but never leads. A photo with no
+sign is left alone. Screenshots, edited photos, files StillScope saved and
+frames already wide are skipped. `RecentScanner` reads the library and feeds
+all of this. Photos that were saved, dismissed or found ordinary are
+remembered and not examined again.
+
+The reference proportions in `PictureSignals` are estimates and have not been
+tuned against real photographs. Each reading is a plain number per photo,
+which is also the form a trained classifier would take as input or replace.
+
+Limits: a plain, soft photo with no people or text and no corrected neighbour
+gives nothing to read and will not be found, and photos still in iCloud are
+skipped until they are on the device. Scanning happens only while the app is open.

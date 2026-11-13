@@ -31,7 +31,8 @@ enum RecentScanner {
     /// Photos from the last `days` that look squeezed, newest first, and the
     /// identifiers of those examined and found ordinary, so they need not be
     /// examined again.
-    static func scan(days: Int = 14, limit: Int = 60, skipping handled: Set<String>) async -> (found: [Found], ordinary: [String]) {
+    static func scan(days: Int = 14, limit: Int = 60, skipping handled: Set<String>,
+                     corrections: [PictureSignals.Correction] = []) async -> (found: [Found], ordinary: [String]) {
         var found: [Found] = []
         var ordinary: [String] = []
 
@@ -45,9 +46,18 @@ enum RecentScanner {
             // scanning must not start downloads.
             guard let data = await data(for: candidate.id, allowNetwork: false) else { continue }
 
+            // A photo from the same few minutes as one the owner corrected
+            // needs no further reading.
+            let session = candidate.taken.flatMap {
+                PictureSignals.sessionFactor(taken: $0, size: candidate.size, corrections: corrections)
+            }
+            let picture = session == nil ? await PictureReader.readings(for: data) : PictureReader.Readings()
+            let faces = session == nil ? await FaceEstimator.suggestion(for: data) : nil
+
             let facts = PhotoFacts(
                 name: candidate.name, size: candidate.size, lensModel: lensModel(in: data),
-                faceFactor: await FaceEstimator.suggestion(for: data),
+                faceFactor: faces, textFactor: picture.text, bodyFactor: picture.body,
+                detailFactor: picture.detail, sessionFactor: session,
                 isScreenshot: false, isEdited: false)
 
             if let verdict = SqueezeDetector.verdict(for: facts) {
@@ -73,12 +83,21 @@ enum RecentScanner {
         }
     }
 
+    /// What a corrected photo teaches the scan: when it was taken, its size
+    /// and the factor used on it.
+    static func correction(for id: String, factor: Double) -> PictureSignals.Correction? {
+        guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [id], options: nil).firstObject,
+              let taken = asset.creationDate else { return nil }
+        return PictureSignals.Correction(taken: taken, size: PixelSize(width: asset.pixelWidth, height: asset.pixelHeight), factor: factor)
+    }
+
     // MARK: - Reading the library
 
     private struct Candidate {
         let id: String
         let name: String?
         let size: PixelSize
+        let taken: Date?
         let isScreenshot: Bool
         let isEdited: Bool
     }
@@ -97,6 +116,7 @@ enum RecentScanner {
                 id: asset.localIdentifier,
                 name: resources.first { $0.type == .photo }?.originalFilename,
                 size: PixelSize(width: asset.pixelWidth, height: asset.pixelHeight),
+                taken: asset.creationDate,
                 isScreenshot: asset.mediaSubtypes.contains(.photoScreenshot),
                 isEdited: resources.contains { $0.type == .adjustmentData }))
         }

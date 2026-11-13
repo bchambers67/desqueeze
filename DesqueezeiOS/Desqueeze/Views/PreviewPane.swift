@@ -81,7 +81,7 @@ struct PreviewPane: View {
                 Rectangle().stroke(Brand.secondary, lineWidth: 1).frame(width: 68, height: 50)
             }
 
-            PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images) {
+            PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images, photoLibrary: .shared()) {
                 VStack(spacing: Brand.spacingXS) {
                     Text("CHOOSE PHOTOS")
                         .font(Brand.sans(12, weight: .medium))

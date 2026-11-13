@@ -74,6 +74,9 @@ final class AppModel {
     private(set) var isScanning = false
     /// Which library photo each queued item came from, when it came from a scan.
     private var libraryIDs: [Batch.Item.ID: String] = [:]
+    /// The same, for the photo open in the editor.
+    private var openLibraryID: String?
+    private static let correctionsKey = "detect.corrections"
     private static let findKey = "detect.enabled"
     private static let handledKey = "detect.handled"
     var sharedFile: SharedFile?
@@ -119,6 +122,22 @@ final class AppModel {
         UserDefaults.standard.set(Array(all.suffix(1000)), forKey: Self.handledKey)
     }
 
+    /// Photos the owner has corrected, kept so that others from the same
+    /// session can be recognised.
+    private var corrections: [PictureSignals.Correction] {
+        UserDefaults.standard.data(forKey: Self.correctionsKey)
+            .flatMap { try? JSONDecoder().decode([PictureSignals.Correction].self, from: $0) } ?? []
+    }
+
+    /// Notes that a library photo was corrected at `factor`.
+    private func learn(from libraryID: String?, factor: Double) {
+        guard findsSqueezed, RecentScanner.hasAccess, let libraryID,
+              let correction = RecentScanner.correction(for: libraryID, factor: factor) else { return }
+        remember([libraryID])
+        let all = Array((corrections + [correction]).suffix(200))
+        UserDefaults.standard.set(try? JSONEncoder().encode(all), forKey: Self.correctionsKey)
+    }
+
     private func startFinding() async {
         guard await RecentScanner.requestAccess() else {
             findsSqueezed = false
@@ -133,9 +152,9 @@ final class AppModel {
         guard findsSqueezed, RecentScanner.hasAccess, !isScanning, !hasContent else { return }
         isScanning = true
         defer { isScanning = false }
-        let skipping = handled
+        let skipping = handled, learned = corrections
         let result = await Task.detached(priority: .utility) {
-            await RecentScanner.scan(skipping: skipping)
+            await RecentScanner.scan(skipping: skipping, corrections: learned)
         }.value
         remember(result.ordinary)
         found = result.found
@@ -151,6 +170,7 @@ final class AppModel {
         thumbnailing?.cancel()
         thumbnails = [:]
         libraryIDs = [:]
+        openLibraryID = nil
         session.close()
         batch.clear()
 
@@ -203,6 +223,8 @@ final class AppModel {
         notice = nil
         thumbnailing?.cancel()
         thumbnails = [:]
+        libraryIDs = [:]
+        openLibraryID = nil
         batch.clear()
         await session.open(data)
         suggestion = await FaceEstimator.suggestion(for: data)
@@ -213,6 +235,8 @@ final class AppModel {
         suggestion = nil
         thumbnailing?.cancel()
         thumbnails = [:]
+        libraryIDs = [:]
+        openLibraryID = nil
         guard !picked.isEmpty else { return }
 
         if picked.count == 1 {
@@ -221,6 +245,7 @@ final class AppModel {
                 notice = Notice(text: "That photo could not be loaded.", isError: true)
                 return
             }
+            openLibraryID = picked[0].itemIdentifier
             await session.open(data)
             suggestion = await FaceEstimator.suggestion(for: data)
         } else {
@@ -236,6 +261,7 @@ final class AppModel {
                     }
                     return data
                 }
+                libraryIDs[id] = item.itemIdentifier
                 queued.append((id, item))
             }
             // One at a time, so only one full-size photo is in memory.
@@ -290,6 +316,8 @@ final class AppModel {
         batch.clear()
         thumbnailing?.cancel()
         thumbnails = [:]
+        libraryIDs = [:]
+        openLibraryID = nil
         suggestion = nil
         notice = nil
     }
@@ -300,6 +328,7 @@ final class AppModel {
         do {
             let name = String(format: "desqueeze_%.2fx.jpg", session.squeeze.factor)
             try await PhotoLibraryWriter.save(jpeg: try await session.export(), named: name)
+            learn(from: openLibraryID, factor: session.squeeze.factor)
             notice = Notice(text: "Saved to your library.", isError: false)
         } catch {
             notice = Notice(text: error.localizedDescription, isError: true)
@@ -324,7 +353,11 @@ final class AppModel {
         await batch.run(squeeze: session.squeeze, matte: session.matte) { name, file in
             try await PhotoLibraryWriter.save(jpeg: file, named: name)
         }
-        // A found photo that is now saved has been dealt with.
+        // A library photo that is now saved has been dealt with, and says
+        // something about the photos taken alongside it.
+        for item in batch.items where item.state == .done {
+            learn(from: libraryIDs[item.id], factor: (item.squeeze ?? session.squeeze).factor)
+        }
         remember(batch.items.filter { $0.state == .done }.compactMap { libraryIDs[$0.id] })
         let failed = batch.items.count - batch.finishedCount
         notice = failed == 0
