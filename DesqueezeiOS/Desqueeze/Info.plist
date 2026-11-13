@@ -11,7 +11,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Desqueeze</string>
+	<string>StillScope</string>
+	<key>CFBundleDisplayName</key>
+	<string>StillScope</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -22,7 +24,7 @@
 	<!-- Add-only: the app writes corrected frames and never reads the library.
 	     PhotosPicker supplies input without any authorisation. -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Desqueeze saves corrected photographs to your library.</string>
+	<string>StillScope saves corrected photographs to your library.</string>
 
 	<!-- Portrait and both landscapes. The Duo's inner display is large enough
 	     that locking orientation would waste it, and the fold already forces a

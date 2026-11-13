@@ -14,7 +14,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>1.0.0</Version>
     <Company>Chambers &amp; Light LLC</Company>
-    <Product>Desqueeze</Product>
+    <Product>StillScope</Product>
     <Copyright>© 2024 Chambers &amp; Light LLC</Copyright>
     <Description>Anamorphic photo de-squeeze tool</Description>
   </PropertyGroup>

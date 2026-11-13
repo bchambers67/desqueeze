@@ -14,7 +14,7 @@ enum PhotoLibraryWriter {
         var errorDescription: String? {
             switch self {
             case .denied:
-                "Desqueeze needs permission to add photos. Enable it in Settings › Privacy › Photos."
+                "StillScope needs permission to add photos. Enable it in Settings › Privacy › Photos."
             }
         }
     }
