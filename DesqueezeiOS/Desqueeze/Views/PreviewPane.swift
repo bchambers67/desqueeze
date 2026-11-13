@@ -2,7 +2,7 @@ import DesqueezeCore
 import PhotosUI
 import SwiftUI
 
-/// The image surface: empty state, live preview, and the frame-edge readout.
+/// The image surface: the empty state and the live preview.
 struct PreviewPane: View {
     let model: AppModel
 
@@ -53,7 +53,6 @@ struct PreviewPane: View {
             .accessibilityLabel("Inspect the corrected photo")
 
             HStack(alignment: .bottom) {
-                readout
                 Spacer()
                 FrameMark(text: "TAP TO INSPECT", size: 9)
                     .padding(.horizontal, Brand.spacingSM)
@@ -69,21 +68,6 @@ struct PreviewPane: View {
             return CGFloat(out.width) / CGFloat(out.height)
         }
         return CGFloat(frame.image.width) / CGFloat(max(frame.image.height, 1))
-    }
-
-    /// Dimensions and ratio, set as a frame-edge annotation.
-    @ViewBuilder
-    private var readout: some View {
-        if let out = session.outputSize, let source = session.sourceSize {
-            HStack(spacing: Brand.spacingSM) {
-                CoralRule(width: 10)
-                FrameMark(text: "\(source.width) × \(source.height) → \(out.width) × \(out.height)")
-                FrameMark(text: String(format: "· %.2f:1", session.squeeze.aspectRatio(for: source)))
-            }
-            .padding(.horizontal, Brand.spacingSM)
-            .padding(.vertical, 5)
-            .background(Brand.chamber.opacity(0.85))
-        }
     }
 
     // MARK: - Empty
