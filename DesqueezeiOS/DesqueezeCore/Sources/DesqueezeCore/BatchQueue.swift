@@ -27,8 +27,13 @@ public final class BatchQueue<Renderer: FrameRenderer> {
     private let renderer: Renderer
     public init(renderer: Renderer) { self.renderer = renderer }
 
-    public func add(name: String, load: @escaping @Sendable () async throws -> Data) {
-        items.append(Item(id: UUID(), name: name, load: load))
+    /// Queues a photo and returns its identity, so a caller can keep
+    /// something of its own, a thumbnail say, against it.
+    @discardableResult
+    public func add(name: String, load: @escaping @Sendable () async throws -> Data) -> Item.ID {
+        let item = Item(id: UUID(), name: name, load: load)
+        items.append(item)
+        return item.id
     }
 
     public func remove(_ id: Item.ID) { items.removeAll { $0.id == id } }

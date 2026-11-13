@@ -17,6 +17,9 @@ final class AppModel {
 
     /// A factor read from the faces in the open photo, when there is one.
     private(set) var suggestion: Double?
+    /// A preview of each queued photo, as shot. Absent until it has loaded.
+    private(set) var thumbnails: [Batch.Item.ID: CoreImageRenderer.Frame] = [:]
+    private var thumbnailing: Task<Void, Never>?
     private(set) var notice: Notice?
 
     // Held here rather than in a view: a fold rebuilds the views, and an open
@@ -53,6 +56,8 @@ final class AppModel {
     func take(_ picked: [PhotosPickerItem]) async {
         notice = nil
         suggestion = nil
+        thumbnailing?.cancel()
+        thumbnails = [:]
         guard !picked.isEmpty else { return }
 
         if picked.count == 1 {
@@ -66,14 +71,27 @@ final class AppModel {
         } else {
             session.close()
             batch.clear()
+            var queued: [(Batch.Item.ID, PhotosPickerItem)] = []
             for (index, item) in picked.prefix(Self.batchLimit).enumerated() {
                 // The picker gives no filename without library access, which
                 // this app does not ask for; number them instead.
-                batch.add(name: String(format: "Photo-%02d.jpg", index + 1)) {
+                let id = batch.add(name: String(format: "Photo-%02d.jpg", index + 1)) {
                     guard let data = try await item.loadTransferable(type: Data.self) else {
                         throw CoreImageRenderer.Failure.undecodable
                     }
                     return data
+                }
+                queued.append((id, item))
+            }
+            // One at a time, so only one full-size photo is in memory.
+            thumbnailing = Task {
+                for (id, item) in queued {
+                    guard !Task.isCancelled else { return }
+                    guard let data = try? await item.loadTransferable(type: Data.self),
+                          let thumbnail = await Thumbnailer.thumbnail(of: data, longestEdge: 900),
+                          !Task.isCancelled
+                    else { continue }
+                    thumbnails[id] = thumbnail
                 }
             }
         }
@@ -115,6 +133,8 @@ final class AppModel {
         sharedFile = nil
         session.close()
         batch.clear()
+        thumbnailing?.cancel()
+        thumbnails = [:]
         suggestion = nil
         notice = nil
     }
