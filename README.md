@@ -74,14 +74,17 @@ Every client implements the Chambers & Light brand guide under the StillScope
 name. `BrandTheme.swift` (macOS and iOS) and `BrandTheme.xaml` (Windows) are
 the only places a colour or face is declared.
 
-| Token     | Hex       | Use                                  |
-|-----------|-----------|--------------------------------------|
-| Chamber   | `#201612` | Window ground, image wells           |
-| Coral     | `#FF6748` | The one accent: selection and export |
-| Silver    | `#C2C1BA` | Secondary text, hairlines            |
-| Warm gray | `#F5F3F1` | Readouts on dark, ground on light    |
-| White     | `#FFFFFF` | Primary text                         |
-| Error     | `#D32F2F` | Errors. Coral is never a warning.    |
+| Token       | Hex       | Use                                  |
+|-------------|-----------|--------------------------------------|
+| Pine        | `#1C2723` | Window ground, image wells           |
+| Halide      | `#C7D9CE` | The one accent: selection and export |
+| Halide deep | `#98B1A3` | Secondary text, hairlines            |
+| Paper       | `#ECEAE1` | Primary text                         |
+| Safelight   | `#E63E2D` | Errors only                          |
+
+The palette is the green register of the one published at chambersandlight.com.
+Halide is pale, so labels set on it are pine. The web client still uses the
+site's own red-accented scheme.
 
 **Typography** is one sans, Neue Haas Grotesk falling back through Helvetica
 Neue and Inter to the system face, with Space Mono for factors and dimensions.

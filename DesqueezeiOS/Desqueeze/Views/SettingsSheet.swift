@@ -16,8 +16,16 @@ struct SettingsSheet: View {
                 } footer: {
                     Text("Saved and shared photos get a white border, 5% of the long edge on every side. The preview shows the photo without it.")
                 }
+
+                Section {
+                    Toggle("Find squeezed photos", isOn: $model.findsSqueezed)
+                } header: {
+                    Text("Library")
+                } footer: {
+                    Text("Checks the last two weeks of your library for photos shot through an anamorphic lens that have not been corrected, and offers to queue them. It goes by the lens the camera recorded and by the shape of faces. Your photos stay on this device.")
+                }
             }
-            .tint(Brand.coral)
+            .tint(Brand.accent)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

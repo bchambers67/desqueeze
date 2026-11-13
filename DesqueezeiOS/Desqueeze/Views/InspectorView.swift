@@ -20,7 +20,7 @@ struct InspectorView: View {
 
     var body: some View {
         ZStack {
-            Brand.chamber.ignoresSafeArea()
+            Brand.ground.ignoresSafeArea()
             if let frame {
                 ZoomableImage(image: frame.image, displayScale: displayScale,
                               command: $command, zoomPercent: $zoomPercent)
@@ -28,13 +28,13 @@ struct InspectorView: View {
             } else if let failure {
                 Text(failure).font(Brand.sans(13)).foregroundStyle(Brand.error)
             } else {
-                ProgressView().tint(Brand.coral)
+                ProgressView().tint(Brand.accent)
             }
         }
         // The controls float over the photograph in one glass layer.
         .overlay(alignment: .top) { bar }
         .preferredColorScheme(.dark)
-        .tint(Brand.white)
+        .tint(Brand.primary)
         .task {
             do { frame = try await session.inspectionFrame() }
             catch { failure = error.localizedDescription }
@@ -74,7 +74,7 @@ struct InspectorView: View {
                         .font(.system(size: 16, weight: .medium))
                 }
             }
-            .foregroundStyle(Brand.white)
+            .foregroundStyle(Brand.primary)
             .padding(.horizontal, Brand.spacingMD)
             .padding(.top, Brand.spacingSM)
         }
@@ -122,7 +122,7 @@ private struct ZoomableImage: UIViewRepresentable {
     func makeUIView(context: Context) -> FittingScrollView {
         let scroll = FittingScrollView()
         scroll.delegate = context.coordinator
-        scroll.backgroundColor = UIColor(Brand.chamber)
+        scroll.backgroundColor = UIColor(Brand.ground)
         // Limits depend on the view's size, which is not known until layout,
         // and changes again on a fold or rotation.
         scroll.onLayout = { [coordinator = context.coordinator] in coordinator.layoutIfNeeded($0) }

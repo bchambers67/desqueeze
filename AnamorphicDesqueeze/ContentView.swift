@@ -102,6 +102,8 @@ struct ContentView: View {
             }
             .buttonStyle(.glassProminent)
             .tint(Brand.coral)
+            // The accent is pale, so the label on it is the dark ground.
+            .foregroundStyle(Brand.backgroundPrimary)
             .keyboardShortcut("e")
             .disabled(!canExport)
             .help(exportTitle)

@@ -23,6 +23,10 @@
 
 	<!-- Add-only: the app writes corrected frames and never reads the library.
 	     PhotosPicker supplies input without any authorisation. -->
+	<!-- Read access is asked for only if "Find squeezed photos" is turned on
+	     in Settings. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>StillScope looks through your recent photos for ones shot with an anamorphic lens that still need correcting. Photos stay on your device.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>StillScope saves corrected photographs to your library.</string>
 

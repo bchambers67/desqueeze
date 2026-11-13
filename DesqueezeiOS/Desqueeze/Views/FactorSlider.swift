@@ -95,7 +95,7 @@ struct FactorSlider: View {
                         .contentTransition(.numericText())
                     Text(stop?.hint.capitalized ?? (isDragging && !isFree ? "Hold to fine-tune" : "Custom"))
                         .font(Brand.sans(12))
-                        .foregroundStyle(stop == nil ? Brand.silver : Brand.coral)
+                        .foregroundStyle(stop == nil ? Brand.secondary : Brand.accent)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
@@ -104,13 +104,13 @@ struct FactorSlider: View {
             }
 
             Slider(value: $raw, in: Self.range, step: 0.01, onEditingChanged: dragChanged)
-                .tint(Brand.coral)
+                .tint(Brand.accent)
                 .accessibilityLabel("Squeeze factor")
                 .accessibilityValue(String(format: "%.2f", factor))
                 .background(alignment: .bottom) { ticks.offset(y: 24) }
                 .padding(.bottom, 26)
         }
-        .tint(Brand.white)
+        .tint(Brand.primary)
         .onChange(of: raw) { _, new in
             // A change that only mirrors the factor did not come from a finger.
             if abs(new - factor) > 0.001 || isDragging { moved(to: new) }
@@ -135,12 +135,12 @@ struct FactorSlider: View {
                     / (Self.range.upperBound - Self.range.lowerBound)
                 VStack(spacing: 3) {
                     Rectangle()
-                        .fill(stop == preset ? Brand.coral : Brand.silver)
+                        .fill(stop == preset ? Brand.accent : Brand.secondary)
                         .frame(width: 1, height: 7)
                     if labelled.contains(preset) {
                         Text(String(format: "%.2f", value))
                             .font(Brand.mono(9))
-                            .foregroundStyle(stop == preset ? Brand.white : Brand.silver)
+                            .foregroundStyle(stop == preset ? Brand.primary : Brand.secondary)
                             .fixedSize()
                     }
                 }

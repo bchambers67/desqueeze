@@ -286,7 +286,7 @@ struct SheetDoneButton: View {
                 .frame(maxWidth: .infinity, minHeight: 30)
         }
         .buttonStyle(.bordered)
-        .tint(Brand.white)
+        .tint(Brand.primary)
     }
 }
 
@@ -361,15 +361,17 @@ private struct SaveButton: View {
                 }
             }
         } label: {
+            // The accent is pale, so what sits on it is the dark ground.
             if model.isWorking {
-                ProgressView()
+                ProgressView().tint(Brand.ground)
             } else {
                 Label(model.mode == .batch ? "Save all to library" : "Save to library",
                       systemImage: "square.and.arrow.down")
                     .labelStyle(.iconOnly)
+                    .foregroundStyle(Brand.ground)
             }
         }
-        .tint(Brand.coral)
+        .tint(Brand.accent)
         .disabled(!model.hasContent || model.isWorking)
     }
 }
@@ -384,7 +386,7 @@ struct StatusChip: View {
         if let notice = model.notice {
             Label(notice.text, systemImage: notice.isError ? "exclamationmark.triangle" : "checkmark")
                 .font(Brand.sans(13))
-                .foregroundStyle(notice.isError ? Brand.error : Brand.white)
+                .foregroundStyle(notice.isError ? Brand.error : Brand.primary)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .glassEffect(.regular, in: .capsule)
