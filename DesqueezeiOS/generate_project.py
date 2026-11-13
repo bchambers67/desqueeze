@@ -158,3 +158,76 @@ w("/* End XCSwiftPackageProductDependency section */")
 w(f"\t}};\n\trootObject = {oid('project')} /* Project object */;\n}}")
 (ROOT / "Desqueeze.xcodeproj" / "project.pbxproj").write_text("\n".join(L) + "\n")
 print("sources:", len(sources), "groups:", [str(g) for g in groups])
+
+# A shared scheme, committed with the project. Xcode Cloud and any other
+# machine can only build a scheme that is shared; Xcode's automatic ones are
+# per-user and never leave the Mac that made them.
+ref = f'''<BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "{oid('target')}"
+               BuildableName = "Desqueeze.app"
+               BlueprintName = "Desqueeze"
+               ReferencedContainer = "container:Desqueeze.xcodeproj">
+            </BuildableReference>'''
+scheme = f'''<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "2600"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            {ref}
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         {ref}
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction
+      buildConfiguration = "Release"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         {ref}
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>
+'''
+schemes = ROOT / "Desqueeze.xcodeproj" / "xcshareddata" / "xcschemes"
+schemes.mkdir(parents=True, exist_ok=True)
+(schemes / "Desqueeze.xcscheme").write_text(scheme)
