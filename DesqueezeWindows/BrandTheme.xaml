@@ -4,27 +4,26 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
-        Chambers & Light brand system.
-        Tokens mirror the authoritative :root custom properties published at
-        chambersandlight.com. The palette follows a darkroom metaphor: the
-        chamber holds the image, paper receives it, halide is the light-sensitive
-        layer, grain the texture, and safelight the only illumination safe to
-        work by.
+        StillScope, in the Chambers & Light brand system.
+        Colours come from the brand guide: chamber, coral, silver, white and
+        warm gray. The resource keys keep their earlier names so every view
+        that uses them picks up the guide's values without being touched.
     -->
 
-    <!-- ── Palette ──────────────────────────────────────────── -->
-    <Color x:Key="ChamberColor">#FF16110F</Color>       <!-- chamber        -->
-    <Color x:Key="PineColor">#FF1C2723</Color>          <!-- pine           -->
-    <Color x:Key="PaperColor">#FFECEAE1</Color>         <!-- paper          -->
-    <Color x:Key="HalideColor">#FFC7D9CE</Color>        <!-- halide         -->
-    <Color x:Key="HalideDeepColor">#FF98B1A3</Color>    <!-- halide-deep    -->
-    <Color x:Key="GrainColor">#FF6E665F</Color>         <!-- grain          -->
-    <Color x:Key="SafelightColor">#FFE63E2D</Color>     <!-- safelight      -->
-    <Color x:Key="SafelightDeepColor">#FFC22E1F</Color> <!-- safelight-deep -->
+    <!-- Palette -->
+    <Color x:Key="ChamberColor">#FF201612</Color>       <!-- chamber: the ground      -->
+    <Color x:Key="PineColor">#FF2E221C</Color>          <!-- chamber, lifted: selection -->
+    <Color x:Key="PaperColor">#FFFFFFFF</Color>         <!-- white: primary text      -->
+    <Color x:Key="HalideColor">#FFF5F3F1</Color>        <!-- warm gray: readouts      -->
+    <Color x:Key="HalideDeepColor">#FFC2C1BA</Color>    <!-- silver: secondary text   -->
+    <Color x:Key="GrainColor">#FF8F8C86</Color>         <!-- silver, dimmed: hints    -->
+    <Color x:Key="SafelightColor">#FFFF6748</Color>     <!-- coral: the one accent    -->
+    <Color x:Key="SafelightDeepColor">#FFE5553A</Color> <!-- coral, pressed           -->
+    <Color x:Key="ErrorColor">#FFD32F2F</Color>         <!-- error: never coral       -->
 
     <!-- Raised steps derived from chamber / pine -->
-    <Color x:Key="ChamberRaisedColor">#FF1A1512</Color>
-    <Color x:Key="PineRaisedColor">#FF243029</Color>
+    <Color x:Key="ChamberRaisedColor">#FF271C17</Color>
+    <Color x:Key="PineRaisedColor">#FF382A23</Color>
 
     <SolidColorBrush x:Key="ChamberBrush"       Color="{StaticResource ChamberColor}"/>
     <SolidColorBrush x:Key="ChamberRaisedBrush" Color="{StaticResource ChamberRaisedColor}"/>
@@ -38,23 +37,24 @@
     <SolidColorBrush x:Key="SafelightDeepBrush" Color="{StaticResource SafelightDeepColor}"/>
 
     <!-- edge-light : hairline rule on dark ground -->
-    <SolidColorBrush x:Key="EdgeLightBrush"     Color="#29ECEAE1"/>
-    <SolidColorBrush x:Key="SafelightFaintBrush" Color="#14E63E2D"/>
+    <SolidColorBrush x:Key="EdgeLightBrush"     Color="#33C2C1BA"/>
+    <SolidColorBrush x:Key="ErrorBrush"         Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="SafelightFaintBrush" Color="#14FF6748"/>
 
     <!-- ── Typography ──────────────────────────────────────── -->
     <!-- Fallback chains match the brand's font stacks; WPF resolves the
          first installed family in the comma-separated list. -->
-    <FontFamily x:Key="DisplayFont">Bodoni Moda, Bodoni MT, Didot, Georgia, serif</FontFamily>
-    <FontFamily x:Key="GroteskFont">Archivo, Segoe UI, Arial, sans-serif</FontFamily>
+    <FontFamily x:Key="DisplayFont">Neue Haas Grotesk Display Pro, Neue Haas Grotesk Text Pro, Helvetica Neue, Inter, Segoe UI, Arial, sans-serif</FontFamily>
+    <FontFamily x:Key="GroteskFont">Neue Haas Grotesk Display Pro, Neue Haas Grotesk Text Pro, Helvetica Neue, Inter, Segoe UI, Arial, sans-serif</FontFamily>
     <FontFamily x:Key="MonoFont">Space Mono, Cascadia Mono, Consolas, monospace</FontFamily>
 
     <sys:Double x:Key="FontSizeCaption">11</sys:Double>
     <sys:Double x:Key="FontSizeBody">13</sys:Double>
     <sys:Double x:Key="FontSizeMono">12</sys:Double>
-    <sys:Double x:Key="FontSizeWordmark">26</sys:Double>
+    <sys:Double x:Key="FontSizeWordmark">17</sys:Double>
 
     <!-- Tracking is applied through the local:Track.Em attached property in
-         Tracking.cs, in em units matching the brand (.12 / .18 / .22).
+         Tracking.cs, in em units matching the brand (.05 to .15).
          WPF has no letter-spacing primitive, so there is no double to declare
          here — see Tracking.cs for why. -->
 

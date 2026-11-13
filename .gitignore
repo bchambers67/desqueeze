@@ -4,3 +4,8 @@ xcuserdata/
 .build/
 DerivedData/
 .DS_Store
+
+# .NET build output
+bin/
+obj/
+dist-ci/
