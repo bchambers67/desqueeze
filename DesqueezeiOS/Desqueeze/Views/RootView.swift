@@ -16,16 +16,19 @@ struct RootView: View {
         GeometryReader { proxy in
             let edge = BarEdge.resolve(for: proxy.size)
             let bar = SideBar.metrics(trailingInset: proxy.safeAreaInsets.trailing)
+            let panelShown = model.showsFactorPanel(besideSideBar: edge == .trailing)
 
             NavigationStack {
                 canvas
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    // Sideways on an open Duo the slider stays on screen,
-                    // under the photograph, instead of in a sheet.
+                    // The factor panel sits between the photograph and the
+                    // bar, growing out of the button that opens it: bottom
+                    // centre on the bottom bar, the trailing edge beside the
+                    // side bar.
                     .safeAreaInset(edge: .bottom, spacing: 0) {
-                        if edge == .trailing, model.isFactorDockShown, model.hasContent {
-                            FactorDock(model: model)
-                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        if panelShown {
+                            FactorPanel(model: model)
+                                .transition(.zoom(from: edge == .trailing ? .trailing : .bottom))
                         }
                     }
                     // The content layer keeps the brand ground and runs to
@@ -37,20 +40,19 @@ struct RootView: View {
                     // edge, so it runs into the strip and starts below them.
                     .overlay(alignment: .trailing) {
                         if edge == .trailing {
-                            SideBar(model: model, topClearance: bar.topClearance,
+                            SideBar(model: model, panelShown: panelShown, topClearance: bar.topClearance,
                                     width: bar.width, centreShift: bar.centreShift)
                         }
                     }
                     .ignoresSafeArea(.container, edges: edge == .trailing ? .trailing : [])
                     .overlay(alignment: .top) { StatusChip(model: model) }
                     .toolbar {
-                        if edge == .bottom { BottomBarItems(model: model) }
+                        if edge == .bottom { BottomBarItems(model: model, panelShown: panelShown) }
                     }
                     .toolbar(.hidden, for: .navigationBar)
                     .animation(.smooth(duration: 0.3), value: edge)
-                    .animation(.smooth(duration: 0.25), value: model.isFactorDockShown)
-                    // The sheet belongs to the bottom bar; the dock replaces it.
-                    .onChange(of: edge) { _, _ in model.isChoosingFactor = false }
+                    // A spring with a little give, like a folder opening.
+                    .animation(.spring(response: 0.42, dampingFraction: 0.8), value: panelShown)
                     .animation(.smooth(duration: 0.2), value: model.notice)
             }
             // Renders are sized for the surface showing them. This fires again
@@ -71,9 +73,6 @@ struct RootView: View {
         }
         .sheet(isPresented: $model.isShowingSettings) {
             SettingsSheet(model: model)
-        }
-        .sheet(isPresented: $model.isChoosingFactor) {
-            FactorSheet(model: model)
         }
     }
 
