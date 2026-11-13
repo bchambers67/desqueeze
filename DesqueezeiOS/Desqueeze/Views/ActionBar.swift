@@ -73,7 +73,6 @@ struct BottomBarItems: ToolbarContent {
 /// render, and morph, as a single layer.
 struct SideBar: View {
     let model: AppModel
-    let panelShown: Bool
     /// Room left at the top for the clock and status icons, which an open Duo
     /// draws in this same strip.
     var topClearance: CGFloat = 20
@@ -107,10 +106,8 @@ struct SideBar: View {
 
                 Spacer(minLength: 0)
 
-                FactorButton(model: model, panelShown: panelShown, iconOnly: true)
-                    .buttonStyle(.glass)
-
-                Spacer(minLength: 0)
+                // No factor button here: beside this bar the factor panel is
+                // always on screen.
 
                 if model.mode == .single {
                     Group {
@@ -169,12 +166,21 @@ private struct ClearButton: View {
 
 /// Checks recent photos again for ones that need correcting. It appears only
 /// while that feature is switched on in Settings.
+///
+/// A tap runs the everyday check, which skips photos already looked at. A
+/// long press offers the full one, which looks at all of them again. That is
+/// the system's own idiom for a second action on a bar button, so it behaves
+/// the same in the toolbar and in the side bar.
 private struct RescanButton: View {
     let model: AppModel
 
     var body: some View {
-        Button {
-            Task { await model.rescan() }
+        Menu {
+            Button {
+                Task { await model.rescan(everything: true) }
+            } label: {
+                Label("Recheck every recent photo", systemImage: "arrow.clockwise.circle")
+            }
         } label: {
             if model.isScanning {
                 ProgressView()
@@ -182,6 +188,8 @@ private struct RescanButton: View {
                 Label("Check recent photos", systemImage: "arrow.triangle.2.circlepath")
                     .labelStyle(.iconOnly)
             }
+        } primaryAction: {
+            Task { await model.rescan() }
         }
         .disabled(model.isScanning || model.isWorking)
     }
@@ -199,31 +207,22 @@ private struct SettingsButton: View {
     }
 }
 
-/// The squeeze factor control's button: it opens and closes the factor panel.
-///
-/// Along the bottom it shows the factor. In the side bar there is no room for
-/// a number, so it is a symbol, a frame opening outward from its centre line,
-/// and the panel shows the number.
+/// The squeeze factor control's button, in the bottom bar: it shows the
+/// factor, and pops the factor panel out and back.
 private struct FactorButton: View {
     let model: AppModel
     let panelShown: Bool
-    var iconOnly = false
 
     var body: some View {
         Button {
-            model.factorPanelChoice = !panelShown
+            model.isFactorPanelOpen.toggle()
         } label: {
-            if iconOnly {
-                Label("Squeeze factor", systemImage: "arrow.left.and.line.vertical.and.arrow.right")
-                    .labelStyle(.iconOnly)
-            } else {
-                Text(String(format: "%.2f×", model.session.squeeze.factor))
-                    .font(Brand.mono(15, weight: .medium))
-                    .monospacedDigit()
-                    .lineLimit(1)
-                    .fixedSize()
-                    .padding(.horizontal, 4)
-            }
+            Text(String(format: "%.2f×", model.session.squeeze.factor))
+                .font(Brand.mono(15, weight: .medium))
+                .monospacedDigit()
+                .lineLimit(1)
+                .fixedSize()
+                .padding(.horizontal, 4)
         }
         // Lit while its panel is open, as the one thing that closes it.
         .foregroundStyle(panelShown ? Brand.accent : Brand.primary)
@@ -303,12 +302,13 @@ extension View {
     func fittedSheet() -> some View { modifier(FittedSheet()) }
 }
 
-/// The factor slider in a glass panel above the action bar.
+/// The factor slider in a glass panel.
 ///
-/// It is part of the screen, not a sheet over it: the bar stays in reach
-/// below, the photograph stays in view above, and the panel takes the space
-/// between. It grows out of the factor button that opens it, the way a folder
-/// opens on the Home Screen, and shrinks back into it.
+/// With a bottom bar it pops out over the photograph, just above the bar,
+/// growing out of the factor button the way a folder opens on the Home
+/// Screen. Nothing beneath it moves: it floats over the content and the bar
+/// stays in reach. On an open Duo held sideways it is always on screen, in a
+/// strip of its own under the photograph.
 struct FactorPanel: View {
     let model: AppModel
 

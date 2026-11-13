@@ -112,18 +112,17 @@ bottom on iPhone and on an open Duo held upright, and on an open Duo held
 sideways a bar against the right edge, built
 from the system's glass button styles in a single `GlassEffectContainer`. Icons
 carry accessibility labels; the factor, being text, has a group to itself. Its
-button opens a glass panel between the photograph and the bar, holding a
-slider from 1.00 to 2.00. The panel is part of the screen, not a sheet: the
-bar stays in reach below it, and it grows out of the button and shrinks back
-into it on a spring, as a folder does on the Home Screen. The nine lens
+button pops a glass panel out over the photograph, just above the bar, holding
+a slider from 1.00 to 2.00. The panel floats: nothing beneath it moves, and
+the bar stays in reach. It grows out of the button and shrinks back into it on
+a spring, as a folder does on the Home Screen. The nine lens
 presets are stop points marked under the track: the factor snaps to them, with
 a light haptic tap on each. Holding still between two stops for two seconds
 releases the snap, and the factor then follows the thumb in hundredths until
 the finger lifts. The preview reshapes with the factor at once and the proper
 render follows; renders asked for while one is running collapse into one. On an
-open Duo held sideways the panel is open by default beside a photo, and the
-side bar's factor button, a frame opening outward from its centre line, shows
-or hides it. The accent marks Save and the factor. The brand's square corners and flat surfaces hold for the
+open Duo held sideways the panel is always on screen, in a strip of its own
+under the photograph, and the side bar has no factor button. The accent marks Save and the factor. The brand's square corners and flat surfaces hold for the
 content layer beneath; the glass layer keeps the system's shapes.
 
 `BarEdge` decides the side from the window's size, not from a device check or a
@@ -191,7 +190,8 @@ hosts pass completion handlers that predate `Sendable`.
 
 With **Find squeezed photos** on in Settings, StillScope checks the last two
 weeks of the library each time it comes forward and offers to queue what it
-finds. A button in the action bar runs the same check on demand. It is off by default, because it is the one feature that reads the
+finds. A button in the action bar runs the same check on demand, and a long press on
+it offers a full recheck that looks again at photos an earlier check passed over. It is off by default, because it is the one feature that reads the
 library, and turning it on is what asks for that access.
 
 `SqueezeDetector` in the core package decides. Two signs are trusted outright:
