@@ -94,6 +94,21 @@ struct EditorSessionTests {
         #expect(file == Fixture.jpeg(Fixture.app1(width: 9000, height: 4000), Fixture.jfif))
     }
 
+    @Test("an export with a matte is rendered with it, and records the size including the border")
+    func exportsWithMatte() async throws {
+        let renderer = FakeRenderer()
+        let session = EditorSession(renderer: renderer)
+        await session.open(photo)
+        await session.choose(.x150)
+        session.matte = Matte(fraction: 0.05)
+
+        let file = try await session.export()
+
+        // 9000 × 4000 with a border of 5% of the long edge, 450, on every side.
+        #expect(renderer.mattes == [Matte(fraction: 0.05)])
+        #expect(file == Fixture.jpeg(Fixture.app1(width: 9900, height: 4900), Fixture.jfif))
+    }
+
     @Test("there is nothing to export before a photo is open")
     func exportsNothing() async {
         let session = EditorSession(renderer: FakeRenderer())

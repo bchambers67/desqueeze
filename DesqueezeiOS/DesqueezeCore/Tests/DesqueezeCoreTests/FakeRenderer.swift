@@ -49,5 +49,10 @@ final class FakeRenderer: FrameRenderer, @unchecked Sendable {
         await gate?.hold(squeeze.factor)
         return Rendered(factor: squeeze.factor, longestEdge: longestEdge)
     }
-    func export(_ source: Data, squeeze: Squeeze) async throws -> Data { exported }
+    /// The matte each export was asked for, in order.
+    var mattes: [Matte?] = []
+    func export(_ source: Data, squeeze: Squeeze, matte: Matte?) async throws -> Data {
+        mattes.append(matte)
+        return exported
+    }
 }

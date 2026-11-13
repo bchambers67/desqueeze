@@ -69,6 +69,9 @@ struct RootView: View {
         .sheet(item: $model.sharedFile) { file in
             ActivitySheet(url: file.url)
         }
+        .sheet(isPresented: $model.isShowingSettings) {
+            SettingsSheet(model: model)
+        }
         .sheet(isPresented: $model.isChoosingFactor) {
             FactorSheet(model: model)
         }

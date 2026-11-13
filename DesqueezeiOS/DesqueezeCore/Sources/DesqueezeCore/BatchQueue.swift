@@ -50,7 +50,7 @@ public final class BatchQueue<Renderer: FrameRenderer> {
 
     /// Corrects each unfinished photo and hands the result to `save`. A call
     /// made while a run is under way returns at once.
-    public func run(squeeze: Squeeze, saving save: (_ name: String, _ file: Data) async throws -> Void) async {
+    public func run(squeeze: Squeeze, matte: Matte? = nil, saving save: (_ name: String, _ file: Data) async throws -> Void) async {
         guard !isRunning else { return }
         isRunning = true
         defer { isRunning = false }
@@ -63,9 +63,9 @@ public final class BatchQueue<Renderer: FrameRenderer> {
             do {
                 let source = try await item.load()
                 let own = item.squeeze ?? squeeze
-                let size = own.outputSize(for: try await renderer.size(of: source))
-                let jpeg = try await renderer.export(source, squeeze: own)
-                let file = CaptureMetadata.carry(from: source, onto: jpeg, size: size)
+                let frame = own.outputSize(for: try await renderer.size(of: source))
+                let jpeg = try await renderer.export(source, squeeze: own, matte: matte)
+                let file = CaptureMetadata.carry(from: source, onto: jpeg, size: matte?.outputSize(for: frame) ?? frame)
                 try await save(Self.outputName(for: item.name, squeeze: own), file)
                 setState(.done, for: id)
             } catch {
