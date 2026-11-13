@@ -1,7 +1,11 @@
 import DesqueezeCore
 import SwiftUI
 
-/// The batch: every queued photo, its factor, and how it fared.
+/// The batch, as pictures: every queued photo, corrected as it will be saved.
+///
+/// Each tile is the photo's thumbnail given the shape of its factor. Moving
+/// the slider reshapes all of them at once; nothing is re-rendered to do it.
+/// A photo follows the batch factor unless a tap gives it one of its own.
 struct BatchPane: View {
     let model: AppModel
 
@@ -9,25 +13,17 @@ struct BatchPane: View {
 
     @State private var editing: Batch.Item?
 
+    private let columns = [GridItem(.adaptive(minimum: 240, maximum: 420), spacing: Brand.spacingMD)]
+    private let tileHeight: CGFloat = 150
+
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                SectionLabel(text: "\(batch.items.count) PHOTOS")
-                Spacer()
-                FrameMark(text: "\(batch.finishedCount) / \(batch.items.count) SAVED")
-            }
-            .padding(Brand.spacingMD)
-
-            Hairline()
-
-            ScrollView {
-                LazyVStack(spacing: 0) {
-                    ForEach(batch.items) { item in
-                        row(item)
-                        Hairline()
-                    }
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: Brand.spacingMD) {
+                ForEach(batch.items) { item in
+                    tile(item)
                 }
             }
+            .padding(Brand.spacingMD)
         }
         .background(Brand.chamber)
         .sheet(item: $editing) { item in
@@ -38,72 +34,87 @@ struct BatchPane: View {
         }
     }
 
-    private func row(_ item: Batch.Item) -> some View {
-        HStack(spacing: Brand.spacingMD) {
-            stateMark(item.state)
+    private func tile(_ item: Batch.Item) -> some View {
+        let factor = (item.squeeze ?? model.session.squeeze).factor
+        let locked = batch.isRunning || item.state == .done
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.name)
-                    .font(Brand.mono(13))
-                    .foregroundStyle(Brand.white)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                if case .failed(let reason) = item.state {
-                    Text(reason)
-                        .font(Brand.sans(11))
-                        .foregroundStyle(Brand.error)
-                        .fixedSize(horizontal: false, vertical: true)
+        return VStack(spacing: 6) {
+            Button {
+                editing = item
+            } label: {
+                ZStack {
+                    if let frame = model.thumbnails[item.id] {
+                        let shot = CGFloat(frame.image.width) / CGFloat(max(frame.image.height, 1))
+                        Image(decorative: frame.image, scale: 1)
+                            .resizable()
+                            .aspectRatio(shot * factor, contentMode: .fit)
+                            .opacity(item.state == .done ? 0.55 : 1)
+                    } else {
+                        ProgressView().tint(Brand.coral)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: tileHeight)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .disabled(locked)
+            .accessibilityLabel("\(item.name), \(String(format: "%.2f", factor)) times")
+            .accessibilityHint("Sets this photo's own factor")
+            .overlay(alignment: .topLeading) { stateMark(item.state).padding(8) }
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    batch.remove(item.id)
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(Brand.white)
+                        .frame(width: 44, height: 44)
+                }
+                .disabled(batch.isRunning)
+                .accessibilityLabel("Remove \(item.name)")
+            }
+            .overlay(alignment: .bottomTrailing) {
+                // Only a photo with its own factor is marked; the rest follow
+                // the slider and need no label.
+                if let own = item.squeeze {
+                    Text(String(format: "%.2f×", own.factor))
+                        .font(Brand.mono(11))
+                        .foregroundStyle(Brand.white)
+                        .padding(.horizontal, 7)
+                        .frame(height: 22)
+                        .background(Brand.chamber.opacity(0.85))
+                        .overlay(Rectangle().stroke(Brand.coral, lineWidth: 1))
+                        .padding(8)
                 }
             }
 
-            Spacer(minLength: Brand.spacingSM)
-
-            factorMenu(item)
-
-            Button {
-                batch.remove(item.id)
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(Brand.silver)
-                    .frame(width: 44, height: 44)
+            if case .failed(let reason) = item.state {
+                Text(reason)
+                    .font(Brand.sans(11))
+                    .foregroundStyle(Brand.error)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .disabled(batch.isRunning)
-            .accessibilityLabel("Remove \(item.name)")
         }
-        .padding(.horizontal, Brand.spacingMD)
-        .padding(.vertical, 12)
-    }
-
-    /// Each photo follows the batch unless given a factor of its own. The
-    /// button opens the factor slider; there is no menu to scroll.
-    private func factorMenu(_ item: Batch.Item) -> some View {
-        Button {
-            editing = item
-        } label: {
-            Text(item.squeeze.map { String(format: "%.2f×", $0.factor) } ?? "BATCH")
-                .font(Brand.mono(13))
-                .foregroundStyle(item.squeeze == nil ? Brand.silver : Brand.white)
-                .padding(.horizontal, 12)
-                .frame(minWidth: 72, minHeight: 44)
-                .overlay(Rectangle().stroke(item.squeeze == nil ? Brand.hairline : Brand.coral, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Factor for \(item.name)")
-        .disabled(batch.isRunning || item.state == .done)
     }
 
     @ViewBuilder
     private func stateMark(_ state: Batch.Item.State) -> some View {
         switch state {
         case .waiting:
-            Rectangle().stroke(Brand.silver.opacity(0.5), lineWidth: 1).frame(width: 10, height: 10)
+            EmptyView()
         case .working:
-            ProgressView().controlSize(.mini).tint(Brand.coral).frame(width: 10, height: 10)
+            ProgressView().controlSize(.small).tint(Brand.coral)
         case .done:
-            Rectangle().fill(Brand.silver).frame(width: 10, height: 10)
+            Image(systemName: "checkmark")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Brand.white)
+                .accessibilityLabel("Saved")
         case .failed:
-            Rectangle().fill(Brand.error).frame(width: 10, height: 10)
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(Brand.error)
+                .accessibilityLabel("Failed")
         }
     }
 }

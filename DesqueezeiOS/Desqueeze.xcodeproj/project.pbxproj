@@ -10,6 +10,7 @@
 		65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */; };
 		4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A8A670FF04B283780D9A67 /* FaceEstimator.swift */; };
 		DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */; };
+		23E29E917B353CC25AE73862 /* Thumbnailer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */; };
 		97072BA9276C863DDD24E740 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5650F65F933ADEFD15FD877 /* AppModel.swift */; };
 		C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D6210A0C9331BB3D874A7B /* BrandTheme.swift */; };
 		C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */; };
@@ -27,6 +28,7 @@
 		8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImageRenderer.swift; sourceTree = "<group>"; };
 		86A8A670FF04B283780D9A67 /* FaceEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceEstimator.swift; sourceTree = "<group>"; };
 		49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
+		4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thumbnailer.swift; sourceTree = "<group>"; };
 		F5650F65F933ADEFD15FD877 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		75D6210A0C9331BB3D874A7B /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
 		1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
@@ -81,6 +83,7 @@
 				8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */,
 				86A8A670FF04B283780D9A67 /* FaceEstimator.swift */,
 				49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */,
+				4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */,
 			);
 			path = Adapters;
 			sourceTree = "<group>";
@@ -191,6 +194,7 @@
 				65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */,
 				4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */,
 				DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */,
+				23E29E917B353CC25AE73862 /* Thumbnailer.swift in Sources */,
 				97072BA9276C863DDD24E740 /* AppModel.swift in Sources */,
 				C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */,
 				C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */,
