@@ -139,18 +139,6 @@ struct Hairline: View {
     }
 }
 
-/// The letterspaced text wordmark, used below the logo's minimum display size.
-struct Wordmark: View {
-    var size: CGFloat = 10
-    var color: Color = Brand.silver
-    var body: some View {
-        Text("CHAMBERS & LIGHT")
-            .font(Brand.sans(size, weight: .medium))
-            .tracking(Brand.tracking(Brand.trackWide, at: size))
-            .foregroundStyle(color)
-    }
-}
-
 /// A frame-edge style annotation, after the "C&L · 36A" markings on the logo.
 struct FrameMark: View {
     let text: String

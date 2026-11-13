@@ -22,7 +22,7 @@ final class AppModel {
     // Held here rather than in a view: a fold rebuilds the views, and an open
     // inspector or a running save must not reset when it does.
     var isInspecting = false
-    var isEnteringCustom = false
+    var isChoosingFactor = false
     var sharedFile: SharedFile?
     private(set) var isWorking = false
 
