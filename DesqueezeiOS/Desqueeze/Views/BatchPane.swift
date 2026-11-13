@@ -154,6 +154,7 @@ private struct ItemFactorSheet: View {
             FactorSlider(factor: $factor)
         }
         .padding(20)
+        .ignoresSafeArea(.container, edges: .horizontal)
         .onChange(of: factor) { _, new in choose(Squeeze(factor: new)) }
         .presentationDetents([.height(240)])
         .presentationDragIndicator(.visible)
