@@ -73,8 +73,17 @@ struct SideBar: View {
     /// Room left at the top for the clock and status icons, which an open Duo
     /// draws in this same strip.
     var topClearance: CGFloat = 20
+    /// The bar is as wide as the strip it shares with the status icons, so
+    /// its buttons centre on the same line as the clock above them.
+    var width: CGFloat = SideBar.minimumWidth
 
-    static let width: CGFloat = 76
+    static let minimumWidth: CGFloat = 76
+
+    /// The bar's width and top clearance for a window's safe area.
+    static func metrics(trailingInset: CGFloat) -> (width: CGFloat, topClearance: CGFloat) {
+        let sharesStatusStrip = trailingInset > 20
+        return (max(minimumWidth, trailingInset), sharesStatusStrip ? 124 : 20)
+    }
 
     var body: some View {
         GlassEffectContainer(spacing: 14) {
@@ -106,7 +115,7 @@ struct SideBar: View {
             .buttonBorderShape(.circle)
             .padding(.top, topClearance)
             .padding(.bottom, 20)
-            .frame(width: Self.width)
+            .frame(width: width)
         }
     }
 }
@@ -157,6 +166,8 @@ private struct FactorButton: View {
             Text(String(format: "%.2f×", model.session.squeeze.factor))
                 .font(Brand.mono(15, weight: .medium))
                 .monospacedDigit()
+                .lineLimit(1)
+                .fixedSize()
                 .padding(.horizontal, 4)
         }
         .accessibilityLabel("Squeeze factor")
