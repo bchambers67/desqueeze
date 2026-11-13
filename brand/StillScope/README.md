@@ -15,20 +15,24 @@ what the tool is for.
 
 One shape: the wide scope frame as an anamorphic lens draws it. The sides
 stand straight and the top and bottom edges bow toward the centre, which is
-the curve of an anamorphic field and the shape of a curved scope screen. It is
-always coral.
+the curve of an anamorphic field and the shape of a curved scope screen. On a
+dark ground it is halide; on a light ground it is halide deep or pine.
 
 ## Colour
 
-Taken from the Chambers & Light brand guide.
+The green register of the palette published at chambersandlight.com. It
+replaced the chamber-and-coral scheme in November 2026.
 
-| Name      | Hex       | Use                                         |
-|-----------|-----------|---------------------------------------------|
-| Chamber   | `#201612` | Ground, icon background                     |
-| Coral     | `#FF6748` | The mark. One accent per surface.           |
-| Silver    | `#C2C1BA` | Secondary text, hairlines                   |
-| Warm gray | `#F5F3F1` | Wordmark on dark, the ground on light       |
-| White     | `#FFFFFF` | Primary text on Chamber                     |
+| Name        | Hex       | Use                                        |
+|-------------|-----------|--------------------------------------------|
+| Pine        | `#1C2723` | Ground, icon background                    |
+| Halide      | `#C7D9CE` | The accent and the mark. One per surface.  |
+| Halide deep | `#98B1A3` | Secondary text, hairlines                  |
+| Paper       | `#ECEAE1` | Primary text on pine; the light ground     |
+| Safelight   | `#E63E2D` | Errors only                                |
+
+Halide is pale. Anything set on it, such as the label of a primary button, is
+pine, never paper.
 
 ## Type
 
@@ -44,7 +48,7 @@ glass, highlights, shadows and the dark, clear and tinted variants itself, so
 the layers here carry shape and colour only: no gradients, shadows or masks.
 
 `icon/layers/field.svg` is the whole icon: one 1024 × 1024 layer holding the
-coral shape. Set the background fill to Chamber `#201612`.
+halide shape. Set the background fill to Pine `#1C2723`.
 
 To build the icon:
 
@@ -69,5 +73,5 @@ wordmark and lockup come for dark and light grounds; the mark is the same on
 both. All are SVG with outlined type.
 
 Keep clear space around the lockup equal to the height of the mark. Do not
-recolour the mark, straighten or reverse its curve, or set the name in mixed
-weights.
+set the mark in colours outside the palette, straighten or reverse its curve,
+or set the name in mixed weights.

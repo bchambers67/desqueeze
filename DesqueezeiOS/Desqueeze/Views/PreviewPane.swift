@@ -12,12 +12,12 @@ struct PreviewPane: View {
 
     var body: some View {
         ZStack {
-            Brand.chamber
+            Brand.ground
 
             if let frame = session.preview {
                 loaded(frame)
             } else if session.isRendering {
-                ProgressView().tint(Brand.coral)
+                ProgressView().tint(Brand.accent)
             } else {
                 emptyState
             }
@@ -57,7 +57,7 @@ struct PreviewPane: View {
                 FrameMark(text: "TAP TO INSPECT", size: 9)
                     .padding(.horizontal, Brand.spacingSM)
                     .padding(.vertical, 5)
-                    .background(Brand.chamber.opacity(0.85))
+                    .background(Brand.ground.opacity(0.85))
             }
             .padding(Brand.spacingMD)
         }
@@ -76,9 +76,9 @@ struct PreviewPane: View {
         VStack(spacing: Brand.spacingLG) {
             // The mark: a squeezed frame opening to its true width.
             HStack(spacing: Brand.spacingSM) {
-                Rectangle().stroke(Brand.silver, lineWidth: 1).frame(width: 24, height: 50)
-                Rectangle().fill(Brand.coral).frame(width: 20, height: 2)
-                Rectangle().stroke(Brand.silver, lineWidth: 1).frame(width: 68, height: 50)
+                Rectangle().stroke(Brand.secondary, lineWidth: 1).frame(width: 24, height: 50)
+                Rectangle().fill(Brand.accent).frame(width: 20, height: 2)
+                Rectangle().stroke(Brand.secondary, lineWidth: 1).frame(width: 68, height: 50)
             }
 
             PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images) {
@@ -86,17 +86,40 @@ struct PreviewPane: View {
                     Text("CHOOSE PHOTOS")
                         .font(Brand.sans(12, weight: .medium))
                         .tracking(Brand.tracking(Brand.trackLabel, at: 12))
-                        .foregroundStyle(Brand.white)
+                        .foregroundStyle(Brand.primary)
                     Text("One to correct and inspect. Several for a batch.")
                         .font(Brand.sans(13))
-                        .foregroundStyle(Brand.silver)
+                        .foregroundStyle(Brand.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, Brand.spacingLG)
                 .padding(.vertical, Brand.spacingMD)
-                .overlay(Rectangle().stroke(Brand.silver, lineWidth: 1))
+                .overlay(Rectangle().stroke(Brand.secondary, lineWidth: 1))
             }
             .buttonStyle(.plain)
+
+            // What a scan of recent photos turned up, when that is switched on.
+            if !model.found.isEmpty {
+                Button {
+                    model.queueFound()
+                } label: {
+                    VStack(spacing: Brand.spacingXS) {
+                        Text(model.found.count == 1 ? "REVIEW 1 SQUEEZED PHOTO" : "REVIEW \(model.found.count) SQUEEZED PHOTOS")
+                            .font(Brand.sans(12, weight: .medium))
+                            .tracking(Brand.tracking(Brand.trackLabel, at: 12))
+                            .foregroundStyle(Brand.accent)
+                        Text("Found in your recent photos.")
+                            .font(Brand.sans(13))
+                            .foregroundStyle(Brand.secondary)
+                    }
+                    .padding(.horizontal, Brand.spacingLG)
+                    .padding(.vertical, Brand.spacingMD)
+                    .overlay(Rectangle().stroke(Brand.accent, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+            } else if model.isScanning {
+                FrameMark(text: "CHECKING RECENT PHOTOS", size: 9)
+            }
 
             if let failure = session.failure {
                 Text(failure)

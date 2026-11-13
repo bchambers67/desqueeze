@@ -4,26 +4,26 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
-        StillScope, in the Chambers & Light brand system.
-        Colours come from the brand guide: chamber, coral, silver, white and
-        warm gray. The resource keys keep their earlier names so every view
-        that uses them picks up the guide's values without being touched.
+        StillScope, in the green register of the Chambers & Light palette
+        published at chambersandlight.com: pine for the ground, halide for the
+        accent, paper for type. The resource keys keep their earlier names so
+        the views that use them need no change.
     -->
 
     <!-- Palette -->
-    <Color x:Key="ChamberColor">#FF201612</Color>       <!-- chamber: the ground      -->
-    <Color x:Key="PineColor">#FF2E221C</Color>          <!-- chamber, lifted: selection -->
-    <Color x:Key="PaperColor">#FFFFFFFF</Color>         <!-- white: primary text      -->
-    <Color x:Key="HalideColor">#FFF5F3F1</Color>        <!-- warm gray: readouts      -->
-    <Color x:Key="HalideDeepColor">#FFC2C1BA</Color>    <!-- silver: secondary text   -->
-    <Color x:Key="GrainColor">#FF8F8C86</Color>         <!-- silver, dimmed: hints    -->
-    <Color x:Key="SafelightColor">#FFFF6748</Color>     <!-- coral: the one accent    -->
-    <Color x:Key="SafelightDeepColor">#FFE5553A</Color> <!-- coral, pressed           -->
-    <Color x:Key="ErrorColor">#FFD32F2F</Color>         <!-- error: never coral       -->
+    <Color x:Key="ChamberColor">#FF1C2723</Color>       <!-- pine: the ground          -->
+    <Color x:Key="PineColor">#FF2C3B35</Color>          <!-- pine, lifted: selection   -->
+    <Color x:Key="PaperColor">#FFECEAE1</Color>         <!-- paper: primary text       -->
+    <Color x:Key="HalideColor">#FFC7D9CE</Color>        <!-- halide: readouts          -->
+    <Color x:Key="HalideDeepColor">#FF98B1A3</Color>    <!-- halide deep: secondary    -->
+    <Color x:Key="GrainColor">#FF74897E</Color>         <!-- halide deep, dimmed: hints -->
+    <Color x:Key="SafelightColor">#FFC7D9CE</Color>     <!-- halide: the one accent    -->
+    <Color x:Key="SafelightDeepColor">#FFAFC4B8</Color> <!-- halide, pressed           -->
+    <Color x:Key="ErrorColor">#FFE63E2D</Color>         <!-- safelight red: errors only -->
 
     <!-- Raised steps derived from chamber / pine -->
-    <Color x:Key="ChamberRaisedColor">#FF271C17</Color>
-    <Color x:Key="PineRaisedColor">#FF382A23</Color>
+    <Color x:Key="ChamberRaisedColor">#FF222F2A</Color>
+    <Color x:Key="PineRaisedColor">#FF34443E</Color>
 
     <SolidColorBrush x:Key="ChamberBrush"       Color="{StaticResource ChamberColor}"/>
     <SolidColorBrush x:Key="ChamberRaisedBrush" Color="{StaticResource ChamberRaisedColor}"/>
@@ -37,9 +37,9 @@
     <SolidColorBrush x:Key="SafelightDeepBrush" Color="{StaticResource SafelightDeepColor}"/>
 
     <!-- edge-light : hairline rule on dark ground -->
-    <SolidColorBrush x:Key="EdgeLightBrush"     Color="#33C2C1BA"/>
+    <SolidColorBrush x:Key="EdgeLightBrush"     Color="#4098B1A3"/>
     <SolidColorBrush x:Key="ErrorBrush"         Color="{StaticResource ErrorColor}"/>
-    <SolidColorBrush x:Key="SafelightFaintBrush" Color="#14FF6748"/>
+    <SolidColorBrush x:Key="SafelightFaintBrush" Color="#14C7D9CE"/>
 
     <!-- ── Typography ──────────────────────────────────────── -->
     <!-- Fallback chains match the brand's font stacks; WPF resolves the
@@ -95,7 +95,8 @@
     <!-- ── Safelight export button ──────────────────────────────── -->
     <Style x:Key="ExportButton" TargetType="Button" BasedOn="{StaticResource PlainButton}">
         <Setter Property="Background"       Value="{StaticResource SafelightBrush}"/>
-        <Setter Property="Foreground"       Value="{StaticResource PaperBrush}"/>
+        <!-- The accent is pale, so the label on it is the dark ground. -->
+        <Setter Property="Foreground"       Value="{StaticResource ChamberBrush}"/>
         <Setter Property="FontFamily"       Value="{StaticResource GroteskFont}"/>
         <Setter Property="FontWeight"       Value="SemiBold"/>
         <Setter Property="FontSize"         Value="10"/>

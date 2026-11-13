@@ -32,7 +32,7 @@
         <Border HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Margin="8"
-                Background="#D9201612"
+                Background="#D91C2723"
                 Padding="8,5">
             <StackPanel Orientation="Horizontal">
                 <Rectangle Width="10" Height="2"

@@ -41,6 +41,7 @@
 		E79C6B825223ADD74AADB8A1 /* CoreImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */; };
 		E7A4DB31B7711884AA210878 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2FB13A70B2FAD9CB7AF0EC1E /* PrivacyInfo.xcprivacy */; };
 		ED8C4E2C169B4A9CA7D32A4B /* Share.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5E738569DF849DC1D502A13B /* Share.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FE03BE8892831B8AF11AC534 /* RecentScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA467A7D6E7493353C6A4AC /* RecentScanner.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +90,7 @@
 		5A686FB922363CCD771D011D /* ActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBar.swift; sourceTree = "<group>"; };
 		5E738569DF849DC1D502A13B /* Share.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Share.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		6795F82E61A2E6B03DFFCD1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		6FA467A7D6E7493353C6A4AC /* RecentScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentScanner.swift; sourceTree = "<group>"; };
 		729E7EA7D7C368ED72BF9567 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		75D6210A0C9331BB3D874A7B /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
 		86A8A670FF04B283780D9A67 /* FaceEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceEstimator.swift; sourceTree = "<group>"; };
@@ -223,6 +225,7 @@
 				8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */,
 				86A8A670FF04B283780D9A67 /* FaceEstimator.swift */,
 				49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */,
+				6FA467A7D6E7493353C6A4AC /* RecentScanner.swift */,
 				4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */,
 			);
 			path = Adapters;
@@ -356,6 +359,7 @@
 				65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */,
 				4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */,
 				DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */,
+				FE03BE8892831B8AF11AC534 /* RecentScanner.swift in Sources */,
 				23E29E917B353CC25AE73862 /* Thumbnailer.swift in Sources */,
 				97072BA9276C863DDD24E740 /* AppModel.swift in Sources */,
 				C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */,

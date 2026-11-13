@@ -15,29 +15,32 @@ enum Brand {
 
     // MARK: - Palette
 
-    /// Chamber · the brand's near-black. Never `#000000`.
-    static let chamber  = Color(hex: "#201612")
-    /// Coral · accent only: rules, the active state, the primary action.
-    static let coral    = Color(hex: "#FF6748")
-    /// Silver · borders, dividers, secondary text.
-    static let silver   = Color(hex: "#C2C1BA")
-    /// White · text on chamber.
-    static let white    = Color(hex: "#FFFFFF")
-    /// Errors get their own red: coral sits too close to a warning colour to
-    /// double as one.
-    static let error    = Color(hex: "#D32F2F")
+    // The green register of the palette published at chambersandlight.com.
+    // The names below predate it and are kept so the views need no change:
+    // `chamber` is the ground, `coral` the accent, `silver` secondary.
 
-    /// Hairline rule on chamber ground: silver, heavily reduced.
-    static let edgeLight = silver.opacity(0.22)
+    /// Pine · the ground. A deep green-black, never `#000000`.
+    static let chamber  = Color(hex: "#1C2723")
+    /// Halide · the accent: rules, the active state, the primary action.
+    static let coral    = Color(hex: "#C7D9CE")
+    /// Halide, deep · borders, dividers, secondary text.
+    static let silver   = Color(hex: "#98B1A3")
+    /// Paper · text on the ground.
+    static let white    = Color(hex: "#ECEAE1")
+    /// Safelight red, for errors only.
+    static let error    = Color(hex: "#E63E2D")
+
+    /// Hairline rule on the ground.
+    static let edgeLight = silver.opacity(0.28)
 
     // MARK: - Semantic aliases
     //
     // The views bind to these, so the palette can change in one place.
 
     static let backgroundPrimary   = chamber
-    static let backgroundSecondary = Color(hex: "#2B1F1A")   // chamber, one step raised
-    static let surface             = Color(hex: "#2B1F1A")
-    static let surfaceElevated     = Color(hex: "#362822")   // chamber, two steps raised
+    static let backgroundSecondary = Color(hex: "#26332E")   // ground, one step raised
+    static let surface             = Color(hex: "#26332E")
+    static let surfaceElevated     = Color(hex: "#30403A")   // ground, two steps raised
     static let accent              = coral
     static let textPrimary         = white
     static let textSecondary       = silver

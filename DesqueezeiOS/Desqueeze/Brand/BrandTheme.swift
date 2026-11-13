@@ -1,48 +1,41 @@
 import SwiftUI
 import UIKit
 
-/// Chambers & Light brand system.
+/// Chambers & Light brand system, in its green register.
 ///
-/// Tokens come from the C&L brand guide. There are four brand colours plus two
-/// utility values; the guide is explicit that nothing outside that table is used
-/// without being asked for.
+/// The colours are the ones published at chambersandlight.com: pine for the
+/// ground, halide for the accent, paper for type. They replace the earlier
+/// chamber-and-coral scheme. Tokens are named for what they do, not what
+/// colour they are, so the scheme can change here without touching a view.
 ///
-/// Note on ground colour: the guide reserves chamber backgrounds for "covers,
-/// decks, and gallery materials" and sets documents on white. A photo-judging
-/// surface is gallery context, and a neutral dark ground avoids casting the
-/// image being evaluated, so this app sits on chamber throughout.
-///
-/// Two layers, two sets of rules. The content layer — the photograph, its
-/// readouts, the batch list — follows the guide to the letter: chamber ground,
-/// square corners, hairlines, no shadows or gradients. The control layer that
-/// floats above it is the system's Liquid Glass, with the system's shapes; the
-/// brand reaches it only as the one coral tint on the primary action.
+/// Two layers, two sets of rules. The content layer, the photograph and the
+/// batch grid, keeps square corners, hairlines and no shadows or gradients.
+/// The control layer that floats above it is the system's Liquid Glass, with
+/// the system's shapes; the brand reaches it only as the accent on the
+/// primary action.
 enum Brand {
 
     // MARK: - Palette
 
-    /// Chamber — the brand's near-black. Text on light ground, ground on dark.
-    /// Never `#000000`.
-    static let chamber  = Color(hex: 0x201612)
-    /// Coral — accent only. Rules, the active state, one highlight per screen.
-    /// Never body copy, never a fill behind long text, never a warning.
-    static let coral    = Color(hex: 0xFF6748)
-    /// Silver — borders, dividers, secondary text, table rules.
-    static let silver   = Color(hex: 0xC2C1BA)
-    /// White — reading surfaces, and text on chamber.
-    static let white    = Color(hex: 0xFFFFFF)
-    /// Warm gray — optional input fills and row striping.
-    static let warmGray = Color(hex: 0xF5F3F1)
+    /// Pine: the ground. A deep green-black, never `#000000`.
+    static let ground  = Color(hex: 0x1C2723)
+    /// Halide: the accent. The active state, the primary action, one
+    /// highlight per screen. It is pale, so anything set on it is `ground`.
+    static let accent  = Color(hex: 0xC7D9CE)
+    /// Halide, deep: secondary text, borders and dividers.
+    static let secondary = Color(hex: 0x98B1A3)
+    /// Paper: primary text on the ground.
+    static let primary = Color(hex: 0xECEAE1)
 
-    /// The guide calls for a distinct red for errors, because coral sits too
-    /// close to a warning colour to double as one.
-    static let error    = Color(hex: 0xD32F2F)
+    /// Safelight red, for errors only. It is the one warm colour left, so it
+    /// cannot be mistaken for anything else.
+    static let error   = Color(hex: 0xE63E2D)
 
-    // Derived steps. Kept to blends of chamber so the palette stays closed.
-    /// One step up from chamber, for raised rows and bars.
-    static let chamberRaised = Color(hex: 0x2B1F1A)
-    /// Hairline rule on chamber ground — silver, heavily reduced.
-    static let hairline = silver.opacity(0.22)
+    // Derived steps, kept to blends of the ground so the palette stays closed.
+    /// One step up from the ground, for raised rows and bars.
+    static let groundRaised = Color(hex: 0x26332E)
+    /// Hairline rule on the ground.
+    static let hairline = secondary.opacity(0.28)
 
     // MARK: - Typography
     //
@@ -119,18 +112,17 @@ extension Color {
 
 // MARK: - Brand devices
 
-/// A coral rule. The guide allows a single coral rule to mark the primary
-/// section or the title; everything else divides in silver.
-struct CoralRule: View {
+/// A short accent rule, used once to mark the primary section or title.
+struct AccentRule: View {
     var width: CGFloat = 28
     var body: some View {
         Rectangle()
-            .fill(Brand.coral)
+            .fill(Brand.accent)
             .frame(width: width, height: 2)
     }
 }
 
-/// A silver hairline divider.
+/// A hairline divider.
 struct Hairline: View {
     var body: some View {
         Rectangle()
@@ -147,20 +139,20 @@ struct FrameMark: View {
         Text(text)
             .font(Brand.mono(size))
             .tracking(Brand.tracking(Brand.trackMeta, at: size))
-            .foregroundStyle(Brand.silver)
+            .foregroundStyle(Brand.secondary)
     }
 }
 
-/// A section label: coral tick, then letterspaced caps in silver.
+/// A section label: accent tick, then letterspaced caps.
 struct SectionLabel: View {
     let text: String
     var body: some View {
         HStack(spacing: Brand.spacingSM) {
-            CoralRule(width: 14)
+            AccentRule(width: 14)
             Text(text)
                 .font(Brand.sans(11, weight: .medium))
                 .tracking(Brand.tracking(Brand.trackLabel, at: 11))
-                .foregroundStyle(Brand.silver)
+                .foregroundStyle(Brand.secondary)
         }
     }
 }

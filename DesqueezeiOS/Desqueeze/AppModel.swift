@@ -38,6 +38,26 @@ final class AppModel {
         }
     }
     private static let matteKey = "export.addsMatte"
+
+    /// Whether to look through recent photos for ones that need correcting.
+    /// Off until the owner turns it on, because it reads the library.
+    var findsSqueezed: Bool {
+        didSet {
+            UserDefaults.standard.set(findsSqueezed, forKey: Self.findKey)
+            if findsSqueezed {
+                Task { await startFinding() }
+            } else {
+                found = []
+            }
+        }
+    }
+    /// Recent photos that look squeezed and have not been dealt with.
+    private(set) var found: [RecentScanner.Found] = []
+    private(set) var isScanning = false
+    /// Which library photo each queued item came from, when it came from a scan.
+    private var libraryIDs: [Batch.Item.ID: String] = [:]
+    private static let findKey = "detect.enabled"
+    private static let handledKey = "detect.handled"
     var sharedFile: SharedFile?
     private(set) var isWorking = false
 
@@ -60,7 +80,94 @@ final class AppModel {
         session = Session(renderer: renderer)
         batch = Batch(renderer: renderer)
         addsMatte = UserDefaults.standard.bool(forKey: Self.matteKey)
+        findsSqueezed = UserDefaults.standard.bool(forKey: Self.findKey)
         session.matte = addsMatte ? .standard : nil
+    }
+
+    // MARK: - Finding squeezed photos
+
+    /// Photos already corrected, dismissed or examined and found ordinary.
+    private var handled: Set<String> {
+        Set(UserDefaults.standard.stringArray(forKey: Self.handledKey) ?? [])
+    }
+
+    private func remember(_ ids: [String]) {
+        guard !ids.isEmpty else { return }
+        var all = UserDefaults.standard.stringArray(forKey: Self.handledKey) ?? []
+        all.append(contentsOf: ids)
+        // Only recent photos are ever scanned, so old entries can go.
+        UserDefaults.standard.set(Array(all.suffix(1000)), forKey: Self.handledKey)
+    }
+
+    private func startFinding() async {
+        guard await RecentScanner.requestAccess() else {
+            findsSqueezed = false
+            notice = Notice(text: "StillScope needs access to your photos to find squeezed ones. Allow it in Settings › Privacy › Photos.", isError: true)
+            return
+        }
+        await scanRecent()
+    }
+
+    /// Looks for squeezed photos, when that is switched on and nothing is open.
+    func scanRecent() async {
+        guard findsSqueezed, RecentScanner.hasAccess, !isScanning, !hasContent else { return }
+        isScanning = true
+        defer { isScanning = false }
+        let skipping = handled
+        let result = await Task.detached(priority: .utility) {
+            await RecentScanner.scan(skipping: skipping)
+        }.value
+        remember(result.ordinary)
+        found = result.found
+    }
+
+    /// Puts the photos the scan found into the batch, each with the factor
+    /// the scan read for it.
+    func queueFound() {
+        let photos = Array(found.prefix(Self.batchLimit))
+        guard !photos.isEmpty else { return }
+        notice = nil
+        suggestion = nil
+        thumbnailing?.cancel()
+        thumbnails = [:]
+        libraryIDs = [:]
+        session.close()
+        batch.clear()
+
+        var queued: [(Batch.Item.ID, String)] = []
+        for photo in photos {
+            let libraryID = photo.id
+            let id = batch.add(name: photo.name) {
+                guard let data = await RecentScanner.data(for: libraryID, allowNetwork: true) else {
+                    throw CoreImageRenderer.Failure.undecodable
+                }
+                return data
+            }
+            if let factor = photo.factor {
+                batch.setSqueeze(Squeeze(factor: factor), for: id)
+            }
+            libraryIDs[id] = libraryID
+            queued.append((id, libraryID))
+        }
+        found = []
+
+        thumbnailing = Task {
+            for (id, libraryID) in queued {
+                guard !Task.isCancelled else { return }
+                guard let data = await RecentScanner.data(for: libraryID, allowNetwork: true),
+                      let thumbnail = await Thumbnailer.thumbnail(of: data, longestEdge: 900),
+                      !Task.isCancelled
+                else { continue }
+                thumbnails[id] = thumbnail
+            }
+        }
+    }
+
+    /// Takes a photo out of the batch. One the scan found is not offered again.
+    func removeFromBatch(_ id: Batch.Item.ID) {
+        if let libraryID = libraryIDs.removeValue(forKey: id) { remember([libraryID]) }
+        thumbnails[id] = nil
+        batch.remove(id)
     }
 
     // MARK: - Intake
@@ -197,6 +304,8 @@ final class AppModel {
         await batch.run(squeeze: session.squeeze, matte: session.matte) { name, file in
             try await PhotoLibraryWriter.save(jpeg: file, named: name)
         }
+        // A found photo that is now saved has been dealt with.
+        remember(batch.items.filter { $0.state == .done }.compactMap { libraryIDs[$0.id] })
         let failed = batch.items.count - batch.finishedCount
         notice = failed == 0
             ? Notice(text: "\(batch.finishedCount) saved to your library.", isError: false)

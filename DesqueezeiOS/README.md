@@ -95,12 +95,14 @@ screens.
 
 ## Brand
 
-Implements the Chambers & Light system from the brand guide: chamber `#201612`,
-coral `#FF6748`, silver `#C2C1BA`, white `#FFFFFF`, with `#D32F2F` reserved for
-errors because coral sits too close to a warning colour to double as one.
-Typography is one letterspaced sans (Neue Haas Grotesk → Helvetica Neue → Inter)
-with Space Mono for frame-edge annotations. Square corners throughout, silver
-hairlines, coral as punctuation only.
+Uses the green register of the palette published at chambersandlight.com:
+pine `#1C2723` for the ground, halide `#C7D9CE` for the accent, halide deep
+`#98B1A3` for secondary text and paper `#ECEAE1` for type, with safelight red
+`#E63E2D` kept for errors. Typography is one letterspaced sans (Neue Haas
+Grotesk → Helvetica Neue → Inter) with Space Mono for frame-edge annotations.
+Square corners throughout, hairlines, the accent as punctuation only. Tokens
+are named for their role (`ground`, `accent`, `secondary`, `primary`), so the
+scheme changes in one file.
 
 `BrandTheme.swift` is the single place a colour or face is declared.
 
@@ -118,18 +120,17 @@ the finger lifts. The preview reshapes with the factor at once and the proper
 render follows; renders asked for while one is running collapse into one. On an open Duo held
 sideways the slider is docked along the bottom instead, and the side bar's
 factor button, a frame opening outward from its centre line, shows or hides
-it. Coral marks Save and the factor. The brand's square corners and flat surfaces hold for the
+it. The accent marks Save and the factor. The brand's square corners and flat surfaces hold for the
 content layer beneath; the glass layer keeps the system's shapes.
 
 `BarEdge` decides the side from the window's size, not from a device check or a
 fold API: an open Duo's short side is about 626 points and no slab iPhone
 exceeds 440.
 
-**One deliberate departure.** The guide sets reading surfaces on white and
-reserves chamber grounds for "covers, decks, and gallery materials." This app
-sits on chamber throughout: a photo-judging surface is gallery context, and a
-neutral dark ground avoids casting the image being evaluated. Flagging it
-because it is a reading of the guide, not a rule in it.
+**A dark ground on purpose.** A photo-judging surface is gallery context, and
+a dark, low-chroma ground keeps the interface from casting the image being
+evaluated. Pine is a green-black, close enough to neutral not to tint what
+sits on it.
 
 ## Limits worth knowing
 
@@ -182,3 +183,21 @@ StillScope can be reached without opening it first.
 Both extensions show `QuickEditor`, compiled from the same source as the app's
 slider and renderer. They are built in Swift 5 mode because the extension
 hosts pass completion handlers that predate `Sendable`.
+
+## Finding squeezed photos
+
+With **Find squeezed photos** on in Settings, StillScope checks the last two
+weeks of the library each time it comes forward and offers to queue what it
+finds. It is off by default, because it is the one feature that reads the
+library, and turning it on is what asks for that access.
+
+`SqueezeDetector` in the core package decides, from two signs: a lens the
+camera recorded as anamorphic, which often states its factor, and faces that
+are clearly too narrow. A photo with neither is left alone. Screenshots,
+edited photos, files StillScope saved and frames already wide are skipped.
+`RecentScanner` reads the library and feeds it. Photos that were saved,
+dismissed or found ordinary are remembered and not examined again.
+
+Limits: a photo shot through an adapted lens with no faces in it carries
+neither sign and will not be found, and photos still in iCloud are skipped
+until they are on the device. Scanning happens only while the app is open.

@@ -60,10 +60,14 @@ struct QuickEditor: View {
                     Button("Cancel", action: cancel)
                     Spacer()
                     Button(action: action) {
-                        if model.isWorking { ProgressView() } else { Text(actionTitle).fontWeight(.semibold) }
+                        if model.isWorking {
+                            ProgressView().tint(Brand.ground)
+                        } else {
+                            Text(actionTitle).fontWeight(.semibold).foregroundStyle(Brand.ground)
+                        }
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Brand.coral)
+                    .tint(Brand.accent)
                     .disabled(!model.hasPhoto || model.isWorking)
                 }
                 .padding(.horizontal, 20)
@@ -84,7 +88,7 @@ struct QuickEditor: View {
                         .multilineTextAlignment(.center)
                         .padding(24)
                 } else {
-                    ProgressView().tint(Brand.coral)
+                    ProgressView().tint(Brand.accent)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -101,9 +105,9 @@ struct QuickEditor: View {
                 .padding(.top, 14)
                 .padding(.bottom, 10)
         }
-        .background(Brand.chamber.ignoresSafeArea())
-        .foregroundStyle(Brand.white)
-        .tint(Brand.white)
+        .background(Brand.ground.ignoresSafeArea())
+        .foregroundStyle(Brand.primary)
+        .tint(Brand.primary)
         .preferredColorScheme(.dark)
     }
 }

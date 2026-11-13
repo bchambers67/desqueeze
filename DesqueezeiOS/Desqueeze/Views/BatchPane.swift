@@ -25,7 +25,7 @@ struct BatchPane: View {
             }
             .padding(Brand.spacingMD)
         }
-        .background(Brand.chamber)
+        .background(Brand.ground)
         .sheet(item: $editing) { item in
             ItemFactorSheet(name: item.name, current: item.squeeze,
                             batchFactor: model.session.squeeze.factor) { squeeze in
@@ -50,7 +50,7 @@ struct BatchPane: View {
                             .aspectRatio(shot * factor, contentMode: .fit)
                             .opacity(item.state == .done ? 0.55 : 1)
                     } else {
-                        ProgressView().tint(Brand.coral)
+                        ProgressView().tint(Brand.accent)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -64,11 +64,11 @@ struct BatchPane: View {
             .overlay(alignment: .topLeading) { stateMark(item.state).padding(8) }
             .overlay(alignment: .topTrailing) {
                 Button {
-                    batch.remove(item.id)
+                    model.removeFromBatch(item.id)
                 } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(Brand.white)
+                        .foregroundStyle(Brand.primary)
                         .frame(width: 44, height: 44)
                 }
                 .disabled(batch.isRunning)
@@ -80,11 +80,11 @@ struct BatchPane: View {
                 if let own = item.squeeze {
                     Text(String(format: "%.2f×", own.factor))
                         .font(Brand.mono(11))
-                        .foregroundStyle(Brand.white)
+                        .foregroundStyle(Brand.primary)
                         .padding(.horizontal, 7)
                         .frame(height: 22)
-                        .background(Brand.chamber.opacity(0.85))
-                        .overlay(Rectangle().stroke(Brand.coral, lineWidth: 1))
+                        .background(Brand.ground.opacity(0.85))
+                        .overlay(Rectangle().stroke(Brand.accent, lineWidth: 1))
                         .padding(8)
                 }
             }
@@ -104,11 +104,11 @@ struct BatchPane: View {
         case .waiting:
             EmptyView()
         case .working:
-            ProgressView().controlSize(.small).tint(Brand.coral)
+            ProgressView().controlSize(.small).tint(Brand.accent)
         case .done:
             Image(systemName: "checkmark")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Brand.white)
+                .foregroundStyle(Brand.primary)
                 .accessibilityLabel("Saved")
         case .failed:
             Image(systemName: "exclamationmark.triangle.fill")

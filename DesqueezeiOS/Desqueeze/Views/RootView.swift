@@ -31,7 +31,7 @@ struct RootView: View {
                     // The content layer keeps the brand ground and runs to
                     // every edge, beneath the glass.
                     .padding(.trailing, edge == .trailing ? bar.width : 0)
-                    .background(Brand.chamber.ignoresSafeArea())
+                    .background(Brand.ground.ignoresSafeArea())
                     // An open Duo keeps its clock and status icons in a strip
                     // down the trailing edge. The bar belongs against that
                     // edge, so it runs into the strip and starts below them.
@@ -62,7 +62,7 @@ struct RootView: View {
             }
         }
         .preferredColorScheme(.dark)
-        .tint(Brand.white)
+        .tint(Brand.primary)
         .fullScreenCover(isPresented: $model.isInspecting) {
             InspectorView(session: model.session)
         }
