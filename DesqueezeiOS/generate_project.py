@@ -131,7 +131,7 @@ debug = common + [("COPY_PHASE_STRIP", "NO"), ("DEBUG_INFORMATION_FORMAT", "dwar
                   ("ONLY_ACTIVE_ARCH", "YES"), ("SWIFT_ACTIVE_COMPILATION_CONDITIONS", "DEBUG"), ("SWIFT_OPTIMIZATION_LEVEL", '"-Onone"')]
 release = common + [("COPY_PHASE_STRIP", "NO"), ("DEBUG_INFORMATION_FORMAT", '"dwarf-with-dsym"'), ("ENABLE_NS_ASSERTIONS", "NO"),
                     ("SWIFT_COMPILATION_MODE", "wholemodule"), ("SWIFT_OPTIMIZATION_LEVEL", '"-O"'), ("VALIDATE_PRODUCT", "YES")]
-target = [("CODE_SIGN_STYLE", "Automatic"), ("CURRENT_PROJECT_VERSION", "1"), ("DEVELOPMENT_TEAM", "FZ6W4MM7UN"),
+target = [("CODE_SIGN_STYLE", "Automatic"), ("CURRENT_PROJECT_VERSION", "2"), ("DEVELOPMENT_TEAM", "FZ6W4MM7UN"),
           ("ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon"), ("ENABLE_PREVIEWS", "YES"), ("GENERATE_INFOPLIST_FILE", "NO"), ("INFOPLIST_FILE", "Desqueeze/Info.plist"),
           ("LD_RUNPATH_SEARCH_PATHS", '(\n\t\t\t\t\t"$(inherited)",\n\t\t\t\t\t"@executable_path/Frameworks",\n\t\t\t\t)'),
           ("MARKETING_VERSION", "1.0"), ("PRODUCT_BUNDLE_IDENTIFIER", "com.chambersandlight.stillscope"),

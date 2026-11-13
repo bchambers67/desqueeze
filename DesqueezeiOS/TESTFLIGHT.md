@@ -10,7 +10,7 @@ and Xcode, signed in as the team's account holder.
 | App name           | StillScope                                 |
 | Bundle identifier  | `com.chambersandlight.stillscope`          |
 | Team               | `FZ6W4MM7UN`, signing managed by Xcode     |
-| Version / build    | 1.0 (1)                                    |
+| Version / build    | 1.0 (2)                                    |
 | Category           | Photography                                |
 | App icon           | 1024 px, light and dark, no transparency   |
 | Encryption         | Declared as none, so no compliance prompt  |
