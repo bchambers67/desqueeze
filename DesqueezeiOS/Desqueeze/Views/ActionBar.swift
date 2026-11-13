@@ -77,12 +77,17 @@ struct SideBar: View {
     /// its buttons centre on the same line as the clock above them.
     var width: CGFloat = SideBar.minimumWidth
 
+    /// How far left of the strip's middle the buttons sit. The status icons
+    /// are not centred in the safe-area strip: the display's rounded corner
+    /// pushes them inward, and the bar follows them.
+    var centreShift: CGFloat = 0
+
     static let minimumWidth: CGFloat = 76
 
     /// The bar's width and top clearance for a window's safe area.
-    static func metrics(trailingInset: CGFloat) -> (width: CGFloat, topClearance: CGFloat) {
+    static func metrics(trailingInset: CGFloat) -> (width: CGFloat, topClearance: CGFloat, centreShift: CGFloat) {
         let sharesStatusStrip = trailingInset > 20
-        return (max(minimumWidth, trailingInset), sharesStatusStrip ? 124 : 20)
+        return (max(minimumWidth, trailingInset), sharesStatusStrip ? 124 : 20, sharesStatusStrip ? 7 : 0)
     }
 
     var body: some View {
@@ -115,6 +120,7 @@ struct SideBar: View {
             .buttonBorderShape(.circle)
             .padding(.top, topClearance)
             .padding(.bottom, 20)
+            .padding(.trailing, centreShift * 2)
             .frame(width: width)
         }
     }
