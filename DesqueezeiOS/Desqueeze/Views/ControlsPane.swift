@@ -1,18 +1,19 @@
-import SwiftUI
+import DesqueezeCore
 import PhotosUI
+import SwiftUI
 
-/// Factor selection, readout, and export.
+/// Factor selection, readout, and output, for one photo or a batch.
 struct ControlsPane: View {
-    @Bindable var model: EditorModel
+    let model: AppModel
 
-    @State private var pickerItem: PhotosPickerItem?
-    @State private var exportState: ExportState = .idle
+    @State private var picked: [PhotosPickerItem] = []
+    @State private var typed = ""
+    @State private var isWorking = false
+    @State private var shared: SharedFile?
     @FocusState private var customFocused: Bool
 
-    private enum ExportState: Equatable {
-        case idle, working, saved
-        case failed(String)
-    }
+    private var session: Session { model.session }
+    private var isBatch: Bool { model.mode == .batch }
 
     var body: some View {
         ScrollView {
@@ -20,8 +21,10 @@ struct ControlsPane: View {
                 masthead
                 Hairline()
                 factors
-                Hairline()
-                output
+                if !isBatch {
+                    Hairline()
+                    output
+                }
                 Hairline()
                 actions
                 colophon
@@ -30,14 +33,16 @@ struct ControlsPane: View {
         }
         .background(Brand.chamberRaised)
         .scrollDismissesKeyboard(.interactively)
-        .onChange(of: pickerItem) { _, item in
-            guard let item else { return }
+        .onAppear { typed = session.typedFactor }
+        .onChange(of: picked) { _, items in
+            guard !items.isEmpty else { return }
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self) {
-                    model.load(data: data)
-                    exportState = .idle
-                }
+                await model.take(items)
+                picked = []
             }
+        }
+        .sheet(item: $shared) { file in
+            ActivitySheet(url: file.url)
         }
     }
 
@@ -58,7 +63,11 @@ struct ControlsPane: View {
 
     private var factors: some View {
         VStack(alignment: .leading, spacing: Brand.spacingMD) {
-            SectionLabel(text: "SQUEEZE FACTOR")
+            SectionLabel(text: isBatch ? "BATCH FACTOR" : "SQUEEZE FACTOR")
+
+            if !isBatch, let suggestion = model.suggestion {
+                suggestionBanner(suggestion)
+            }
 
             VStack(spacing: 1) {
                 ForEach(SqueezePreset.selectable) { preset in
@@ -69,11 +78,38 @@ struct ControlsPane: View {
         }
     }
 
+    /// A factor read from the faces in the photo. Offered, never applied.
+    private func suggestionBanner(_ factor: Double) -> some View {
+        HStack(spacing: Brand.spacingSM) {
+            VStack(alignment: .leading, spacing: 2) {
+                FrameMark(text: "READ FROM FACES", size: 9)
+                Text(String(format: "%.2f×", factor))
+                    .font(Brand.mono(15, weight: .medium))
+                    .foregroundStyle(Brand.white)
+            }
+            Spacer()
+            Button {
+                Task { await model.useSuggestion() }
+            } label: {
+                Text("USE")
+                    .font(Brand.sans(11, weight: .medium))
+                    .tracking(Brand.tracking(Brand.trackLabel, at: 11))
+                    .foregroundStyle(Brand.white)
+                    .padding(.horizontal, 14)
+                    .frame(height: 30)
+                    .overlay(Rectangle().stroke(Brand.coral, lineWidth: 1))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(Brand.spacingMD)
+        .overlay(Rectangle().stroke(Brand.hairline, lineWidth: 1))
+    }
+
     private func row(_ preset: SqueezePreset) -> some View {
-        let active = model.preset == preset
+        let active = session.preset == preset
         return Button {
             customFocused = false
-            model.preset = preset
+            Task { await session.choose(preset) }
         } label: {
             HStack(spacing: Brand.spacingSM) {
                 marker(active)
@@ -87,9 +123,7 @@ struct ControlsPane: View {
             .padding(.vertical, 13)
             .background(active ? Brand.chamber : .clear)
             .overlay(alignment: .leading) {
-                Rectangle()
-                    .fill(active ? Brand.coral : .clear)
-                    .frame(width: 2)
+                Rectangle().fill(active ? Brand.coral : .clear).frame(width: 2)
             }
             .contentShape(Rectangle())
         }
@@ -97,11 +131,12 @@ struct ControlsPane: View {
     }
 
     private var customRow: some View {
-        let active = model.preset == .custom
+        let active = session.preset == .custom
+        let invalid = active && !session.typedFactorIsValid
         return HStack(spacing: Brand.spacingSM) {
             Button {
-                model.preset = .custom
                 customFocused = true
+                Task { await session.type(typed) }
             } label: {
                 HStack(spacing: Brand.spacingSM) {
                     marker(active)
@@ -114,7 +149,7 @@ struct ControlsPane: View {
             }
             .buttonStyle(.plain)
 
-            TextField("1.33", text: $model.customFactor)
+            TextField("1.33", text: $typed)
                 .focused($customFocused)
                 .keyboardType(.decimalPad)
                 .multilineTextAlignment(.center)
@@ -124,9 +159,13 @@ struct ControlsPane: View {
                 .padding(.vertical, 6)
                 .background(Brand.chamber)
                 .overlay(
-                    Rectangle().stroke(active ? Brand.coral : Brand.hairline, lineWidth: 1)
+                    // A factor that cannot be read is flagged in the error
+                    // red, not coral: coral is the accent, not a warning.
+                    Rectangle().stroke(invalid ? Brand.error : active ? Brand.coral : Brand.hairline, lineWidth: 1)
                 )
-                .disabled(!active)
+                .onChange(of: typed) { _, text in
+                    Task { await session.type(text) }
+                }
 
             Text("×")
                 .font(Brand.sans(13))
@@ -136,9 +175,7 @@ struct ControlsPane: View {
         .padding(.vertical, 13)
         .background(active ? Brand.chamber : .clear)
         .overlay(alignment: .leading) {
-            Rectangle()
-                .fill(active ? Brand.coral : .clear)
-                .frame(width: 2)
+            Rectangle().fill(active ? Brand.coral : .clear).frame(width: 2)
         }
     }
 
@@ -158,17 +195,17 @@ struct ControlsPane: View {
         VStack(alignment: .leading, spacing: Brand.spacingMD) {
             SectionLabel(text: "OUTPUT")
             VStack(spacing: Brand.spacingSM) {
-                metric("SOURCE", model.sourcePixelSize.map(dimensions) ?? "—")
-                metric("OUTPUT", model.outputPixelSize.map(dimensions) ?? "—")
-                metric("FACTOR", String(format: "%.2f×", model.factor))
-                metric("ASPECT", model.aspectRatio.map { String(format: "%.2f : 1", $0) } ?? "—")
+                metric("SOURCE", session.sourceSize.map(dimensions) ?? "—")
+                metric("OUTPUT", session.outputSize.map(dimensions) ?? "—")
+                metric("FACTOR", String(format: "%.2f×", session.squeeze.factor))
+                metric("ASPECT", session.sourceSize.map {
+                    String(format: "%.2f : 1", session.squeeze.aspectRatio(for: $0))
+                } ?? "—")
             }
         }
     }
 
-    private func dimensions(_ size: CGSize) -> String {
-        "\(Int(size.width)) × \(Int(size.height))"
-    }
+    private func dimensions(_ size: PixelSize) -> String { "\(size.width) × \(size.height)" }
 
     private func metric(_ label: String, _ value: String) -> some View {
         HStack {
@@ -189,60 +226,87 @@ struct ControlsPane: View {
         VStack(alignment: .leading, spacing: Brand.spacingMD) {
             SectionLabel(text: "EXPORT")
 
-            if let message = model.errorMessage {
-                notice(message, tone: Brand.error)
+            if let notice = model.notice {
+                HStack(alignment: .top, spacing: Brand.spacingSM) {
+                    Rectangle().fill(notice.isError ? Brand.error : Brand.silver).frame(width: 2)
+                    Text(notice.text)
+                        .font(Brand.sans(12))
+                        .foregroundStyle(notice.isError ? Brand.error : Brand.silver)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
-            switch exportState {
-            case .failed(let message): notice(message, tone: Brand.error)
-            case .saved:               notice("Saved to your library.", tone: Brand.silver)
-            default:                   EmptyView()
+            if isBatch {
+                primary("SAVE ALL TO LIBRARY", enabled: !model.batch.items.isEmpty) {
+                    await model.runBatch()
+                }
+            } else {
+                primary("SAVE TO LIBRARY", enabled: session.hasPhoto) {
+                    await model.saveToLibrary()
+                }
+                secondary("SHARE…", enabled: session.hasPhoto) {
+                    if let url = await model.exportedFile() { shared = SharedFile(url: url) }
+                }
             }
 
-            Button(action: export) {
-                Text(exportState == .working ? "SAVING" : "SAVE TO LIBRARY")
-                    .font(Brand.sans(12, weight: .medium))
-                    .tracking(Brand.tracking(Brand.trackLabel, at: 12))
-                    .foregroundStyle(model.hasImage ? Brand.white : Brand.silver.opacity(0.5))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, Brand.spacingMD)
-                    .background(model.hasImage ? Brand.coral : Brand.chamber)
-            }
-            .buttonStyle(.plain)
-            .disabled(!model.hasImage || exportState == .working)
+            HStack(spacing: Brand.spacingLG) {
+                PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images) {
+                    Text("Choose photos…")
+                        .font(Brand.sans(13))
+                        .foregroundStyle(Brand.silver)
+                }
+                .buttonStyle(.plain)
 
-            PhotosPicker(selection: $pickerItem, matching: .images) {
-                Text("Choose a different photo…")
-                    .font(Brand.sans(13))
-                    .foregroundStyle(Brand.silver)
+                if session.hasPhoto || isBatch {
+                    Button("Clear") { model.reset() }
+                        .font(Brand.sans(13))
+                        .foregroundStyle(Brand.silver)
+                        .buttonStyle(.plain)
+                }
             }
-            .buttonStyle(.plain)
+            .disabled(isWorking)
         }
     }
 
-    private func notice(_ text: String, tone: Color) -> some View {
-        HStack(alignment: .top, spacing: Brand.spacingSM) {
-            Rectangle().fill(tone).frame(width: 2)
-            Text(text)
-                .font(Brand.sans(12))
-                .foregroundStyle(tone)
-                .fixedSize(horizontal: false, vertical: true)
+    private func primary(_ title: String, enabled: Bool, action: @escaping () async -> Void) -> some View {
+        let live = enabled && !isWorking
+        return Button {
+            run(action)
+        } label: {
+            Text(isWorking ? "WORKING" : title)
+                .font(Brand.sans(12, weight: .medium))
+                .tracking(Brand.tracking(Brand.trackLabel, at: 12))
+                .foregroundStyle(live ? Brand.white : Brand.silver.opacity(0.5))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Brand.spacingMD)
+                .background(live ? Brand.coral : Brand.chamber)
         }
-        .padding(.vertical, 2)
+        .buttonStyle(.plain)
+        .disabled(!live)
     }
 
-    private func export() {
-        exportState = .working
+    private func secondary(_ title: String, enabled: Bool, action: @escaping () async -> Void) -> some View {
+        let live = enabled && !isWorking
+        return Button {
+            run(action)
+        } label: {
+            Text(title)
+                .font(Brand.sans(12, weight: .medium))
+                .tracking(Brand.tracking(Brand.trackLabel, at: 12))
+                .foregroundStyle(live ? Brand.white : Brand.silver.opacity(0.5))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 13)
+                .overlay(Rectangle().stroke(Brand.silver.opacity(live ? 1 : 0.3), lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .disabled(!live)
+    }
+
+    private func run(_ action: @escaping () async -> Void) {
+        isWorking = true
         Task {
-            do {
-                let data = try await model.exportJPEG()
-                try await PhotoLibraryWriter.save(jpeg: data)
-                exportState = .saved
-                try? await Task.sleep(for: .seconds(3))
-                if exportState == .saved { exportState = .idle }
-            } catch {
-                exportState = .failed(error.localizedDescription)
-            }
+            await action()
+            isWorking = false
         }
     }
 
@@ -255,4 +319,23 @@ struct ControlsPane: View {
         }
         .padding(.top, Brand.spacingMD)
     }
+}
+
+// MARK: - Share sheet
+
+private struct SharedFile: Identifiable {
+    let url: URL
+    var id: URL { url }
+}
+
+/// The system share sheet. `ShareLink` wants its item up front; the export is
+/// rendered on demand, so the sheet is presented once the file exists.
+private struct ActivitySheet: UIViewControllerRepresentable {
+    let url: URL
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [url], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
 }

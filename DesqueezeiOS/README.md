@@ -2,8 +2,9 @@
 
 Anamorphic correction on iPhone and iPad, built for iOS 27 and the iPhone Duo.
 
-Status: **scaffold**. The correction pipeline, adaptive layout, import and export
-work end to end. The items under *Not yet built* are deliberately absent.
+Corrects one photo with live preview and pixel-level inspection, or a batch of
+up to 36. Suggests a factor from the faces in the frame, keeps capture metadata
+on export, and saves to the photo library or the share sheet.
 
 ## Requirements
 
@@ -17,6 +18,33 @@ open DesqueezeiOS/Desqueeze.xcodeproj
 
 Set your Development Team under *Signing & Capabilities* before running on
 device.
+
+## How it is built
+
+The logic lives in `DesqueezeCore`, a Swift package with no UIKit, Core Image or
+Vision in it, built test-first. The app is views and three adapters on top.
+
+```
+cd DesqueezeiOS/DesqueezeCore && swift test      # 27 tests, runs on macOS or Linux
+```
+
+In Xcode the same tests run from the `DesqueezeCore` scheme.
+
+Tests sit at four seams, agreed before any were written:
+
+| Seam | Module | What a test there catches |
+|---|---|---|
+| Geometry | `Squeeze` | wrong output size or ratio; typed factors, including `1,5` from a comma-decimal keypad |
+| Capture metadata | `CaptureMetadata.carry` | EXIF lost, duplicated, or left describing the old size; a damaged block being "repaired" |
+| Editor session | `EditorSession` | a slow render overwriting a newer one; state lost across a fold; a bad file leaving stale state |
+| Batch queue | `BatchQueue` | one bad photo stopping the run; a retry saving finished photos twice |
+
+The session and the queue reach pixels through one protocol, `FrameRenderer`.
+Core Image satisfies it in the app (`CoreImageRenderer`); a fake does in tests.
+That is the only thing faked: it is the one boundary the logic does not own.
+
+Not under test, because no seam was agreed for them: the SwiftUI views, the
+Core Image and Vision adapters, and the snap-to-preset rule for suggestions.
 
 ## The correction
 
@@ -56,7 +84,7 @@ foldables at all. Folding is handled the way any other resize is handled:
   Regular → image and controls side by side. Compact → image above, controls
   beneath. This covers the Duo's two states and every iPad configuration
   without a device check.
-- Document state lives in an `@Observable` model owned by the app, never in
+- Document state lives in `EditorSession`, owned by the app, never in
   view-local `@State`. A fold is a resize: SwiftUI rebuilds the tree around the
   new size class, and view-local state goes with it. Holding it outside is what
   makes the fold lossless — factor, source image and render survive it.
@@ -84,14 +112,16 @@ sits on chamber throughout: a photo-judging surface is gallery context, and a
 neutral dark ground avoids casting the image being evaluated. Flagging it
 because it is a reading of the guide, not a rule in it.
 
-## Not yet built
+## Limits worth knowing
 
-- Batch — the macOS and Windows clients both have it
-- Auto-detection — macOS uses Vision face geometry to suggest a factor
-- Metadata preservation — macOS carries EXIF, GPS and capture data onto the
-  export; this writes a clean JPEG
-- App icon
-- Share sheet export; currently saves to the photo library only
+- **Inspection is capped at 8192 px on the long edge.** A 48MP frame widened 2×
+  is 16000 px wide, and one bitmap that size is not a reasonable ask of memory.
+  Below the cap, 1:1 is every pixel of the export; above it, 1:1 is of the
+  capped frame, and the bar shows its size.
+- **Batch photos are numbered, not named.** The picker gives no filename
+  without photo-library read access, which this app does not ask for.
+- **Exports are JPEG.** TIFF and PNG are on macOS.
+- **No app icon yet.**
 
 ## iOS 27 adoption
 

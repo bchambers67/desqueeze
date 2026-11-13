@@ -1,68 +1,83 @@
-import SwiftUI
+import DesqueezeCore
 import PhotosUI
+import SwiftUI
 
 /// The image surface: empty state, live preview, and the frame-edge readout.
 struct PreviewPane: View {
-    @Bindable var model: EditorModel
-    @State private var pickerItem: PhotosPickerItem?
+    let model: AppModel
+
+    @State private var picked: [PhotosPickerItem] = []
+    @State private var inspecting = false
+
+    private var session: Session { model.session }
 
     var body: some View {
         ZStack {
             Brand.chamber
 
-            if let image = model.preview {
-                loaded(image)
-            } else if model.hasImage {
-                // Source is in, first render still running.
-                ProgressView()
-                    .tint(Brand.coral)
+            if let frame = session.preview {
+                loaded(frame)
+            } else if session.isRendering {
+                ProgressView().tint(Brand.coral)
             } else {
                 emptyState
             }
         }
         .clipped()
-        .onChange(of: pickerItem) { _, item in
-            guard let item else { return }
+        .onChange(of: picked) { _, items in
+            guard !items.isEmpty else { return }
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self) {
-                    model.load(data: data)
-                }
+                await model.take(items)
+                picked = []
             }
+        }
+        .fullScreenCover(isPresented: $inspecting) {
+            InspectorView(session: session)
         }
     }
 
     // MARK: - Loaded
 
-    private func loaded(_ image: UIImage) -> some View {
+    private func loaded(_ frame: CoreImageRenderer.Frame) -> some View {
         ZStack(alignment: .bottomLeading) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(Brand.spacingMD)
-                .overlay(alignment: .topTrailing) {
-                    if model.isWorking {
-                        ProgressView()
-                            .tint(Brand.coral)
-                            .padding(Brand.spacingLG)
-                    }
+            Button {
+                inspecting = true
+            } label: {
+                Image(decorative: frame.image, scale: 1)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(Brand.spacingMD)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Inspect the corrected photo")
+            .overlay(alignment: .topTrailing) {
+                if session.isRendering {
+                    ProgressView().tint(Brand.coral).padding(Brand.spacingLG)
                 }
+            }
 
-            readout
-                .padding(Brand.spacingMD)
+            HStack(alignment: .bottom) {
+                readout
+                Spacer()
+                FrameMark(text: "TAP TO INSPECT", size: 9)
+                    .padding(.horizontal, Brand.spacingSM)
+                    .padding(.vertical, 5)
+                    .background(Brand.chamber.opacity(0.85))
+            }
+            .padding(Brand.spacingMD)
         }
     }
 
     /// Dimensions and ratio, set as a frame-edge annotation.
     @ViewBuilder
     private var readout: some View {
-        if let out = model.outputPixelSize {
+        if let out = session.outputSize, let source = session.sourceSize {
             HStack(spacing: Brand.spacingSM) {
                 CoralRule(width: 10)
-                FrameMark(text: "\(Int(out.width)) × \(Int(out.height))")
-                if let ratio = model.aspectRatio {
-                    FrameMark(text: String(format: "· %.2f:1", ratio))
-                }
+                FrameMark(text: "\(out.width) × \(out.height)")
+                FrameMark(text: String(format: "· %.2f:1", session.squeeze.aspectRatio(for: source)))
             }
             .padding(.horizontal, Brand.spacingSM)
             .padding(.vertical, 5)
@@ -76,32 +91,33 @@ struct PreviewPane: View {
         VStack(spacing: Brand.spacingLG) {
             // The mark: a squeezed frame opening to its true width.
             HStack(spacing: Brand.spacingSM) {
-                Rectangle()
-                    .stroke(Brand.silver, lineWidth: 1)
-                    .frame(width: 24, height: 50)
-                Rectangle()
-                    .fill(Brand.coral)
-                    .frame(width: 20, height: 2)
-                Rectangle()
-                    .stroke(Brand.silver, lineWidth: 1)
-                    .frame(width: 68, height: 50)
+                Rectangle().stroke(Brand.silver, lineWidth: 1).frame(width: 24, height: 50)
+                Rectangle().fill(Brand.coral).frame(width: 20, height: 2)
+                Rectangle().stroke(Brand.silver, lineWidth: 1).frame(width: 68, height: 50)
             }
 
-            PhotosPicker(selection: $pickerItem, matching: .images) {
+            PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images) {
                 VStack(spacing: Brand.spacingXS) {
-                    Text("CHOOSE A PHOTO")
+                    Text("CHOOSE PHOTOS")
                         .font(Brand.sans(12, weight: .medium))
                         .tracking(Brand.tracking(Brand.trackLabel, at: 12))
                         .foregroundStyle(Brand.white)
-                    Text("Anamorphic frames, corrected.")
+                    Text("One to correct and inspect. Several for a batch.")
                         .font(Brand.sans(13))
                         .foregroundStyle(Brand.silver)
+                        .multilineTextAlignment(.center)
                 }
                 .padding(.horizontal, Brand.spacingLG)
                 .padding(.vertical, Brand.spacingMD)
                 .overlay(Rectangle().stroke(Brand.silver, lineWidth: 1))
             }
             .buttonStyle(.plain)
+
+            if let failure = session.failure {
+                Text(failure)
+                    .font(Brand.sans(12))
+                    .foregroundStyle(Brand.error)
+            }
 
             FrameMark(text: "HEIC · RAW · JPEG · TIFF · PNG", size: 9)
         }

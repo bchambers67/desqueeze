@@ -7,270 +7,289 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		IO000001 /* DesqueezeApp.swift in Sources */       = {isa = PBXBuildFile; fileRef = IO100001 /* DesqueezeApp.swift */; };
-		IO000002 /* BrandTheme.swift in Sources */         = {isa = PBXBuildFile; fileRef = IO100002 /* BrandTheme.swift */; };
-		IO000003 /* SqueezePreset.swift in Sources */      = {isa = PBXBuildFile; fileRef = IO100003 /* SqueezePreset.swift */; };
-		IO000004 /* EditorModel.swift in Sources */        = {isa = PBXBuildFile; fileRef = IO100004 /* EditorModel.swift */; };
-		IO000005 /* DesqueezeService.swift in Sources */   = {isa = PBXBuildFile; fileRef = IO100005 /* DesqueezeService.swift */; };
-		IO000006 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = IO100006 /* PhotoLibraryWriter.swift */; };
-		IO000007 /* RootView.swift in Sources */           = {isa = PBXBuildFile; fileRef = IO100007 /* RootView.swift */; };
-		IO000008 /* PreviewPane.swift in Sources */        = {isa = PBXBuildFile; fileRef = IO100008 /* PreviewPane.swift */; };
-		IO000009 /* ControlsPane.swift in Sources */       = {isa = PBXBuildFile; fileRef = IO100009 /* ControlsPane.swift */; };
-		IO000010 /* Assets.xcassets in Resources */        = {isa = PBXBuildFile; fileRef = IO100010 /* Assets.xcassets */; };
+		65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */; };
+		4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A8A670FF04B283780D9A67 /* FaceEstimator.swift */; };
+		DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */; };
+		97072BA9276C863DDD24E740 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5650F65F933ADEFD15FD877 /* AppModel.swift */; };
+		C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D6210A0C9331BB3D874A7B /* BrandTheme.swift */; };
+		C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */; };
+		50565145AD73F9B69A1372E6 /* BatchPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A84CC9232B7469B0C8C57D /* BatchPane.swift */; };
+		AB697797E935001326609F05 /* ControlsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5657A349571B3E18F0C718B /* ControlsPane.swift */; };
+		9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729E7EA7D7C368ED72BF9567 /* InspectorView.swift */; };
+		DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577BC15846CD67CA3BFE4338 /* PreviewPane.swift */; };
+		D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6795F82E61A2E6B03DFFCD1C /* RootView.swift */; };
+		9E0C54E4573EBB5A160F5621 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */; };
+		B470063E3A315C50793EED81 /* DesqueezeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2E82B89D92189E65115417C3 /* DesqueezeCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		IO100000 /* Desqueeze.app */             = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Desqueeze.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		IO100001 /* DesqueezeApp.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
-		IO100002 /* BrandTheme.swift */          = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
-		IO100003 /* SqueezePreset.swift */       = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqueezePreset.swift; sourceTree = "<group>"; };
-		IO100004 /* EditorModel.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorModel.swift; sourceTree = "<group>"; };
-		IO100005 /* DesqueezeService.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeService.swift; sourceTree = "<group>"; };
-		IO100006 /* PhotoLibraryWriter.swift */  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
-		IO100007 /* RootView.swift */            = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		IO100008 /* PreviewPane.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
-		IO100009 /* ControlsPane.swift */        = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsPane.swift; sourceTree = "<group>"; };
-		IO100010 /* Assets.xcassets */           = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		IO100011 /* Info.plist */                = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		38A007151ABE87CC01A5B6E9 /* Desqueeze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Desqueeze.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImageRenderer.swift; sourceTree = "<group>"; };
+		86A8A670FF04B283780D9A67 /* FaceEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceEstimator.swift; sourceTree = "<group>"; };
+		49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
+		F5650F65F933ADEFD15FD877 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		75D6210A0C9331BB3D874A7B /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
+		1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
+		15A84CC9232B7469B0C8C57D /* BatchPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchPane.swift; sourceTree = "<group>"; };
+		D5657A349571B3E18F0C718B /* ControlsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsPane.swift; sourceTree = "<group>"; };
+		729E7EA7D7C368ED72BF9567 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		577BC15846CD67CA3BFE4338 /* PreviewPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
+		6795F82E61A2E6B03DFFCD1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		26FDEE6E8D53D799B185CBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		16CE6AF2820C26A77C21C652 /* DesqueezeCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesqueezeCore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		IO200001 /* Frameworks */ = {
+		7C503312CC8BAFB92C99C1ED /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
-			files = ();
+			files = (
+				B470063E3A315C50793EED81 /* DesqueezeCore in Frameworks */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		IO300000 = {
+		D103645A7B5AB4394B88D427 = {
 			isa = PBXGroup;
 			children = (
-				IO300001 /* Desqueeze */,
-				IO300002 /* Products */,
+				1CDB0BEF8ECF3DDAB2CD4BC8 /* Desqueeze */,
+				16CE6AF2820C26A77C21C652 /* DesqueezeCore */,
+				0500089CBF0A8CDDA7483BA4 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		IO300001 /* Desqueeze */ = {
+		1CDB0BEF8ECF3DDAB2CD4BC8 /* Desqueeze */ = {
 			isa = PBXGroup;
 			children = (
-				IO100001 /* DesqueezeApp.swift */,
-				IO300003 /* Brand */,
-				IO300004 /* Models */,
-				IO300005 /* Services */,
-				IO300006 /* Views */,
-				IO100010 /* Assets.xcassets */,
-				IO100011 /* Info.plist */,
+				F5650F65F933ADEFD15FD877 /* AppModel.swift */,
+				1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */,
+				F329258BCDA6E1179F365E9E /* Adapters */,
+				26113218D32C87985E6545C1 /* Brand */,
+				AC64880DAB13448F132866D4 /* Views */,
+				9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */,
+				26FDEE6E8D53D799B185CBE8 /* Info.plist */,
 			);
 			path = Desqueeze;
 			sourceTree = "<group>";
 		};
-		IO300002 /* Products */ = {
+		F329258BCDA6E1179F365E9E /* Adapters */ = {
 			isa = PBXGroup;
 			children = (
-				IO100000 /* Desqueeze.app */,
+				8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */,
+				86A8A670FF04B283780D9A67 /* FaceEstimator.swift */,
+				49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */,
 			);
-			name = Products;
+			path = Adapters;
 			sourceTree = "<group>";
 		};
-		IO300003 /* Brand */ = {
+		26113218D32C87985E6545C1 /* Brand */ = {
 			isa = PBXGroup;
 			children = (
-				IO100002 /* BrandTheme.swift */,
+				75D6210A0C9331BB3D874A7B /* BrandTheme.swift */,
 			);
 			path = Brand;
 			sourceTree = "<group>";
 		};
-		IO300004 /* Models */ = {
+		AC64880DAB13448F132866D4 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				IO100003 /* SqueezePreset.swift */,
-				IO100004 /* EditorModel.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		IO300005 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				IO100005 /* DesqueezeService.swift */,
-				IO100006 /* PhotoLibraryWriter.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		IO300006 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				IO100007 /* RootView.swift */,
-				IO100008 /* PreviewPane.swift */,
-				IO100009 /* ControlsPane.swift */,
+				15A84CC9232B7469B0C8C57D /* BatchPane.swift */,
+				D5657A349571B3E18F0C718B /* ControlsPane.swift */,
+				729E7EA7D7C368ED72BF9567 /* InspectorView.swift */,
+				577BC15846CD67CA3BFE4338 /* PreviewPane.swift */,
+				6795F82E61A2E6B03DFFCD1C /* RootView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		0500089CBF0A8CDDA7483BA4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				38A007151ABE87CC01A5B6E9 /* Desqueeze.app */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		IO400000 /* Desqueeze */ = {
+		0E8A3AD980EC179856012B7E /* Desqueeze */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = IO500000 /* Build configuration list for PBXNativeTarget "Desqueeze" */;
+			buildConfigurationList = 0DC14BCB1536FCF5F33DB2B7 /* Build configuration list for PBXNativeTarget "Desqueeze" */;
 			buildPhases = (
-				IO200000 /* Sources */,
-				IO200001 /* Frameworks */,
-				IO200002 /* Resources */,
+				0C035B91A132D1F4BF29979B /* Sources */,
+				7C503312CC8BAFB92C99C1ED /* Frameworks */,
+				4212B0F0FD5B8FF11FE28ACC /* Resources */,
 			);
-			buildRules = ();
-			dependencies = ();
+			buildRules = (
+			);
+			dependencies = (
+			);
 			name = Desqueeze;
+			packageProductDependencies = (
+				2E82B89D92189E65115417C3 /* DesqueezeCore */,
+			);
 			productName = Desqueeze;
-			productReference = IO100000 /* Desqueeze.app */;
+			productReference = 38A007151ABE87CC01A5B6E9 /* Desqueeze.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		IO600000 /* Project object */ = {
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
 				TargetAttributes = {
-					IO400000 = {
+					0E8A3AD980EC179856012B7E = {
 						CreatedOnToolsVersion = 27.0;
 					};
 				};
 			};
-			buildConfigurationList = IO500001 /* Build configuration list for PBXProject "Desqueeze" */;
+			buildConfigurationList = 812314D856B639773231C926 /* Build configuration list for PBXProject "Desqueeze" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, Base);
-			mainGroup = IO300000;
-			productRefGroup = IO300002 /* Products */;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D103645A7B5AB4394B88D427;
+			packageReferences = (
+				F50BB6F9BA30430FABA74EFA /* XCLocalSwiftPackageReference "DesqueezeCore" */,
+			);
+			productRefGroup = 0500089CBF0A8CDDA7483BA4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			targets = (IO400000 /* Desqueeze */);
+			targets = (
+				0E8A3AD980EC179856012B7E /* Desqueeze */,
+			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		IO200002 /* Resources */ = {
+		4212B0F0FD5B8FF11FE28ACC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				IO000010 /* Assets.xcassets in Resources */,
+				9E0C54E4573EBB5A160F5621 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		IO200000 /* Sources */ = {
+		0C035B91A132D1F4BF29979B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				IO000001 /* DesqueezeApp.swift in Sources */,
-				IO000002 /* BrandTheme.swift in Sources */,
-				IO000003 /* SqueezePreset.swift in Sources */,
-				IO000004 /* EditorModel.swift in Sources */,
-				IO000005 /* DesqueezeService.swift in Sources */,
-				IO000006 /* PhotoLibraryWriter.swift in Sources */,
-				IO000007 /* RootView.swift in Sources */,
-				IO000008 /* PreviewPane.swift in Sources */,
-				IO000009 /* ControlsPane.swift in Sources */,
+				65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */,
+				4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */,
+				DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */,
+				97072BA9276C863DDD24E740 /* AppModel.swift in Sources */,
+				C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */,
+				C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */,
+				50565145AD73F9B69A1372E6 /* BatchPane.swift in Sources */,
+				AB697797E935001326609F05 /* ControlsPane.swift in Sources */,
+				9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */,
+				DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */,
+				D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		IO700000 /* Debug */ = {
+		08A8D745E6D2F7503EE67BD5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		IO700001 /* Release */ = {
+		44D3323D9E0FBC44342D5AD1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
-				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		IO700002 /* Debug - Target */ = {
+		66E5F20B33386BD1E7723871 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Desqueeze/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
-				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
-				MARKETING_VERSION = 0.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chambersandlight.desqueeze;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		IO700003 /* Release - Target */ = {
+		F0D944C295A3D6BE8BBF7B03 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Desqueeze/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
-				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks");
-				MARKETING_VERSION = 0.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chambersandlight.desqueeze;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -278,20 +297,39 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		IO500000 /* Build configuration list for PBXNativeTarget "Desqueeze" */ = {
+		812314D856B639773231C926 /* Build configuration list for PBXProject "Desqueeze" */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (IO700002 /* Debug */, IO700003 /* Release */);
+			buildConfigurations = (
+				08A8D745E6D2F7503EE67BD5 /* Debug */,
+				44D3323D9E0FBC44342D5AD1 /* Release */,
+			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		IO500001 /* Build configuration list for PBXProject "Desqueeze" */ = {
+		0DC14BCB1536FCF5F33DB2B7 /* Build configuration list for PBXNativeTarget "Desqueeze" */ = {
 			isa = XCConfigurationList;
-			buildConfigurations = (IO700000 /* Debug */, IO700001 /* Release */);
+			buildConfigurations = (
+				66E5F20B33386BD1E7723871 /* Debug */,
+				F0D944C295A3D6BE8BBF7B03 /* Release */,
+			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		F50BB6F9BA30430FABA74EFA /* XCLocalSwiftPackageReference "DesqueezeCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = DesqueezeCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2E82B89D92189E65115417C3 /* DesqueezeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DesqueezeCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = IO600000 /* Project object */;
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
 }
