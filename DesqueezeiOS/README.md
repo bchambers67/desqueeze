@@ -188,7 +188,7 @@ hosts pass completion handlers that predate `Sendable`.
 
 With **Find squeezed photos** on in Settings, StillScope checks the last two
 weeks of the library each time it comes forward and offers to queue what it
-finds. It is off by default, because it is the one feature that reads the
+finds. A button in the action bar runs the same check on demand. It is off by default, because it is the one feature that reads the
 library, and turning it on is what asks for that access.
 
 `SqueezeDetector` in the core package decides. Two signs are trusted outright:
