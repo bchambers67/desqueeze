@@ -25,14 +25,10 @@ final class AppModel {
     // Held here rather than in a view: a fold rebuilds the views, and an open
     // inspector or a running save must not reset when it does.
     var isInspecting = false
-    /// Whether the factor panel is open, once the owner has said. Until
-    /// then it follows the layout: open beside a photo on an open Duo held
-    /// sideways, where there is room, and closed elsewhere.
-    var factorPanelChoice: Bool?
-
-    func showsFactorPanel(besideSideBar: Bool) -> Bool {
-        factorPanelChoice ?? (besideSideBar && hasContent)
-    }
+    /// Whether the factor panel is popped out over the photograph. This is
+    /// for the layouts with a bottom bar. On an open Duo held sideways the
+    /// panel has a place of its own and is always there.
+    var isFactorPanelOpen = false
 
     var isShowingSettings = false
 

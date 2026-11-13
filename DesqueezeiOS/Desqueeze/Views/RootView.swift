@@ -16,20 +16,17 @@ struct RootView: View {
         GeometryReader { proxy in
             let edge = BarEdge.resolve(for: proxy.size)
             let bar = SideBar.metrics(trailingInset: proxy.safeAreaInsets.trailing)
-            let panelShown = model.showsFactorPanel(besideSideBar: edge == .trailing)
+            // Popped out on request over a bottom bar; always there beside
+            // the side bar.
+            let panelPopped = edge == .bottom && model.isFactorPanelOpen
 
             NavigationStack {
                 canvas
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    // The factor panel sits between the photograph and the
-                    // bar, growing out of the button that opens it: bottom
-                    // centre on the bottom bar, the trailing edge beside the
-                    // side bar.
+                    // Sideways on an open Duo the factor panel has a strip of
+                    // its own under the photograph, and is always there.
                     .safeAreaInset(edge: .bottom, spacing: 0) {
-                        if panelShown {
-                            FactorPanel(model: model)
-                                .transition(.zoom(from: edge == .trailing ? .trailing : .bottom))
-                        }
+                        if edge == .trailing { FactorPanel(model: model) }
                     }
                     // The content layer keeps the brand ground and runs to
                     // every edge, beneath the glass.
@@ -40,19 +37,28 @@ struct RootView: View {
                     // edge, so it runs into the strip and starts below them.
                     .overlay(alignment: .trailing) {
                         if edge == .trailing {
-                            SideBar(model: model, panelShown: panelShown, topClearance: bar.topClearance,
+                            SideBar(model: model, topClearance: bar.topClearance,
                                     width: bar.width, centreShift: bar.centreShift)
                         }
                     }
                     .ignoresSafeArea(.container, edges: edge == .trailing ? .trailing : [])
                     .overlay(alignment: .top) { StatusChip(model: model) }
+                    // Elsewhere the panel floats over the content, just above
+                    // the bar, growing out of the factor button at the bar's
+                    // centre. It is an overlay so that nothing under it moves.
+                    .overlay(alignment: .bottom) {
+                        if panelPopped {
+                            FactorPanel(model: model)
+                                .transition(.zoom(from: .bottom))
+                        }
+                    }
                     .toolbar {
-                        if edge == .bottom { BottomBarItems(model: model, panelShown: panelShown) }
+                        if edge == .bottom { BottomBarItems(model: model, panelShown: panelPopped) }
                     }
                     .toolbar(.hidden, for: .navigationBar)
                     .animation(.smooth(duration: 0.3), value: edge)
                     // A spring with a little give, like a folder opening.
-                    .animation(.spring(response: 0.42, dampingFraction: 0.8), value: panelShown)
+                    .animation(.spring(response: 0.42, dampingFraction: 0.8), value: panelPopped)
                     .animation(.smooth(duration: 0.2), value: model.notice)
             }
             // Renders are sized for the surface showing them. This fires again
