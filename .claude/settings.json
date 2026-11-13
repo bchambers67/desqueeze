@@ -5,7 +5,8 @@
       "mcp__github__update_pull_request",
       "mcp__github__merge_pull_request",
       "mcp__github__pull_request_read",
-      "mcp__github__subscribe_pr_activity"
+      "mcp__github__subscribe_pr_activity",
+      "mcp__Claude_Code_Remote__read_documentation"
     ]
   }
 }
