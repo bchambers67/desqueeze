@@ -60,7 +60,7 @@ are chosen manually there.
 
 ### A note on letter-spacing
 
-The brand tracks uppercase labels between `.12em` and `.22em`. **WPF has no
+The brand tracks uppercase labels between `.05em` and `.15em`. **WPF has no
 letter-spacing primitive** — `CharacterSpacing` exists only in WinUI/UWP, so
 setting it on a `TextBlock` is a compile error rather than a no-op.
 `Tracking.cs` provides a `Track.Em` attached property that approximates tracking
@@ -70,27 +70,23 @@ applied only to static labels, never to bound text.
 
 ## Brand
 
-The macOS and iOS apps implement the Chambers & Light brand guide. `BrandTheme.swift`
-in each is the only place a colour or face is declared.
+Every client implements the Chambers & Light brand guide under the StillScope
+name. `BrandTheme.swift` (macOS and iOS) and `BrandTheme.xaml` (Windows) are
+the only places a colour or face is declared.
 
-| Colour  | Hex       | Use                                                |
-|---------|-----------|----------------------------------------------------|
-| Chamber | `#201612` | Window ground. Never pure black.                   |
-| Coral   | `#FF6748` | Accent only: rules, active state, the Export tint. |
-| Silver  | `#C2C1BA` | Borders, dividers, secondary text.                 |
-| White   | `#FFFFFF` | Text on chamber.                                   |
+| Token     | Hex       | Use                                  |
+|-----------|-----------|--------------------------------------|
+| Chamber   | `#201612` | Window ground, image wells           |
+| Coral     | `#FF6748` | The one accent: selection and export |
+| Silver    | `#C2C1BA` | Secondary text, hairlines            |
+| Warm gray | `#F5F3F1` | Readouts on dark, ground on light    |
+| White     | `#FFFFFF` | Primary text                         |
+| Error     | `#D32F2F` | Errors. Coral is never a warning.    |
 
-Errors use a separate red, `#D32F2F`: coral sits too close to a warning colour
-to double as one. Type is one sans (Neue Haas Grotesk, falling back to Helvetica
-Neue) with Space Mono for figures; headings are tracked `.05em`–`.15em`.
-
-**Controls are Liquid Glass.** The photograph fills the window. Primary actions
-sit in the window toolbar and the detail in a trailing inspector, both standard
-system components, so the material, grouping and shapes are Apple's own. The
-app draws no backgrounds behind them. The brand's flat, tight-cornered rules
-hold for the content layer; coral reaches the glass once, as the tint on Export.
-
-The Windows and web clients have not been moved to this palette yet.
+**Typography** is one sans, Neue Haas Grotesk falling back through Helvetica
+Neue and Inter to the system face, with Space Mono for factors and dimensions.
+Uppercase labels are tracked between `.05em` and `.15em`. Corners are square
+and rules are hairlines.
 
 ## Brand package
 

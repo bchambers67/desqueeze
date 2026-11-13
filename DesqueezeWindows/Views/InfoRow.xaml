@@ -11,7 +11,7 @@
                    Grid.Column="0"
                    FontFamily="{StaticResource GroteskFont}"
                    FontSize="9"
-                   local:Track.Em="0.12"
+                   local:Track.Em="0.10"
                    Foreground="{StaticResource GrainBrush}"
                    VerticalAlignment="Center"/>
         <TextBlock x:Name="ValueBlock"

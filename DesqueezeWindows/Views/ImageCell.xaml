@@ -32,7 +32,7 @@
         <Border HorizontalAlignment="Left"
                 VerticalAlignment="Bottom"
                 Margin="8"
-                Background="#D916110F"
+                Background="#D9201612"
                 Padding="8,5">
             <StackPanel Orientation="Horizontal">
                 <Rectangle Width="10" Height="2"
@@ -42,7 +42,7 @@
                            FontFamily="{StaticResource GroteskFont}"
                            FontSize="8"
                            FontWeight="SemiBold"
-                           local:Track.Em="0.18"
+                           local:Track.Em="0.12"
                            Foreground="{StaticResource PaperBrush}"
                            VerticalAlignment="Center"
                            Margin="8,0,0,0"/>
