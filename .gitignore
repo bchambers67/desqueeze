@@ -1,0 +1,6 @@
+# Xcode and SwiftPM per-user state
+xcuserdata/
+.swiftpm/
+.build/
+DerivedData/
+.DS_Store

@@ -30,3 +30,15 @@ Core logic lives in `DesqueezeiOS/DesqueezeCore` and is tested with:
 ```
 cd DesqueezeiOS/DesqueezeCore && swift test
 ```
+
+## iOS project file
+
+`DesqueezeiOS/Desqueeze.xcodeproj/project.pbxproj` is generated. After adding
+or removing a Swift file or asset in `DesqueezeiOS/Desqueeze`, regenerate it:
+
+```
+cd DesqueezeiOS && python3 generate_project.py "$PWD"
+```
+
+The owner's signing team is set in the generator. Do not hand-edit the project
+file; change the generator instead.
