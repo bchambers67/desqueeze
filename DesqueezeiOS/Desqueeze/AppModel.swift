@@ -23,6 +23,8 @@ final class AppModel {
     // inspector or a running save must not reset when it does.
     var isInspecting = false
     var isChoosingFactor = false
+    /// The docked slider on an open Duo held sideways; shown until dismissed.
+    var isFactorDockShown = true
     var sharedFile: SharedFile?
     private(set) var isWorking = false
 

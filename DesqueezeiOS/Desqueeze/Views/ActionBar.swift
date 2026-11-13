@@ -101,7 +101,7 @@ struct SideBar: View {
 
                 Spacer(minLength: 0)
 
-                FactorButton(model: model)
+                FactorButton(model: model, togglesDock: true)
                     .buttonStyle(.glass)
 
                 Spacer(minLength: 0)
@@ -161,20 +161,35 @@ private struct ClearButton: View {
     }
 }
 
-/// The squeeze factor: shows the current value, and opens the factor sheet.
+/// The squeeze factor control's button.
+///
+/// Along the bottom it shows the factor and opens the slider in a sheet. In
+/// the side bar there is no room for a number, and the slider is docked on
+/// screen with the number beside it, so the button is a symbol, a frame
+/// opening outward from its centre line, that shows or hides the dock.
 private struct FactorButton: View {
     let model: AppModel
+    var togglesDock = false
 
     var body: some View {
         Button {
-            model.isChoosingFactor = true
+            if togglesDock {
+                model.isFactorDockShown.toggle()
+            } else {
+                model.isChoosingFactor = true
+            }
         } label: {
-            Text(String(format: "%.2f×", model.session.squeeze.factor))
-                .font(Brand.mono(15, weight: .medium))
-                .monospacedDigit()
-                .lineLimit(1)
-                .fixedSize()
-                .padding(.horizontal, 4)
+            if togglesDock {
+                Label("Squeeze factor", systemImage: "arrow.left.and.line.vertical.and.arrow.right")
+                    .labelStyle(.iconOnly)
+            } else {
+                Text(String(format: "%.2f×", model.session.squeeze.factor))
+                    .font(Brand.mono(15, weight: .medium))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .fixedSize()
+                    .padding(.horizontal, 4)
+            }
         }
         .accessibilityLabel("Squeeze factor")
         .accessibilityValue(String(format: "%.2f", model.session.squeeze.factor))
@@ -182,8 +197,9 @@ private struct FactorButton: View {
     }
 }
 
-/// The factor, on a slider, in a short sheet that leaves the photo in view.
-struct FactorSheet: View {
+/// The slider wired to the session: the factor it shows is the session's, and
+/// moving it re-renders. Used in the sheet and in the dock.
+struct FactorControl: View {
     let model: AppModel
     @State private var factor: Double
 
@@ -192,11 +208,13 @@ struct FactorSheet: View {
         _factor = State(initialValue: FactorSlider.clamped(model.session.squeeze.factor))
     }
 
-    private var hasSuggestion: Bool { model.mode == .single && model.suggestion != nil }
+    static func hasSuggestion(_ model: AppModel) -> Bool {
+        model.mode == .single && model.suggestion != nil
+    }
 
     var body: some View {
         VStack(spacing: 16) {
-            if hasSuggestion, let suggestion = model.suggestion {
+            if Self.hasSuggestion(model), let suggestion = model.suggestion {
                 Button {
                     Task { await model.useSuggestion() }
                 } label: {
@@ -208,7 +226,6 @@ struct FactorSheet: View {
 
             FactorSlider(factor: $factor)
         }
-        .padding(20)
         .onChange(of: factor) { _, new in
             Task { await model.use(factor: new) }
         }
@@ -216,9 +233,36 @@ struct FactorSheet: View {
         .onChange(of: model.session.squeeze.factor) { _, new in
             if abs(new - factor) > 0.004 { factor = FactorSlider.clamped(new) }
         }
-        .presentationDetents([.height(hasSuggestion ? 270 : 200)])
-        .presentationBackgroundInteraction(.enabled)
-        .presentationDragIndicator(.visible)
+    }
+}
+
+/// The factor slider in a short sheet that leaves the photo in view.
+struct FactorSheet: View {
+    let model: AppModel
+
+    var body: some View {
+        FactorControl(model: model)
+            .padding(20)
+            .presentationDetents([.height(FactorControl.hasSuggestion(model) ? 270 : 200)])
+            .presentationBackgroundInteraction(.enabled)
+            .presentationDragIndicator(.visible)
+    }
+}
+
+/// The factor slider docked along the bottom, for an open iPhone Duo held
+/// sideways, where there is room to keep it on screen beside the photograph.
+struct FactorDock: View {
+    let model: AppModel
+
+    var body: some View {
+        FactorControl(model: model)
+            .padding(.horizontal, 20)
+            .padding(.top, 14)
+            .padding(.bottom, 6)
+            .frame(maxWidth: 620)
+            .glassEffect(.regular, in: .rect(cornerRadius: 26))
+            .padding(.horizontal, Brand.spacingMD)
+            .padding(.bottom, 10)
     }
 }
 
