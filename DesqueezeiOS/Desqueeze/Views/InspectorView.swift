@@ -41,40 +41,55 @@ struct InspectorView: View {
         }
     }
 
+    /// Every control is the same height and the buttons are the same circle,
+    /// whatever they hold, so the row sits on one line. The system's glass
+    /// button style sizes each button to its label, which left an icon, a
+    /// figure and a cross at three different sizes.
+    private static let controlSize: CGFloat = 48
+
     private var bar: some View {
-        GlassEffectContainer(spacing: 12) {
-            HStack(spacing: 12) {
+        GlassEffectContainer(spacing: 10) {
+            HStack(spacing: 10) {
                 Text("\(zoomPercent)%")
                     .font(Brand.mono(13, weight: .medium))
                     .monospacedDigit()
                     .contentTransition(.numericText())
+                    .frame(minWidth: 44)
                     .padding(.horizontal, 14)
-                    .frame(minWidth: 72, minHeight: 44)
+                    .frame(height: Self.controlSize)
                     .glassEffect(.regular, in: .capsule)
                     .accessibilityLabel("Zoom \(zoomPercent) percent")
 
                 Spacer(minLength: 0)
 
-                Button { command = .fit } label: {
-                    Label("Fit to screen", systemImage: "arrow.down.right.and.arrow.up.left")
-                        .labelStyle(.iconOnly)
+                control("Fit to screen") { command = .fit } label: {
+                    Image(systemName: "arrow.down.right.and.arrow.up.left")
+                        .font(.system(size: 16, weight: .medium))
                 }
-                Button { command = .actualPixels } label: {
-                    Text("1:1")
-                        .font(Brand.mono(13, weight: .medium))
-                        .fixedSize()
+                control("Actual pixels") { command = .actualPixels } label: {
+                    Text("1:1").font(Brand.sans(15, weight: .medium))
                 }
-                .accessibilityLabel("Actual pixels")
-                Button { dismiss() } label: {
-                    Label("Close", systemImage: "xmark").labelStyle(.iconOnly)
+                control("Close") { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .medium))
                 }
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .controlSize(.large)
+            .foregroundStyle(Brand.white)
             .padding(.horizontal, Brand.spacingMD)
             .padding(.top, Brand.spacingSM)
         }
+    }
+
+    private func control<Label: View>(_ name: String, action: @escaping () -> Void,
+                                      @ViewBuilder label: () -> Label) -> some View {
+        Button(action: action) {
+            label()
+                .frame(width: Self.controlSize, height: Self.controlSize)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(), in: .circle)
+        .accessibilityLabel(name)
     }
 }
 
