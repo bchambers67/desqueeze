@@ -1,7 +1,6 @@
 import Foundation
 
-/// What can be read about a photo without looking at its pixels, plus one
-/// thing that can: how narrow its faces are.
+/// Everything known about a photo that bears on whether it is squeezed.
 public struct PhotoFacts: Sendable {
     public var name: String?
     public var size: PixelSize
@@ -9,16 +8,29 @@ public struct PhotoFacts: Sendable {
     public var lensModel: String?
     /// A squeeze factor measured from faces, when there are any.
     public var faceFactor: Double?
+    /// The same, from the shape of text in the frame.
+    public var textFactor: Double?
+    /// The same, from the proportions of people's bodies.
+    public var bodyFactor: Double?
+    /// The same, from the direction of fine detail.
+    public var detailFactor: Double?
+    /// The factor of a corrected photo from the same session.
+    public var sessionFactor: Double?
     public var isScreenshot: Bool
     /// Edited in the photo library since it was taken.
     public var isEdited: Bool
 
     public init(name: String?, size: PixelSize, lensModel: String?, faceFactor: Double?,
-                isScreenshot: Bool, isEdited: Bool) {
+                textFactor: Double? = nil, bodyFactor: Double? = nil, detailFactor: Double? = nil,
+                sessionFactor: Double? = nil, isScreenshot: Bool, isEdited: Bool) {
         self.name = name
         self.size = size
         self.lensModel = lensModel
         self.faceFactor = faceFactor
+        self.textFactor = textFactor
+        self.bodyFactor = bodyFactor
+        self.detailFactor = detailFactor
+        self.sessionFactor = sessionFactor
         self.isScreenshot = isScreenshot
         self.isEdited = isEdited
     }
@@ -27,9 +39,12 @@ public struct PhotoFacts: Sendable {
 /// Decides whether a photo was shot through anamorphic glass and still needs
 /// correcting.
 ///
-/// Two signs count. A lens that names itself anamorphic is the surer one, and
-/// often states its factor. Faces that are clearly too narrow are the other.
-/// A photo with neither is left alone: a wrong guess here would queue someone's
+/// The sure signs are a lens that names itself anamorphic, and a photo the
+/// owner corrected from the same few minutes. After those come readings taken
+/// from the picture: faces, text, bodies and the direction of fine detail.
+/// Faces are trusted alone. The others are looser, so they must agree with
+/// one another, and a reading that says "ordinary" counts against. A photo
+/// with no sign is left alone: a wrong guess here would queue someone's
 /// ordinary photos for stretching.
 public enum SqueezeDetector {
 
@@ -43,11 +58,26 @@ public enum SqueezeDetector {
         }
     }
 
-    public enum Reason: Equatable, Sendable { case lens, faces }
+    public enum Reason: Equatable, Sendable {
+        /// The camera recorded an anamorphic lens.
+        case lens
+        /// Taken alongside a photo the owner corrected.
+        case session
+        /// Faces alone.
+        case faces
+        /// Two or more readings from the picture, in agreement.
+        case picture
+    }
 
     /// Faces narrower than this are taken as squeezed. Below it, the reading
     /// is within what ordinary faces and loose detections produce.
     public static let faceThreshold = 1.25
+    /// The same line for the looser readings.
+    public static let pictureThreshold = 1.2
+    /// A reading under this says the photo looks ordinary.
+    public static let ordinaryBelow = 1.1
+    /// How far apart readings may be and still count as agreeing.
+    public static let agreement = 0.3
 
     /// A frame this wide is a corrected one, or a panorama.
     public static let alreadyWide = 2.2
@@ -58,15 +88,41 @@ public enum SqueezeDetector {
         guard facts.size.height > 0,
               Double(facts.size.width) / Double(facts.size.height) < alreadyWide else { return nil }
 
-        let faces = facts.faceFactor.flatMap { $0 >= faceThreshold ? snapped($0) : nil }
+        let faces = facts.faceFactor.flatMap { $0 >= faceThreshold ? $0 : nil }
+        // Readings that can carry a verdict between them.
+        let firm = [faces, squeezed(facts.textFactor), squeezed(facts.bodyFactor)].compactMap { $0 }
+        // Detail is the loosest: it can back the others up, never lead, and
+        // never count against.
+        let all = firm + [squeezed(facts.detailFactor)].compactMap { $0 }
+        let ordinary = [facts.faceFactor, facts.textFactor, facts.bodyFactor]
+            .compactMap { $0 }.filter { $0 < ordinaryBelow }.count
+        let consensus = all.isEmpty ? nil : snapped(median(all))
 
         if let lens = facts.lensModel?.lowercased(), lens.contains("anamorph") || lens.contains("nanomorph") {
-            return Verdict(factor: statedFactor(in: lens) ?? faces, reason: .lens)
+            return Verdict(factor: statedFactor(in: lens) ?? consensus, reason: .lens)
         }
-        if let faces {
-            return Verdict(factor: faces, reason: .faces)
+        if let session = facts.sessionFactor {
+            return Verdict(factor: session, reason: .session)
         }
-        return nil
+
+        // From here the picture is all there is to go on.
+        guard !firm.isEmpty, all.count > ordinary, let consensus else { return nil }
+        if all.count >= 2 {
+            guard all.max()! - all.min()! <= agreement else { return nil }
+            return Verdict(factor: consensus, reason: .picture)
+        }
+        // One reading: only faces are trusted alone.
+        return faces.map { _ in Verdict(factor: consensus, reason: .faces) }
+    }
+
+    private static func squeezed(_ reading: Double?) -> Double? {
+        reading.flatMap { $0 >= pictureThreshold ? $0 : nil }
+    }
+
+    private static func median(_ values: [Double]) -> Double {
+        let sorted = values.sorted()
+        let middle = sorted.count / 2
+        return sorted.count.isMultiple(of: 2) ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle]
     }
 
     /// A measured factor, moved onto a lens preset when it is close to one.

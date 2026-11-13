@@ -135,7 +135,7 @@ private struct PhotosButton: View {
     @State private var picked: [PhotosPickerItem] = []
 
     var body: some View {
-        PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images) {
+        PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images, photoLibrary: .shared()) {
             Label("Choose photos", systemImage: "photo.on.rectangle.angled")
                 .labelStyle(.iconOnly)
         }

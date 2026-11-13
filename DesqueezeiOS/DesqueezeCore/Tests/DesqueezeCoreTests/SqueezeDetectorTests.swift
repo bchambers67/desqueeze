@@ -5,10 +5,12 @@ import DesqueezeCore
 struct SqueezeDetectorTests {
     /// A plain 3:2 camera frame with nothing known about it.
     func facts(name: String? = "IMG_0001.JPG", width: Int = 6000, height: Int = 4000,
-               lens: String? = nil, face: Double? = nil,
+               lens: String? = nil, face: Double? = nil, text: Double? = nil, body: Double? = nil,
+               detail: Double? = nil, session: Double? = nil,
                screenshot: Bool = false, edited: Bool = false) -> PhotoFacts {
         PhotoFacts(name: name, size: PixelSize(width: width, height: height), lensModel: lens,
-                   faceFactor: face, isScreenshot: screenshot, isEdited: edited)
+                   faceFactor: face, textFactor: text, bodyFactor: body, detailFactor: detail,
+                   sessionFactor: session, isScreenshot: screenshot, isEdited: edited)
     }
 
     @Test("an ordinary photo is left alone")
@@ -69,5 +71,44 @@ struct SqueezeDetectorTests {
     @Test("screenshots are never flagged")
     func screenshots() {
         #expect(SqueezeDetector.verdict(for: facts(face: 1.6, screenshot: true)) == nil)
+    }
+
+    @Test("text and bodies are not trusted alone")
+    func looseReadingsNeedCompany() {
+        #expect(SqueezeDetector.verdict(for: facts(text: 1.5)) == nil)
+        #expect(SqueezeDetector.verdict(for: facts(body: 1.5)) == nil)
+        #expect(SqueezeDetector.verdict(for: facts(detail: 1.5)) == nil)
+    }
+
+    @Test("two readings from the picture that agree flag the photo, at the factor between them")
+    func agreement() {
+        #expect(SqueezeDetector.verdict(for: facts(text: 1.48, body: 1.56)) == .init(factor: 1.5, reason: .picture))
+        #expect(SqueezeDetector.verdict(for: facts(text: 1.3, detail: 1.36)) == .init(factor: 1.33, reason: .picture))
+    }
+
+    @Test("readings that disagree about the factor do not flag the photo")
+    func disagreement() {
+        #expect(SqueezeDetector.verdict(for: facts(text: 1.3, body: 1.9)) == nil)
+    }
+
+    @Test("detail can back another reading up, but two detail-only signs are not enough")
+    func detailOnlySupports() {
+        #expect(SqueezeDetector.verdict(for: facts(body: 1.6, detail: 1.55)) == .init(factor: 1.6, reason: .picture))
+        #expect(SqueezeDetector.verdict(for: facts(detail: 1.6)) == nil)
+    }
+
+    @Test("a reading that says the photo is ordinary counts against")
+    func ordinaryCountsAgainst() {
+        // Faces say squeezed, text says ordinary: one each, so it is left alone.
+        #expect(SqueezeDetector.verdict(for: facts(face: 1.4, text: 1.0)) == nil)
+        // Two say squeezed and one ordinary: flagged.
+        #expect(SqueezeDetector.verdict(for: facts(face: 1.5, text: 1.0, body: 1.52)) == .init(factor: 1.5, reason: .picture))
+    }
+
+    @Test("a photo from the same session as a corrected one is flagged at that factor")
+    func session() {
+        #expect(SqueezeDetector.verdict(for: facts(session: 1.6)) == .init(factor: 1.6, reason: .session))
+        // Even when its own readings say nothing or little.
+        #expect(SqueezeDetector.verdict(for: facts(text: 1.0, session: 1.33)) == .init(factor: 1.33, reason: .session))
     }
 }

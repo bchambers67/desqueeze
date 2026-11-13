@@ -1,7 +1,7 @@
 import Foundation
 
 /// A size in image pixels. Integer on purpose: these are counts, not lengths.
-public struct PixelSize: Equatable, Sendable {
+public struct PixelSize: Equatable, Sendable, Codable {
     public var width: Int
     public var height: Int
     public init(width: Int, height: Int) {
