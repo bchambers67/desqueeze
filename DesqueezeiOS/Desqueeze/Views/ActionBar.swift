@@ -166,12 +166,21 @@ private struct ClearButton: View {
 
 /// Checks recent photos again for ones that need correcting. It appears only
 /// while that feature is switched on in Settings.
+///
+/// A tap runs the everyday check, which skips photos already looked at. A
+/// long press offers the full one, which looks at all of them again. That is
+/// the system's own idiom for a second action on a bar button, so it behaves
+/// the same in the toolbar and in the side bar.
 private struct RescanButton: View {
     let model: AppModel
 
     var body: some View {
-        Button {
-            Task { await model.rescan() }
+        Menu {
+            Button {
+                Task { await model.rescan(everything: true) }
+            } label: {
+                Label("Recheck every recent photo", systemImage: "arrow.clockwise.circle")
+            }
         } label: {
             if model.isScanning {
                 ProgressView()
@@ -179,6 +188,8 @@ private struct RescanButton: View {
                 Label("Check recent photos", systemImage: "arrow.triangle.2.circlepath")
                     .labelStyle(.iconOnly)
             }
+        } primaryAction: {
+            Task { await model.rescan() }
         }
         .disabled(model.isScanning || model.isWorking)
     }

@@ -81,6 +81,8 @@ final class AppModel {
     private static let correctionsKey = "detect.corrections"
     private static let findKey = "detect.enabled"
     private static let handledKey = "detect.handled"
+    private static let dealtWithKey = "detect.dealtWith"
+    private static let ordinaryKey = "detect.ordinary"
     var sharedFile: SharedFile?
     private(set) var isWorking = false
 
@@ -111,17 +113,34 @@ final class AppModel {
 
     // MARK: - Finding squeezed photos
 
-    /// Photos already corrected, dismissed or examined and found ordinary.
-    private var handled: Set<String> {
-        Set(UserDefaults.standard.stringArray(forKey: Self.handledKey) ?? [])
+    /// Photos the owner has dealt with: saved, or taken out of the queue.
+    /// These are never offered again.
+    private var dealtWith: Set<String> {
+        Set(UserDefaults.standard.stringArray(forKey: Self.dealtWithKey) ?? [])
+    }
+
+    /// Photos examined and found ordinary. An everyday check skips them; a
+    /// full recheck looks at them again.
+    private var foundOrdinary: Set<String> {
+        // Before the two lists were kept apart, everything went into one.
+        let earlier = UserDefaults.standard.stringArray(forKey: Self.handledKey) ?? []
+        return Set(earlier + (UserDefaults.standard.stringArray(forKey: Self.ordinaryKey) ?? []))
     }
 
     private func remember(_ ids: [String]) {
+        append(ids, to: Self.dealtWithKey)
+    }
+
+    private func rememberOrdinary(_ ids: [String]) {
+        append(ids, to: Self.ordinaryKey)
+    }
+
+    private func append(_ ids: [String], to key: String) {
         guard !ids.isEmpty else { return }
-        var all = UserDefaults.standard.stringArray(forKey: Self.handledKey) ?? []
+        var all = UserDefaults.standard.stringArray(forKey: key) ?? []
         all.append(contentsOf: ids)
         // Only recent photos are ever scanned, so old entries can go.
-        UserDefaults.standard.set(Array(all.suffix(1000)), forKey: Self.handledKey)
+        UserDefaults.standard.set(Array(all.suffix(1000)), forKey: key)
     }
 
     /// Photos the owner has corrected, kept so that others from the same
@@ -150,12 +169,17 @@ final class AppModel {
     }
 
     /// The same check the app makes when it comes forward, asked for by hand,
-    /// and it says what it found either way.
-    func rescan() async {
+    /// and it says what it found either way. A full recheck also looks again
+    /// at photos an earlier check passed over as ordinary.
+    func rescan(everything: Bool = false) async {
         guard findsSqueezed, !isScanning else { return }
         guard RecentScanner.hasAccess else {
             notice = Notice(text: "StillScope needs access to your photos to find squeezed ones. Allow it in Settings › Privacy › Photos.", isError: true)
             return
+        }
+        if everything {
+            UserDefaults.standard.removeObject(forKey: Self.ordinaryKey)
+            UserDefaults.standard.removeObject(forKey: Self.handledKey)
         }
         await scanRecent(askedFor: true)
         switch found.count {
@@ -175,11 +199,11 @@ final class AppModel {
         guard findsSqueezed, RecentScanner.hasAccess, !isScanning, askedFor || !hasContent else { return }
         isScanning = true
         defer { isScanning = false }
-        let skipping = handled, learned = corrections
+        let skipping = dealtWith.union(foundOrdinary), learned = corrections
         let result = await Task.detached(priority: .utility) {
             await RecentScanner.scan(skipping: skipping, corrections: learned)
         }.value
-        remember(result.ordinary)
+        rememberOrdinary(result.ordinary)
         found = result.found
     }
 
