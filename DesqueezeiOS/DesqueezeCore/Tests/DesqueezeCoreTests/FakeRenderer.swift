@@ -16,9 +16,12 @@ actor Gate {
     private var held: [Double: CheckedContinuation<Void, Never>] = [:]
     private var watchers: [Double: CheckedContinuation<Void, Never>] = [:]
     private var arrived: Set<Double> = []
+    /// Every factor a render was asked for, in order.
+    private(set) var asked: [Double] = []
 
     func hold(_ factor: Double) async {
         arrived.insert(factor)
+        asked.append(factor)
         watchers.removeValue(forKey: factor)?.resume()
         await withCheckedContinuation { held[factor] = $0 }
     }

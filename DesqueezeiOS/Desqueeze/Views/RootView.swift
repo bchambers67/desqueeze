@@ -21,10 +21,18 @@ struct RootView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     // The content layer keeps the brand ground and runs to
                     // every edge, beneath the glass.
+                    .padding(.trailing, edge == .trailing ? SideBar.width : 0)
                     .background(Brand.chamber.ignoresSafeArea())
-                    .safeAreaInset(edge: .trailing, spacing: 0) {
-                        if edge == .trailing { SideBar(model: model) }
+                    // An open Duo keeps its clock and status icons in a strip
+                    // down the trailing edge. The bar belongs against that
+                    // edge, so it runs into the strip and starts below them.
+                    .overlay(alignment: .trailing) {
+                        if edge == .trailing {
+                            SideBar(model: model,
+                                    topClearance: proxy.safeAreaInsets.trailing > 20 ? 104 : 20)
+                        }
                     }
+                    .ignoresSafeArea(.container, edges: edge == .trailing ? .trailing : [])
                     .overlay(alignment: .top) { StatusChip(model: model) }
                     .toolbar {
                         if edge == .bottom { BottomBarItems(model: model) }

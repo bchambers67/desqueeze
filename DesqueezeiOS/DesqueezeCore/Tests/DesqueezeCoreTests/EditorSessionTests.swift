@@ -25,7 +25,7 @@ struct EditorSessionTests {
         #expect(session.preset == .x133)
     }
 
-    @Test("when renders finish out of order, the last factor chosen is the one shown")
+    @Test("a factor chosen while a render is running is the one shown once it lands")
     func latestWins() async {
         let renderer = FakeRenderer()
         let session = EditorSession(renderer: renderer)
@@ -35,15 +35,40 @@ struct EditorSessionTests {
         renderer.gate = gate
         let first = Task { await session.choose(.x133) }
         await gate.untilAsked(for: 1.33)
-        let second = Task { await session.choose(.x180) }
-        await gate.untilAsked(for: 1.80)
+        await session.choose(.x180)
 
+        await gate.release(1.33)   // stale by the time it lands
+        await gate.untilAsked(for: 1.80)
+        #expect(session.preview?.factor != 1.33)
         await gate.release(1.80)
-        await second.value
-        await gate.release(1.33)   // the stale render lands last
         await first.value
 
         #expect(session.preview?.factor == 1.80)
+        #expect(session.isRendering == false)
+    }
+
+    @Test("factors passed through while a render is running are never rendered")
+    func skipsWhatWasPassedThrough() async {
+        let renderer = FakeRenderer()
+        let session = EditorSession(renderer: renderer)
+        await session.open(photo)
+
+        let gate = Gate()
+        renderer.gate = gate
+        let first = Task { await session.choose(.x125) }
+        await gate.untilAsked(for: 1.25)
+        // A slider dragged across three stops before the first render lands.
+        await session.choose(.x150)
+        await session.choose(.x160)
+        await session.choose(.x175)
+
+        await gate.release(1.25)
+        await gate.untilAsked(for: 1.75)
+        await gate.release(1.75)
+        await first.value
+
+        #expect(session.preview?.factor == 1.75)
+        #expect(await gate.asked == [1.25, 1.75])
     }
 
     @Test("a file that is not an image says so, and a good one afterwards clears it")

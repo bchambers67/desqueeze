@@ -39,20 +39,18 @@ struct PreviewPane: View {
             Button {
                 model.isInspecting = true
             } label: {
+                // Shaped by the factor in use now, not the one this frame was
+                // rendered at: the picture follows the slider at once, and the
+                // proper render replaces it a moment later.
                 Image(decorative: frame.image, scale: 1)
                     .resizable()
-                    .scaledToFit()
+                    .aspectRatio(liveAspect(of: frame), contentMode: .fit)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(Brand.spacingMD)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Inspect the corrected photo")
-            .overlay(alignment: .topTrailing) {
-                if session.isRendering {
-                    ProgressView().tint(Brand.coral).padding(Brand.spacingLG)
-                }
-            }
 
             HStack(alignment: .bottom) {
                 readout
@@ -64,6 +62,13 @@ struct PreviewPane: View {
             }
             .padding(Brand.spacingMD)
         }
+    }
+
+    private func liveAspect(of frame: CoreImageRenderer.Frame) -> CGFloat {
+        if let out = session.outputSize, out.height > 0 {
+            return CGFloat(out.width) / CGFloat(out.height)
+        }
+        return CGFloat(frame.image.width) / CGFloat(max(frame.image.height, 1))
     }
 
     /// Dimensions and ratio, set as a frame-edge annotation.

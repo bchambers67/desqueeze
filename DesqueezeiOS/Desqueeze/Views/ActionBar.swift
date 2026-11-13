@@ -7,19 +7,20 @@ import UIKit
 enum BarEdge {
     case bottom, trailing
 
-    /// An open iPhone Duo gets the bar down its right side; everything else
-    /// gets it along the bottom.
+    /// An open iPhone Duo held sideways gets the bar down its right side;
+    /// everything else, an open Duo held upright included, gets it along the
+    /// bottom.
     ///
     /// Apple publishes no API that says "this is a Duo" or "it is open", and
     /// does not publish its size classes, so this goes by the one thing that
     /// is published: the inner display is 1878 pixels on its short side, about
     /// 626 points, where the widest slab iPhone is 440. A phone whose window
     /// is at least `openDuoShortSide` points on its short side can only be an
-    /// open Duo. Folded, its outer display is narrower than that, and the bar
-    /// returns to the bottom.
+    /// open Duo. Folded, its outer display is narrower than that.
     @MainActor
     static func resolve(for size: CGSize, idiom: UIUserInterfaceIdiom = UIDevice.current.userInterfaceIdiom) -> BarEdge {
-        idiom == .phone && min(size.width, size.height) >= openDuoShortSide ? .trailing : .bottom
+        let isOpenDuo = idiom == .phone && min(size.width, size.height) >= openDuoShortSide
+        return isOpenDuo && size.width > size.height ? .trailing : .bottom
     }
 
     private static let openDuoShortSide: CGFloat = 520
@@ -69,6 +70,11 @@ struct BottomBarItems: ToolbarContent {
 /// render, and morph, as a single layer.
 struct SideBar: View {
     let model: AppModel
+    /// Room left at the top for the clock and status icons, which an open Duo
+    /// draws in this same strip.
+    var topClearance: CGFloat = 20
+
+    static let width: CGFloat = 76
 
     var body: some View {
         GlassEffectContainer(spacing: 14) {
@@ -98,8 +104,9 @@ struct SideBar: View {
             }
             .controlSize(.large)
             .buttonBorderShape(.circle)
-            .padding(.vertical, 20)
-            .padding(.horizontal, 12)
+            .padding(.top, topClearance)
+            .padding(.bottom, 20)
+            .frame(width: Self.width)
         }
     }
 }
@@ -200,23 +207,78 @@ struct FactorSheet: View {
 
 /// A squeeze factor on a slider, with the lens presets as its stop points.
 ///
-/// The slider moves in hundredths. Each preset is marked beneath the track,
-/// and arriving on one gives a light selection tap, so the common factors can
-/// be found by feel while every value in between stays reachable.
+/// The thumb follows the finger, but the factor snaps to the nearest preset,
+/// with a light tap on each one it lands on. Holding still between two
+/// presets for two seconds lets go of the snap: from then until the finger
+/// lifts, the factor follows the thumb in hundredths.
 struct FactorSlider: View {
     @Binding var factor: Double
 
+    /// Where the thumb is. The factor is this, snapped, unless the snap has
+    /// been released.
+    @State private var raw: Double
+    @State private var isDragging = false
+    @State private var isFree = false
+    @State private var holdAnchor: Double?
+    @State private var hold: Task<Void, Never>?
+
+    init(factor: Binding<Double>) {
+        _factor = factor
+        _raw = State(initialValue: factor.wrappedValue)
+    }
+
     static let range: ClosedRange<Double> = 1.0...2.0
     static let stops: [SqueezePreset] = SqueezePreset.selectable.filter { $0.factor != nil }
+    static let holdToRelease: Duration = .seconds(2)
 
     static func clamped(_ value: Double) -> Double {
         let bounded = min(max(value, range.lowerBound), range.upperBound)
         return (bounded * 100).rounded() / 100
     }
 
-    /// The preset the thumb is resting on, if any.
+    static func nearestStop(to value: Double) -> Double {
+        stops.compactMap(\.factor).min { abs($0 - value) < abs($1 - value) } ?? value
+    }
+
+    /// The preset the factor is resting on, if any.
     private var stop: SqueezePreset? {
         Self.stops.first { abs(($0.factor ?? 0) - factor) < 0.005 }
+    }
+
+    /// The thumb moved under a finger.
+    private func moved(to value: Double) {
+        if isFree {
+            factor = value
+            return
+        }
+        let snapped = Self.nearestStop(to: value)
+        factor = snapped
+
+        // On a stop there is nothing to wait for.
+        guard abs(snapped - value) > 0.005 else {
+            hold?.cancel()
+            holdAnchor = nil
+            return
+        }
+        // A finger held still still trembles by a step; that is not a move.
+        if let holdAnchor, abs(value - holdAnchor) < 0.015 { return }
+        hold?.cancel()
+        holdAnchor = value
+        hold = Task {
+            try? await Task.sleep(for: Self.holdToRelease)
+            guard !Task.isCancelled else { return }
+            isFree = true
+            factor = raw
+        }
+    }
+
+    private func dragChanged(_ editing: Bool) {
+        isDragging = editing
+        guard !editing else { return }
+        hold?.cancel()
+        holdAnchor = nil
+        isFree = false
+        raw = factor        // the thumb settles where the factor is
     }
 
     /// Roughly half the system thumb: how far the track's ends sit inside the
@@ -232,25 +294,34 @@ struct FactorSlider: View {
                     .monospacedDigit()
                     .contentTransition(.numericText())
                 Spacer()
-                Text(stop?.hint.capitalized ?? "Custom")
+                Text(stop?.hint.capitalized ?? (isDragging && !isFree ? "Hold to fine-tune" : "Custom"))
                     .font(Brand.sans(12))
                     .foregroundStyle(stop == nil ? Brand.silver : Brand.coral)
             }
 
             HStack(spacing: 12) {
                 nudge(-0.01, "minus", "Down 0.01")
-                Slider(value: $factor, in: Self.range, step: 0.01) {
-                    Text("Squeeze factor")
-                }
-                .tint(Brand.coral)
-                .accessibilityValue(String(format: "%.2f", factor))
-                .background(alignment: .bottom) { ticks.offset(y: 22) }
+                Slider(value: $raw, in: Self.range, step: 0.01, onEditingChanged: dragChanged)
+                    .tint(Brand.coral)
+                    .accessibilityLabel("Squeeze factor")
+                    .accessibilityValue(String(format: "%.2f", factor))
+                    .background(alignment: .bottom) { ticks.offset(y: 22) }
                 nudge(0.01, "plus", "Up 0.01")
             }
             .padding(.bottom, 24)
         }
+        .onChange(of: raw) { _, new in
+            // A change that only mirrors the factor did not come from a finger.
+            if abs(new - factor) > 0.001 || isDragging { moved(to: new) }
+        }
+        .onChange(of: factor) { _, new in
+            if !isDragging, abs(raw - new) > 0.001 { raw = new }
+        }
+        .onDisappear { hold?.cancel() }
         // A tap on arriving at a stop point, and none on leaving it.
         .sensoryFeedback(.selection, trigger: stop) { _, new in new != nil }
+        // A firmer one when a hold releases the snap.
+        .sensoryFeedback(.impact(weight: .medium), trigger: isFree) { _, new in new }
     }
 
     /// A mark under the track for each preset; a tap on one jumps to it.

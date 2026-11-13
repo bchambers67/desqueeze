@@ -106,12 +106,16 @@ hairlines, coral as punctuation only.
 
 **Controls are Liquid Glass.** They float above the photograph in one glass
 layer, following Apple's *Adopting Liquid Glass*: the system toolbar along the
-bottom on iPhone, and on an open iPhone Duo a bar down the right side, built
+bottom on iPhone and on an open Duo held upright, and on an open Duo held
+sideways a bar against the right edge, built
 from the system's glass button styles in a single `GlassEffectContainer`. Icons
 carry accessibility labels; the factor, being text, has a group to itself. Its
-button opens a short sheet with a slider from 1.00 to 2.00 in hundredths. The
-nine lens presets are stop points marked under the track, and arriving on one
-gives a light haptic tap. Coral marks Save and the factor. The brand's square corners and flat surfaces hold for the
+button opens a short sheet with a slider from 1.00 to 2.00. The nine lens
+presets are stop points marked under the track: the factor snaps to them, with
+a light haptic tap on each. Holding still between two stops for two seconds
+releases the snap, and the factor then follows the thumb in hundredths until
+the finger lifts. The preview reshapes with the factor at once and the proper
+render follows; renders asked for while one is running collapse into one. Coral marks Save and the factor. The brand's square corners and flat surfaces hold for the
 content layer beneath; the glass layer keeps the system's shapes.
 
 `BarEdge` decides the side from the window's size, not from a device check or a

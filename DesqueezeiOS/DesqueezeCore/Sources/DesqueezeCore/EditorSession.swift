@@ -41,6 +41,7 @@ public final class EditorSession<Renderer: FrameRenderer> {
     private var longestEdge = 2400
     /// Bumped per render request; a result is only shown if still the newest.
     private var generation = 0
+    private var renderLoopIsRunning = false
 
     public init(renderer: Renderer) { self.renderer = renderer }
 
@@ -123,23 +124,35 @@ public final class EditorSession<Renderer: FrameRenderer> {
         isRendering = false
     }
 
+    /// Renders the newest request, and only the newest.
+    ///
+    /// A slider asks for a render on every step. Requests that arrive while
+    /// one is running do not queue behind it: they are folded into a single
+    /// follow-up for whatever the factor is by then, so the preview is never
+    /// more than one render behind the thumb.
     private func render() async {
-        guard let source else { return }
+        guard source != nil else { return }
         generation += 1
-        let mine = generation
+        guard !renderLoopIsRunning else { return }
+        renderLoopIsRunning = true
         isRendering = true
-        // Only the newest render may clear the flag; an older one finishing
-        // while a newer is still running must leave it set.
-        defer { if mine == generation { isRendering = false } }
-        do {
-            let frame = try await renderer.preview(of: source, squeeze: squeeze, longestEdge: longestEdge)
-            // A slower, older render must not overwrite a newer one.
-            guard mine == generation else { return }
-            preview = frame
-            failure = nil
-        } catch {
-            guard mine == generation else { return }
-            failure = error.localizedDescription
+        defer {
+            renderLoopIsRunning = false
+            isRendering = false
+        }
+        while let source {
+            let mine = generation
+            do {
+                let frame = try await renderer.preview(of: source, squeeze: squeeze, longestEdge: longestEdge)
+                // Superseded while it ran: drop it and go round for the newest.
+                guard mine == generation else { continue }
+                preview = frame
+                failure = nil
+            } catch {
+                guard mine == generation else { continue }
+                failure = error.localizedDescription
+            }
+            return
         }
     }
 }
