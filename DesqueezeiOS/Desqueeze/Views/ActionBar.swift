@@ -257,6 +257,10 @@ struct FactorSheet: View {
     var body: some View {
         FactorControl(model: model)
             .padding(20)
+            // The sheet spans the screen, so its content may too. A cover
+            // display reserves a strip down one side that would otherwise
+            // squeeze the slider.
+            .ignoresSafeArea(.container, edges: .horizontal)
             .presentationDetents([.height(FactorControl.hasSuggestion(model) ? 270 : 200)])
             .presentationBackgroundInteraction(.enabled)
             .presentationDragIndicator(.visible)
@@ -362,29 +366,34 @@ struct FactorSlider: View {
     private let labelled: Set<SqueezePreset> = [.x133, .x150, .x175, .x200]
 
     var body: some View {
-        VStack(spacing: 10) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(String(format: "%.2f×", factor))
-                    .font(Brand.mono(26, weight: .medium))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Spacer()
-                Text(stop?.hint.capitalized ?? (isDragging && !isFree ? "Hold to fine-tune" : "Custom"))
-                    .font(Brand.sans(12))
-                    .foregroundStyle(stop == nil ? Brand.silver : Brand.coral)
-            }
-
+        VStack(spacing: 12) {
+            // The nudges flank the readout, so the slider below has the whole
+            // width to itself, which matters most on a narrow cover display.
             HStack(spacing: 12) {
                 nudge(-0.01, "minus", "Down 0.01")
-                Slider(value: $raw, in: Self.range, step: 0.01, onEditingChanged: dragChanged)
-                    .tint(Brand.coral)
-                    .accessibilityLabel("Squeeze factor")
-                    .accessibilityValue(String(format: "%.2f", factor))
-                    .background(alignment: .bottom) { ticks.offset(y: 22) }
+                VStack(spacing: 2) {
+                    Text(String(format: "%.2f×", factor))
+                        .font(Brand.mono(24, weight: .medium))
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                    Text(stop?.hint.capitalized ?? (isDragging && !isFree ? "Hold to fine-tune" : "Custom"))
+                        .font(Brand.sans(12))
+                        .foregroundStyle(stop == nil ? Brand.silver : Brand.coral)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .frame(maxWidth: .infinity)
                 nudge(0.01, "plus", "Up 0.01")
             }
-            .padding(.bottom, 24)
+
+            Slider(value: $raw, in: Self.range, step: 0.01, onEditingChanged: dragChanged)
+                .tint(Brand.coral)
+                .accessibilityLabel("Squeeze factor")
+                .accessibilityValue(String(format: "%.2f", factor))
+                .background(alignment: .bottom) { ticks.offset(y: 24) }
+                .padding(.bottom, 26)
         }
+        .tint(Brand.white)
         .onChange(of: raw) { _, new in
             // A change that only mirrors the factor did not come from a finger.
             if abs(new - factor) > 0.001 || isDragging { moved(to: new) }
@@ -418,7 +427,10 @@ struct FactorSlider: View {
                             .fixedSize()
                     }
                 }
-                .frame(width: 1, alignment: .top)
+                // A fixed, top-aligned box: every mark starts on the same line
+                // whether or not it carries a label, so the short marks never
+                // drop into the row of figures.
+                .frame(width: 1, height: 24, alignment: .top)
                 .position(x: x, y: 12)
             }
         }
@@ -433,9 +445,10 @@ struct FactorSlider: View {
         } label: {
             Label(name, systemImage: symbol)
                 .labelStyle(.iconOnly)
-                .frame(width: 36, height: 36)
+                .frame(width: 28, height: 28)
         }
         .buttonStyle(.bordered)
+        .buttonBorderShape(.circle)
         .buttonRepeatBehavior(.enabled)
     }
 }
