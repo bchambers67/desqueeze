@@ -6,26 +6,9 @@
     {
       "layers": [
         {
-          "glass": false,
-          "image-name": "3-aperture.svg",
-          "name": "aperture"
-        }
-      ],
-      "shadow": {
-        "kind": "none",
-        "opacity": 0.5
-      },
-      "translucency": {
-        "enabled": false,
-        "value": 0.5
-      }
-    },
-    {
-      "layers": [
-        {
           "glass": true,
-          "image-name": "2-lens.svg",
-          "name": "lens"
+          "image-name": "field.svg",
+          "name": "field"
         }
       ],
       "shadow": {
@@ -35,23 +18,6 @@
       "translucency": {
         "enabled": true,
         "value": 0.3
-      }
-    },
-    {
-      "layers": [
-        {
-          "glass": true,
-          "image-name": "1-frame.svg",
-          "name": "frame"
-        }
-      ],
-      "shadow": {
-        "kind": "neutral",
-        "opacity": 0.5
-      },
-      "translucency": {
-        "enabled": true,
-        "value": 0.4
       }
     }
   ],
