@@ -80,10 +80,8 @@ A20 Pro.
 documents no such API, and the developer *What's New* page does not mention
 foldables at all. Folding is handled the way any other resize is handled:
 
-- Layout branches on `horizontalSizeClass`, not on device or measured points.
-  Regular → image and controls side by side. Compact → image above, controls
-  beneath. This covers the Duo's two states and every iPad configuration
-  without a device check.
+- The photograph fills the screen in both states; only the action bar moves,
+  from the bottom edge folded to the right edge open.
 - Document state lives in `EditorSession`, owned by the app, never in
   view-local `@State`. A fold is a resize: SwiftUI rebuilds the tree around the
   new size class, and view-local state goes with it. Holding it outside is what
@@ -105,6 +103,18 @@ with Space Mono for frame-edge annotations. Square corners throughout, silver
 hairlines, coral as punctuation only.
 
 `BrandTheme.swift` is the single place a colour or face is declared.
+
+**Controls are Liquid Glass.** They float above the photograph in one glass
+layer, following Apple's *Adopting Liquid Glass*: the system toolbar along the
+bottom on iPhone, and on an open iPhone Duo a bar down the right side, built
+from the system's glass button styles in a single `GlassEffectContainer`. Icons
+carry accessibility labels; the factor, being text, has a group to itself; coral
+appears once, on Save. The brand's square corners and flat surfaces hold for the
+content layer beneath; the glass layer keeps the system's shapes.
+
+`BarEdge` decides the side from the window's size, not from a device check or a
+fold API: an open Duo's short side is about 626 points and no slab iPhone
+exceeds 440.
 
 **One deliberate departure.** The guide sets reading surfaces on white and
 reserves chamber grounds for "covers, decks, and gallery materials." This app

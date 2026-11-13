@@ -13,8 +13,8 @@
 		97072BA9276C863DDD24E740 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5650F65F933ADEFD15FD877 /* AppModel.swift */; };
 		C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D6210A0C9331BB3D874A7B /* BrandTheme.swift */; };
 		C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */; };
+		29BE1E7FAE3923F78EEB92E2 /* ActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A686FB922363CCD771D011D /* ActionBar.swift */; };
 		50565145AD73F9B69A1372E6 /* BatchPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A84CC9232B7469B0C8C57D /* BatchPane.swift */; };
-		AB697797E935001326609F05 /* ControlsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5657A349571B3E18F0C718B /* ControlsPane.swift */; };
 		9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729E7EA7D7C368ED72BF9567 /* InspectorView.swift */; };
 		DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577BC15846CD67CA3BFE4338 /* PreviewPane.swift */; };
 		D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6795F82E61A2E6B03DFFCD1C /* RootView.swift */; };
@@ -30,8 +30,8 @@
 		F5650F65F933ADEFD15FD877 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		75D6210A0C9331BB3D874A7B /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
 		1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
+		5A686FB922363CCD771D011D /* ActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBar.swift; sourceTree = "<group>"; };
 		15A84CC9232B7469B0C8C57D /* BatchPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchPane.swift; sourceTree = "<group>"; };
-		D5657A349571B3E18F0C718B /* ControlsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsPane.swift; sourceTree = "<group>"; };
 		729E7EA7D7C368ED72BF9567 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		577BC15846CD67CA3BFE4338 /* PreviewPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
 		6795F82E61A2E6B03DFFCD1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -96,8 +96,8 @@
 		AC64880DAB13448F132866D4 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				5A686FB922363CCD771D011D /* ActionBar.swift */,
 				15A84CC9232B7469B0C8C57D /* BatchPane.swift */,
-				D5657A349571B3E18F0C718B /* ControlsPane.swift */,
 				729E7EA7D7C368ED72BF9567 /* InspectorView.swift */,
 				577BC15846CD67CA3BFE4338 /* PreviewPane.swift */,
 				6795F82E61A2E6B03DFFCD1C /* RootView.swift */,
@@ -194,8 +194,8 @@
 				97072BA9276C863DDD24E740 /* AppModel.swift in Sources */,
 				C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */,
 				C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */,
+				29BE1E7FAE3923F78EEB92E2 /* ActionBar.swift in Sources */,
 				50565145AD73F9B69A1372E6 /* BatchPane.swift in Sources */,
-				AB697797E935001326609F05 /* ControlsPane.swift in Sources */,
 				9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */,
 				DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */,
 				D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */,

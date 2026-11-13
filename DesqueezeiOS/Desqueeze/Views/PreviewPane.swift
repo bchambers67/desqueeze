@@ -30,9 +30,6 @@ struct PreviewPane: View {
                 picked = []
             }
         }
-        .fullScreenCover(isPresented: Binding(get: { model.isInspecting }, set: { model.isInspecting = $0 })) {
-            InspectorView(session: session)
-        }
     }
 
     // MARK: - Loaded
@@ -75,7 +72,7 @@ struct PreviewPane: View {
         if let out = session.outputSize, let source = session.sourceSize {
             HStack(spacing: Brand.spacingSM) {
                 CoralRule(width: 10)
-                FrameMark(text: "\(out.width) × \(out.height)")
+                FrameMark(text: "\(source.width) × \(source.height) → \(out.width) × \(out.height)")
                 FrameMark(text: String(format: "· %.2f:1", session.squeeze.aspectRatio(for: source)))
             }
             .padding(.horizontal, Brand.spacingSM)

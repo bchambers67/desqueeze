@@ -1,39 +1,39 @@
 import SwiftUI
 
-/// Root layout.
+/// Root layout: the photograph fills the screen, and the controls float over
+/// it in a single Liquid Glass layer.
 ///
-/// The Duo presents two canvases, a 5.4" outer display and a 7.6" inner one,
-/// and switches between them while the app runs. This branches on the
-/// horizontal size class, which is what actually changes, rather than on the
-/// device or on measured points; the same branch serves iPad.
-///
-/// Apple publishes no hinge or fold API, so nothing here reads one.
+/// On an open iPhone Duo that layer is a bar down the right side; on every
+/// other device it is the system toolbar along the bottom. Folding or opening
+/// a Duo moves it between the two while the app runs. Apple publishes no hinge
+/// or fold API, so nothing here reads one: `BarEdge` goes by the window's size.
 struct RootView: View {
-    let model: AppModel
+    @Bindable var model: AppModel
 
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.displayScale) private var displayScale
-
-    private var isWide: Bool { horizontalSizeClass == .regular }
+    @State private var customDraft = ""
 
     var body: some View {
         GeometryReader { proxy in
-            Group {
-                if isWide {
-                    HStack(spacing: 0) {
-                        canvas.frame(maxWidth: .infinity)
-                        Rectangle().fill(Brand.hairline).frame(width: Brand.hairlineWidth)
-                        ControlsPane(model: model).frame(width: 330)
+            let edge = BarEdge.resolve(for: proxy.size)
+
+            NavigationStack {
+                canvas
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // The content layer keeps the brand ground and runs to
+                    // every edge, beneath the glass.
+                    .background(Brand.chamber.ignoresSafeArea())
+                    .safeAreaInset(edge: .trailing, spacing: 0) {
+                        if edge == .trailing { SideBar(model: model) }
                     }
-                } else {
-                    VStack(spacing: 0) {
-                        canvas.frame(maxHeight: .infinity)
-                        Hairline()
-                        ControlsPane(model: model).frame(maxHeight: proxy.size.height * 0.46)
+                    .overlay(alignment: .top) { StatusChip(model: model) }
+                    .toolbar {
+                        if edge == .bottom { BottomBarItems(model: model) }
                     }
-                }
+                    .toolbar(.hidden, for: .navigationBar)
+                    .animation(.smooth(duration: 0.3), value: edge)
+                    .animation(.smooth(duration: 0.2), value: model.notice)
             }
-            .background(Brand.chamber)
             // Renders are sized for the surface showing them. This fires again
             // when the device is folded or opened, and the session re-renders
             // for the new display while keeping the photo and the factor.
@@ -41,10 +41,25 @@ struct RootView: View {
                 let longest = max(proxy.size.width, proxy.size.height) * displayScale
                 await model.session.fit(longestEdge: max(1200, Int(longest * 1.25)))
             }
-            .animation(.smooth(duration: 0.28), value: isWide)
         }
         .preferredColorScheme(.dark)
-        .tint(Brand.coral)
+        .tint(Brand.white)
+        .fullScreenCover(isPresented: $model.isInspecting) {
+            InspectorView(session: model.session)
+        }
+        .sheet(item: $model.sharedFile) { file in
+            ActivitySheet(url: file.url)
+        }
+        .alert("Custom factor", isPresented: $model.isEnteringCustom) {
+            TextField("1.33", text: $customDraft)
+                .keyboardType(.decimalPad)
+            Button("Cancel", role: .cancel) {}
+            Button("Use") {
+                Task { await model.useTyped(customDraft) }
+            }
+        } message: {
+            Text("Between 1.00 and 3.00.")
+        }
     }
 
     @ViewBuilder

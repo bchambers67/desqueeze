@@ -22,6 +22,8 @@ final class AppModel {
     // Held here rather than in a view: a fold rebuilds the views, and an open
     // inspector or a running save must not reset when it does.
     var isInspecting = false
+    var isEnteringCustom = false
+    var sharedFile: SharedFile?
     private(set) var isWorking = false
 
     struct Notice: Equatable {
@@ -34,6 +36,9 @@ final class AppModel {
     enum Mode { case single, batch }
 
     static let batchLimit = 36
+
+    /// Whether there is anything to act on: an open photo or a queued batch.
+    var hasContent: Bool { session.hasPhoto || !batch.items.isEmpty }
 
     init() {
         let renderer = CoreImageRenderer()
@@ -81,6 +86,15 @@ final class AppModel {
         }
     }
 
+    /// A factor typed by hand. One that cannot be read is reported, and the
+    /// factor in use stays as it was.
+    func useTyped(_ text: String) async {
+        await session.type(text)
+        notice = session.typedFactorIsValid
+            ? nil
+            : Notice(text: "“\(text)” is not a factor. Try something like 1.5.", isError: true)
+    }
+
     /// Runs one output action at a time, and says so while it does.
     func perform(_ action: @MainActor () async -> Void) async {
         guard !isWorking else { return }
@@ -91,6 +105,7 @@ final class AppModel {
 
     func reset() {
         isInspecting = false
+        sharedFile = nil
         session.close()
         batch.clear()
         suggestion = nil
@@ -109,17 +124,16 @@ final class AppModel {
         }
     }
 
-    /// The export written to a temporary file, for the share sheet.
-    func exportedFile() async -> URL? {
+    /// Renders the export to a temporary file and hands it to the share sheet.
+    func share() async {
         do {
             let data = try await session.export()
             let name = String(format: "desqueeze_%.2fx.jpg", session.squeeze.factor)
             let url = FileManager.default.temporaryDirectory.appendingPathComponent(name)
             try data.write(to: url, options: .atomic)
-            return url
+            sharedFile = SharedFile(url: url)
         } catch {
             notice = Notice(text: error.localizedDescription, isError: true)
-            return nil
         }
     }
 
