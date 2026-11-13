@@ -36,6 +36,24 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 
+	<!-- iPad must offer every orientation to take part in multitasking; App
+	     Store validation rejects a build that does not. -->
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.photography</string>
+
+	<!-- The app uses no encryption of its own, which answers the export
+	     compliance question for every upload. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

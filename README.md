@@ -52,7 +52,7 @@ nine squeeze presets as the macOS app.
 dotnet run --project DesqueezeWindows -c Release
 ```
 
-CI publishes a self-contained single-file `Desqueeze.exe` on every push touching
+CI publishes a self-contained single-file `StillScope.exe` on every push touching
 `DesqueezeWindows/` — see `.github/workflows/build-windows.yml`.
 
 The Windows client has no equivalent of the Vision-based auto-estimator; factors
