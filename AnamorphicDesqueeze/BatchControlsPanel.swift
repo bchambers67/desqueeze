@@ -17,7 +17,6 @@ struct BatchControlsPanel: View {
             }
             .padding(Brand.spacingLG)
         }
-        .background(Brand.backgroundSecondary)
     }
 
     private var brandHeader: some View {

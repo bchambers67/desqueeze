@@ -68,33 +68,27 @@ applied only to static labels, never to bound text.
 
 ## Brand
 
-The interface implements the Chambers & Light system. Tokens are the
-authoritative `:root` custom properties published at chambersandlight.com;
-`BrandTheme.swift` (macOS) and `BrandTheme.xaml` (Windows) are the only places
-a colour or face is declared.
+The macOS and iOS apps implement the Chambers & Light brand guide. `BrandTheme.swift`
+in each is the only place a colour or face is declared.
 
-The palette follows a darkroom metaphor: the **chamber** holds the image,
-**paper** receives it, **halide** is the light-sensitive layer, **grain** the
-texture, and **safelight** the only illumination safe to work by.
+| Colour  | Hex       | Use                                                |
+|---------|-----------|----------------------------------------------------|
+| Chamber | `#201612` | Window ground. Never pure black.                   |
+| Coral   | `#FF6748` | Accent only: rules, active state, the Export tint. |
+| Silver  | `#C2C1BA` | Borders, dividers, secondary text.                 |
+| White   | `#FFFFFF` | Text on chamber.                                   |
 
-| Token            | Hex       | Use                                   |
-|------------------|-----------|---------------------------------------|
-| `chamber`        | `#16110F` | Window ground, image wells            |
-| `pine`           | `#1C2723` | Selected rows, raised surfaces        |
-| `paper`          | `#ECEAE1` | Primary text, active labels           |
-| `halide`         | `#C7D9CE` | Numeric readouts, highlights          |
-| `halide-deep`    | `#98B1A3` | Secondary text, section labels        |
-| `grain`          | `#6E665F` | Tertiary text, hints, disabled states |
-| `safelight`      | `#E63E2D` | Accent — selection, export, errors    |
-| `safelight-deep` | `#C22E1F` | Pressed state                         |
+Errors use a separate red, `#D32F2F`: coral sits too close to a warning colour
+to double as one. Type is one sans (Neue Haas Grotesk, falling back to Helvetica
+Neue) with Space Mono for figures; headings are tracked `.05em`–`.15em`.
 
-**Typography** — Bodoni Moda (falling back through Didot to Georgia) for the
-wordmark, Archivo for interface copy, Space Mono for factors and dimensions.
-Each stack is resolved against the faces actually installed, so both apps
-degrade cleanly on a machine without the brand fonts rather than substituting
-silently. Uppercase labels are tracked between `.12em` and `.22em`.
+**Controls are Liquid Glass.** The photograph fills the window. Primary actions
+sit in the window toolbar and the detail in a trailing inspector, both standard
+system components, so the material, grouping and shapes are Apple's own. The
+app draws no backgrounds behind them. The brand's flat, tight-cornered rules
+hold for the content layer; coral reaches the glass once, as the tint on Export.
 
-Corners are square and rules are hairlines throughout.
+The Windows and web clients have not been moved to this palette yet.
 
 ## App icon
 
