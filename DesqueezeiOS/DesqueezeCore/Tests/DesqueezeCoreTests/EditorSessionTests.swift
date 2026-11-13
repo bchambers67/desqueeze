@@ -138,4 +138,21 @@ struct EditorSessionTests {
         await session.choose(.x200)          // 12000 wide: too large to hold as one bitmap
         #expect(try await session.inspectionFrame() == Rendered(factor: 2.0, longestEdge: 8192))
     }
+
+    @Test("clearing while a photo is still opening leaves nothing open")
+    func closesMidOpen() async {
+        let renderer = FakeRenderer()
+        let gate = Gate()
+        renderer.openGate = gate
+        let session = EditorSession(renderer: renderer)
+
+        let opening = Task { await session.open(photo) }
+        await gate.untilAsked(for: 0)
+        session.close()
+        await gate.release(0)
+        await opening.value
+
+        #expect(session.hasPhoto == false)
+        #expect(session.preview == nil)
+    }
 }

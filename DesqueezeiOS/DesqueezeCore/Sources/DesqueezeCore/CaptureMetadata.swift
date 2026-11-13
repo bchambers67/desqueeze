@@ -40,7 +40,10 @@ public enum CaptureMetadata {
             if marker == 0xda { return nil }                // scan starts: no Exif
             let length = Int(b[i + 2]) << 8 | Int(b[i + 3])
             guard length >= 2, i + 2 + length <= b.count else { return nil }
-            if marker == 0xe1 { return i..<(i + 2 + length) }
+            // APP1 carries XMP as well as Exif; only the Exif one is wanted.
+            if marker == 0xe1, length >= 8, Array(b[(i + 4)..<(i + 10)]) == exifHeader {
+                return i..<(i + 2 + length)
+            }
             i += 2 + length
         }
         return nil
@@ -79,8 +82,11 @@ public enum CaptureMetadata {
                 guard entry + 12 <= b.count else { return false }
                 let tag = u16(entry)
                 if followPointer, tag == 0x8769 { subIFD = tiffStart + u32(entry + 8); continue }
-                guard tag == 0xa002 || tag == 0xa003 else { continue }
-                let value = tag == 0xa002 ? size.width : size.height
+                // The renderer bakes rotation into the pixels. Left as found,
+                // the tag would have every viewer rotate the export again.
+                let isOrientation = followPointer && tag == 0x0112
+                guard tag == 0xa002 || tag == 0xa003 || isOrientation else { continue }
+                let value = isOrientation ? 1 : tag == 0xa002 ? size.width : size.height
                 let bytes: [UInt8]
                 switch u16(entry + 2) {
                 case 3: bytes = [UInt8(value & 0xff), UInt8(value >> 8 & 0xff)]

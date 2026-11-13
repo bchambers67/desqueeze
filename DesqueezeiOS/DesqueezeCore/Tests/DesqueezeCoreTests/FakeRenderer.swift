@@ -33,9 +33,12 @@ actor Gate {
 final class FakeRenderer: FrameRenderer, @unchecked Sendable {
     static let unreadable = Data("not an image".utf8)
     var gate: Gate?
+    /// Holds `size(of:)` open, keyed 0, to test what happens mid-open.
+    var openGate: Gate?
     var exported = Fixture.jpeg(Fixture.jfif)
 
     func size(of source: Data) async throws -> PixelSize {
+        await openGate?.hold(0)
         if source == Self.unreadable { throw Unreadable() }
         return PixelSize(width: 6000, height: 4000)
     }

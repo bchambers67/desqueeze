@@ -35,7 +35,7 @@ public final class BatchQueue<Renderer: FrameRenderer> {
     public func clear() { items.removeAll() }
 
     public var finishedCount: Int { items.count(where: { $0.state == .done }) }
-    public var isRunning: Bool { items.contains { $0.state == .working } }
+    public private(set) var isRunning = false
 
     /// Gives one photo its own factor; `nil` returns it to following the batch.
     public func setSqueeze(_ squeeze: Squeeze?, for id: Item.ID) {
@@ -43,11 +43,18 @@ public final class BatchQueue<Renderer: FrameRenderer> {
         items[index].squeeze = squeeze
     }
 
-    /// Corrects each waiting photo and hands the result to `save`.
+    /// Corrects each unfinished photo and hands the result to `save`. A call
+    /// made while a run is under way returns at once.
     public func run(squeeze: Squeeze, saving save: (_ name: String, _ file: Data) async throws -> Void) async {
-        for index in items.indices where items[index].state != .done {
-            items[index].state = .working
-            let item = items[index]
+        guard !isRunning else { return }
+        isRunning = true
+        defer { isRunning = false }
+
+        // Walked by identity, not position: the list can change under a run,
+        // and an index taken before an await may not mean the same photo after.
+        for id in items.filter({ $0.state != .done }).map(\.id) {
+            guard let item = items.first(where: { $0.id == id }) else { continue }
+            setState(.working, for: id)
             do {
                 let source = try await item.load()
                 let own = item.squeeze ?? squeeze
@@ -55,11 +62,16 @@ public final class BatchQueue<Renderer: FrameRenderer> {
                 let jpeg = try await renderer.export(source, squeeze: own)
                 let file = CaptureMetadata.carry(from: source, onto: jpeg, size: size)
                 try await save(Self.outputName(for: item.name, squeeze: own), file)
-                items[index].state = .done
+                setState(.done, for: id)
             } catch {
-                items[index].state = .failed(error.localizedDescription)
+                setState(.failed(error.localizedDescription), for: id)
             }
         }
+    }
+
+    private func setState(_ state: Item.State, for id: Item.ID) {
+        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        items[index].state = state
     }
 
     /// `IMG_0001.HEIC` at 1.5× → `IMG_0001_desqueeze_1_50x.jpg`. The factor goes

@@ -8,12 +8,19 @@ struct ControlsPane: View {
 
     @State private var picked: [PhotosPickerItem] = []
     @State private var typed = ""
-    @State private var isWorking = false
     @State private var shared: SharedFile?
     @FocusState private var customFocused: Bool
 
     private var session: Session { model.session }
     private var isBatch: Bool { model.mode == .batch }
+    private var isWorking: Bool { model.isWorking }
+
+    init(model: AppModel) {
+        self.model = model
+        // Seeded here, not in onAppear: setting it after the view appears
+        // would look like typing, and re-select the custom factor on a fold.
+        _typed = State(initialValue: model.session.typedFactor)
+    }
 
     var body: some View {
         ScrollView {
@@ -33,7 +40,11 @@ struct ControlsPane: View {
         }
         .background(Brand.chamberRaised)
         .scrollDismissesKeyboard(.interactively)
-        .onAppear { typed = session.typedFactor }
+        // A factor set from elsewhere, such as an accepted suggestion, shows
+        // in the field too.
+        .onChange(of: session.typedFactor) { _, text in
+            if typed != text { typed = text }
+        }
         .onChange(of: picked) { _, items in
             guard !items.isEmpty else { return }
             Task {
@@ -164,6 +175,7 @@ struct ControlsPane: View {
                     Rectangle().stroke(invalid ? Brand.error : active ? Brand.coral : Brand.hairline, lineWidth: 1)
                 )
                 .onChange(of: typed) { _, text in
+                    guard text != session.typedFactor else { return }
                     Task { await session.type(text) }
                 }
 
@@ -268,7 +280,7 @@ struct ControlsPane: View {
         }
     }
 
-    private func primary(_ title: String, enabled: Bool, action: @escaping () async -> Void) -> some View {
+    private func primary(_ title: String, enabled: Bool, action: @escaping @MainActor () async -> Void) -> some View {
         let live = enabled && !isWorking
         return Button {
             run(action)
@@ -285,7 +297,7 @@ struct ControlsPane: View {
         .disabled(!live)
     }
 
-    private func secondary(_ title: String, enabled: Bool, action: @escaping () async -> Void) -> some View {
+    private func secondary(_ title: String, enabled: Bool, action: @escaping @MainActor () async -> Void) -> some View {
         let live = enabled && !isWorking
         return Button {
             run(action)
@@ -302,12 +314,8 @@ struct ControlsPane: View {
         .disabled(!live)
     }
 
-    private func run(_ action: @escaping () async -> Void) {
-        isWorking = true
-        Task {
-            await action()
-            isWorking = false
-        }
+    private func run(_ action: @escaping @MainActor () async -> Void) {
+        Task { await model.perform(action) }
     }
 
     // MARK: - Colophon

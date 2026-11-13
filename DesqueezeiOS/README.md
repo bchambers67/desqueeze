@@ -25,7 +25,7 @@ The logic lives in `DesqueezeCore`, a Swift package with no UIKit, Core Image or
 Vision in it, built test-first. The app is views and three adapters on top.
 
 ```
-cd DesqueezeiOS/DesqueezeCore && swift test      # 27 tests, runs on macOS or Linux
+cd DesqueezeiOS/DesqueezeCore && swift test      # 33 tests, runs on macOS or Linux
 ```
 
 In Xcode the same tests run from the `DesqueezeCore` scheme.
@@ -55,7 +55,7 @@ passing the squeeze factor as `aspectRatio` widens the frame, leaves its height
 untouched, and reconstructs with Lanczos — the right filter for a single-axis
 upscale.
 
-That is the whole of `DesqueezeService.desqueeze(_:factor:)`. It is an `actor`,
+That is the whole of `CoreImageRenderer.widened(_:by:)`. The renderer is an `actor`,
 so decode and render stay off the main thread and cannot overlap.
 
 Preview renders are capped to roughly the pixels the current display can show. A
@@ -121,6 +121,11 @@ because it is a reading of the guide, not a rule in it.
 - **Batch photos are numbered, not named.** The picker gives no filename
   without photo-library read access, which this app does not ask for.
 - **Exports are JPEG.** TIFF and PNG are on macOS.
+- **Suggestions are for single photos.** macOS also reads faces per batch item;
+  here a batch follows the factor you choose, with per-photo overrides.
+- **JPEG sources keep their Exif block byte for byte**, maker notes included.
+  HEIC, RAW and other sources keep what Core Image can restate: date, camera,
+  lens, exposure and location. An embedded Exif thumbnail is carried as shot.
 - **No app icon yet.**
 
 ## iOS 27 adoption

@@ -45,13 +45,18 @@ public final class EditorSession<Renderer: FrameRenderer> {
     public init(renderer: Renderer) { self.renderer = renderer }
 
     public func open(_ data: Data) async {
+        generation += 1
+        let mine = generation
         do {
             let size = try await renderer.size(of: data)
+            // Closed, or another photo opened, while this one was loading.
+            guard mine == generation else { return }
             source = data
             sourceSize = size
             failure = nil
             await render()
         } catch {
+            guard mine == generation else { return }
             source = nil
             sourceSize = nil
             preview = nil

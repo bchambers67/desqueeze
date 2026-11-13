@@ -19,13 +19,15 @@ enum PhotoLibraryWriter {
         }
     }
 
-    static func save(jpeg data: Data) async throws {
+    static func save(jpeg data: Data, named name: String? = nil) async throws {
         let status = await requestAddOnlyAccess()
         guard status == .authorized || status == .limited else { throw Failure.denied }
 
         try await PHPhotoLibrary.shared().performChanges {
             let request = PHAssetCreationRequest.forAsset()
-            request.addResource(with: .photo, data: data, options: nil)
+            let options = PHAssetResourceCreationOptions()
+            options.originalFilename = name
+            request.addResource(with: .photo, data: data, options: options)
         }
     }
 

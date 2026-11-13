@@ -7,7 +7,6 @@ struct PreviewPane: View {
     let model: AppModel
 
     @State private var picked: [PhotosPickerItem] = []
-    @State private var inspecting = false
 
     private var session: Session { model.session }
 
@@ -31,7 +30,7 @@ struct PreviewPane: View {
                 picked = []
             }
         }
-        .fullScreenCover(isPresented: $inspecting) {
+        .fullScreenCover(isPresented: Binding(get: { model.isInspecting }, set: { model.isInspecting = $0 })) {
             InspectorView(session: session)
         }
     }
@@ -41,7 +40,7 @@ struct PreviewPane: View {
     private func loaded(_ frame: CoreImageRenderer.Frame) -> some View {
         ZStack(alignment: .bottomLeading) {
             Button {
-                inspecting = true
+                model.isInspecting = true
             } label: {
                 Image(decorative: frame.image, scale: 1)
                     .resizable()

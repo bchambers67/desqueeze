@@ -78,4 +78,35 @@ struct BatchQueueTests {
         #expect(queue.items.map(\.state) == [.done, .done])
         #expect(shelf.saved.map(\.name) == ["a_desqueeze_2_00x.jpg", "b_desqueeze_2_00x.jpg"])
     }
+
+    @Test("asking to run while a run is under way does not save anything twice")
+    func runsOnce() async {
+        let queue = queue(), shelf = Shelf(), gate = Gate()
+        queue.add(name: "a.jpg") { await gate.hold(1); return self.photo }
+
+        let first = Task { await queue.run(squeeze: Squeeze(factor: 2.0), saving: shelf.save) }
+        await gate.untilAsked(for: 1)
+        await queue.run(squeeze: Squeeze(factor: 2.0), saving: shelf.save)   // the second tap
+        await gate.release(1)
+        await first.value
+
+        #expect(shelf.saved.map(\.name) == ["a_desqueeze_2_00x.jpg"])
+    }
+
+    @Test("a photo removed while the batch runs is skipped, and the rest still save")
+    func survivesRemoval() async {
+        let queue = queue(), shelf = Shelf(), gate = Gate()
+        queue.add(name: "a.jpg") { await gate.hold(1); return self.photo }
+        queue.add(name: "b.jpg") { self.photo }
+        queue.add(name: "c.jpg") { self.photo }
+
+        let running = Task { await queue.run(squeeze: Squeeze(factor: 2.0), saving: shelf.save) }
+        await gate.untilAsked(for: 1)
+        queue.remove(queue.items[1].id)
+        await gate.release(1)
+        await running.value
+
+        #expect(shelf.saved.map(\.name) == ["a_desqueeze_2_00x.jpg", "c_desqueeze_2_00x.jpg"])
+        #expect(queue.items.map(\.state) == [.done, .done])
+    }
 }

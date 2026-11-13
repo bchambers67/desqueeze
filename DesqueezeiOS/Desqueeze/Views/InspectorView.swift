@@ -23,7 +23,7 @@ struct InspectorView: View {
             bar
             Hairline()
             ZStack {
-                Color.black
+                Brand.chamber
                 if let frame {
                     ZoomableImage(image: frame.image, displayScale: displayScale,
                                   command: $command, zoomPercent: $zoomPercent)
@@ -80,6 +80,20 @@ struct InspectorView: View {
 
 enum ZoomCommand { case fit, actualPixels }
 
+/// A scroll view that reports each layout pass, so zoom limits can follow its
+/// real size.
+final class FittingScrollView: UIScrollView {
+    var onLayout: ((FittingScrollView) -> Void)?
+    private var lastSize: CGSize = .zero
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard bounds.size != lastSize else { return }
+        lastSize = bounds.size
+        onLayout?(self)
+    }
+}
+
 /// A pinch-zoomable image in which a zoom scale of 1 means one image pixel per
 /// display pixel.
 private struct ZoomableImage: UIViewRepresentable {
@@ -90,10 +104,13 @@ private struct ZoomableImage: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator(zoomPercent: $zoomPercent) }
 
-    func makeUIView(context: Context) -> UIScrollView {
-        let scroll = UIScrollView()
+    func makeUIView(context: Context) -> FittingScrollView {
+        let scroll = FittingScrollView()
         scroll.delegate = context.coordinator
-        scroll.backgroundColor = .black
+        scroll.backgroundColor = UIColor(Brand.chamber)
+        // Limits depend on the view's size, which is not known until layout,
+        // and changes again on a fold or rotation.
+        scroll.onLayout = { [coordinator = context.coordinator] in coordinator.layoutIfNeeded($0) }
         scroll.showsVerticalScrollIndicator = false
         scroll.showsHorizontalScrollIndicator = false
         scroll.contentInsetAdjustmentBehavior = .never
@@ -115,11 +132,10 @@ private struct ZoomableImage: UIViewRepresentable {
         return scroll
     }
 
-    func updateUIView(_ scroll: UIScrollView, context: Context) {
-        context.coordinator.layoutIfNeeded(scroll)
+    func updateUIView(_ scroll: FittingScrollView, context: Context) {
         if let command {
             switch command {
-            case .fit:          scroll.setZoomScale(scroll.minimumZoomScale, animated: true)
+            case .fit:          scroll.setZoomScale(context.coordinator.fitScale, animated: true)
             case .actualPixels: scroll.setZoomScale(1, animated: true)
             }
             DispatchQueue.main.async { self.command = nil }
@@ -131,13 +147,13 @@ private struct ZoomableImage: UIViewRepresentable {
         weak var imageView: UIImageView?
         private var zoomPercent: Binding<Int>
         private var laidOutFor: CGSize = .zero
+        private(set) var fitScale: CGFloat = 1
 
         init(zoomPercent: Binding<Int>) { self.zoomPercent = zoomPercent }
 
         /// Sets the zoom limits for the scroll view's current size, and starts
         /// at fit. Runs again when the size changes, as on a fold or rotation.
         func layoutIfNeeded(_ scroll: UIScrollView) {
-            scroll.layoutIfNeeded()
             guard let imageView, scroll.bounds.size != laidOutFor,
                   scroll.bounds.width > 0, imageView.bounds.width > 0 else { return }
             laidOutFor = scroll.bounds.size
@@ -146,6 +162,7 @@ private struct ZoomableImage: UIViewRepresentable {
                           scroll.bounds.height / imageView.bounds.height)
             // The floor is fit or 1:1, whichever is smaller, so 1:1 is always
             // reachable even for a photo smaller than the screen.
+            fitScale = fit
             scroll.minimumZoomScale = min(fit, 1)
             scroll.maximumZoomScale = max(6, fit * 8)
             scroll.zoomScale = fit
@@ -178,7 +195,7 @@ private struct ZoomableImage: UIViewRepresentable {
         @objc func doubleTapped(_ gesture: UITapGestureRecognizer) {
             guard let scroll = gesture.view as? UIScrollView, let imageView else { return }
             if abs(scroll.zoomScale - 1) < 0.01 {
-                scroll.setZoomScale(scroll.minimumZoomScale, animated: true)
+                scroll.setZoomScale(fitScale, animated: true)
             } else {
                 let point = gesture.location(in: imageView)
                 let size = CGSize(width: scroll.bounds.width, height: scroll.bounds.height)

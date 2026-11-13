@@ -24,7 +24,7 @@ enum Fixture {
     /// An Exif APP1 segment recording `width`×`height`, plus a Make tag so
     /// there is something besides the dimensions that must survive untouched.
     static func app1(width: Int, height: Int, order: Order = .little,
-                     layout: Layout = .subIFD, value: Width = .long) -> [UInt8] {
+                     layout: Layout = .subIFD, value: Width = .long, orientation: Int? = nil) -> [UInt8] {
         var tiff: [UInt8] = (order == .little ? [0x49, 0x49] : [0x4d, 0x4d]) + u16(0x2a, order) + u32(8, order)
         let make = entry(0x010f, .short, 0x4343, order)   // stand-in "Make"
         let dims = entry(0xa002, value, width, order) + entry(0xa003, value, height, order)
@@ -32,8 +32,10 @@ enum Fixture {
         case .ifd0:
             tiff += u16(3, order) + make + dims + u32(0, order)
         case .subIFD:
-            // IFD0 at 8: count(2) + 2 entries(24) + next(4) = 30 → sub-IFD at 38.
-            tiff += u16(2, order) + make + entry(0x8769, .long, 38, order) + u32(0, order)
+            // IFD0 at 8: count(2) + entries(12 each) + next(4), then the sub-IFD.
+            let turn = orientation.map { entry(0x0112, .short, $0, order) } ?? []
+            let count = turn.isEmpty ? 2 : 3
+            tiff += u16(count, order) + make + turn + entry(0x8769, .long, 8 + 2 + count * 12 + 4, order) + u32(0, order)
             tiff += u16(2, order) + dims + u32(0, order)
         }
         let body: [UInt8] = [0x45, 0x78, 0x69, 0x66, 0, 0] + tiff
@@ -41,6 +43,8 @@ enum Fixture {
     }
 
     static let soi: [UInt8] = [0xff, 0xd8]
+    /// An APP1 segment that is XMP, not Exif: same marker, different payload.
+    static let xmp: [UInt8] = [0xff, 0xe1, 0x00, 0x08, 0x68, 0x74, 0x74, 0x70, 0x3a, 0x2f]
     static let jfif: [UInt8] = [0xff, 0xe0, 0x00, 0x04, 0x4a, 0x46]
     /// Start-of-scan onward: stands in for the compressed picture.
     static let scan: [UInt8] = [0xff, 0xda, 0x00, 0x02, 0x11, 0x22, 0x33, 0xff, 0xd9]

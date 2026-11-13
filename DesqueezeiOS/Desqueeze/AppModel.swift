@@ -19,6 +19,11 @@ final class AppModel {
     private(set) var suggestion: Double?
     private(set) var notice: Notice?
 
+    // Held here rather than in a view: a fold rebuilds the views, and an open
+    // inspector or a running save must not reset when it does.
+    var isInspecting = false
+    private(set) var isWorking = false
+
     struct Notice: Equatable {
         var text: String
         var isError: Bool
@@ -76,7 +81,16 @@ final class AppModel {
         }
     }
 
+    /// Runs one output action at a time, and says so while it does.
+    func perform(_ action: @MainActor () async -> Void) async {
+        guard !isWorking else { return }
+        isWorking = true
+        defer { isWorking = false }
+        await action()
+    }
+
     func reset() {
+        isInspecting = false
         session.close()
         batch.clear()
         suggestion = nil
@@ -87,7 +101,8 @@ final class AppModel {
 
     func saveToLibrary() async {
         do {
-            try await PhotoLibraryWriter.save(jpeg: try await session.export())
+            let name = String(format: "desqueeze_%.2fx.jpg", session.squeeze.factor)
+            try await PhotoLibraryWriter.save(jpeg: try await session.export(), named: name)
             notice = Notice(text: "Saved to your library.", isError: false)
         } catch {
             notice = Notice(text: error.localizedDescription, isError: true)
@@ -110,8 +125,8 @@ final class AppModel {
 
     func runBatch() async {
         notice = nil
-        await batch.run(squeeze: session.squeeze) { _, file in
-            try await PhotoLibraryWriter.save(jpeg: file)
+        await batch.run(squeeze: session.squeeze) { name, file in
+            try await PhotoLibraryWriter.save(jpeg: file, named: name)
         }
         let failed = batch.items.count - batch.finishedCount
         notice = failed == 0

@@ -1,5 +1,6 @@
 import CoreImage
 import CoreImage.CIFilterBuiltins
+import ImageIO
 import DesqueezeCore
 import UIKit
 
@@ -56,6 +57,34 @@ actor CoreImageRenderer: FrameRenderer {
         return filter.outputImage ?? image
     }
 
+    /// The source's metadata, restated for the corrected frame.
+    ///
+    /// Core Image writes a frame's properties into the file it encodes, which
+    /// is what keeps date, camera, lens and location on a HEIC or RAW source.
+    /// (A JPEG source goes one better afterwards: `CaptureMetadata` swaps in
+    /// its original Exif block byte for byte, maker notes included.)
+    private func metadata(from original: CIImage, squeeze: Squeeze) -> [String: Any] {
+        var properties = original.properties
+        let width = Int((original.extent.width * squeeze.factor).rounded())
+        let height = Int(original.extent.height.rounded())
+
+        // Rotation is baked into the pixels by now; say so, or every viewer
+        // rotates the export a second time.
+        properties[kCGImagePropertyOrientation as String] = 1
+        properties[kCGImagePropertyPixelWidth as String] = width
+        properties[kCGImagePropertyPixelHeight as String] = height
+
+        var tiff = properties[kCGImagePropertyTIFFDictionary as String] as? [String: Any] ?? [:]
+        tiff[kCGImagePropertyTIFFOrientation as String] = 1
+        properties[kCGImagePropertyTIFFDictionary as String] = tiff
+
+        var exif = properties[kCGImagePropertyExifDictionary as String] as? [String: Any] ?? [:]
+        exif[kCGImagePropertyExifPixelXDimension as String] = width
+        exif[kCGImagePropertyExifPixelYDimension as String] = height
+        properties[kCGImagePropertyExifDictionary as String] = exif
+        return properties
+    }
+
     // MARK: - FrameRenderer
 
     func size(of source: Data) async throws -> PixelSize {
@@ -77,7 +106,8 @@ actor CoreImageRenderer: FrameRenderer {
     }
 
     func export(_ source: Data, squeeze: Squeeze) async throws -> Data {
-        let output = widened(try image(from: source), by: squeeze)
+        let original = try image(from: source)
+        let output = widened(original, by: squeeze).settingProperties(metadata(from: original, squeeze: squeeze))
         let quality = CIImageRepresentationOption(rawValue: kCGImageDestinationLossyCompressionQuality as String)
         guard let jpeg = context.jpegRepresentation(of: output, colorSpace: outputSpace, options: [quality: 0.92]) else {
             throw Failure.renderFailed
