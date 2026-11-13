@@ -10,11 +10,19 @@ struct SettingsSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Add a 5% matte", isOn: $model.addsMatte)
+                    Toggle("Add a matte", isOn: $model.addsMatte)
+                    if model.addsMatte {
+                        Picker("Matte size", selection: $model.matteSize) {
+                            ForEach(AppModel.MatteSize.allCases) { size in
+                                Text(size.label).tag(size)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
                 } header: {
                     Text("Export")
                 } footer: {
-                    Text("Saved and shared photos get a white border, 5% of the long edge on every side. The preview shows the photo without it.")
+                    Text("Saved and shared photos get a white border on every side: 2% of the long edge for small, 5% for medium. The preview shows the photo without it.")
                 }
 
                 Section {

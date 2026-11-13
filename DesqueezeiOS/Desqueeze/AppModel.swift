@@ -34,10 +34,28 @@ final class AppModel {
     var addsMatte: Bool {
         didSet {
             UserDefaults.standard.set(addsMatte, forKey: Self.matteKey)
-            session.matte = addsMatte ? .standard : nil
+            applyMatte()
+        }
+    }
+    var matteSize: MatteSize {
+        didSet {
+            UserDefaults.standard.set(matteSize.rawValue, forKey: Self.matteSizeKey)
+            applyMatte()
         }
     }
     private static let matteKey = "export.addsMatte"
+    private static let matteSizeKey = "export.matteSize"
+
+    enum MatteSize: String, CaseIterable, Identifiable {
+        case small, medium
+        var id: String { rawValue }
+        var matte: Matte { self == .small ? .small : .medium }
+        var label: String { self == .small ? "Small · 2%" : "Medium · 5%" }
+    }
+
+    private func applyMatte() {
+        session.matte = addsMatte ? matteSize.matte : nil
+    }
 
     /// Whether to look through recent photos for ones that need correcting.
     /// Off until the owner turns it on, because it reads the library.
@@ -80,8 +98,10 @@ final class AppModel {
         session = Session(renderer: renderer)
         batch = Batch(renderer: renderer)
         addsMatte = UserDefaults.standard.bool(forKey: Self.matteKey)
+        // Medium is what the matte was before there was a choice.
+        matteSize = UserDefaults.standard.string(forKey: Self.matteSizeKey).flatMap(MatteSize.init) ?? .medium
         findsSqueezed = UserDefaults.standard.bool(forKey: Self.findKey)
-        session.matte = addsMatte ? .standard : nil
+        applyMatte()
     }
 
     // MARK: - Finding squeezed photos

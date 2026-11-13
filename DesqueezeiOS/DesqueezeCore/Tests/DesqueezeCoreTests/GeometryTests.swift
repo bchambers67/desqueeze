@@ -35,6 +35,14 @@ struct GeometryTests {
         #expect(Squeeze(typed: text)?.factor == expected)
     }
 
+    @Test("the small matte is 2% of the long edge and the medium one 5%")
+    func matteSizes() {
+        let frame = PixelSize(width: 6000, height: 4000)
+        #expect(Matte.small.border(for: frame) == 120)
+        #expect(Matte.medium.border(for: frame) == 300)
+        #expect(Matte.small.outputSize(for: frame) == PixelSize(width: 6240, height: 4240))
+    }
+
     @Test("a 5% matte adds a twentieth of the long edge to every side")
     func matte() {
         let matte = Matte(fraction: 0.05)

@@ -79,7 +79,7 @@ External testing asks for the following. Text you can paste:
 > once and snap to the lens presets. Hold between two presets for two seconds
 > to fine-tune. Tap the photo to inspect it at 1:1. Save, then check the
 > result in Photos. Pick several photos to try the batch grid. In Settings,
-> turn on the 5% matte and save again. On an iPhone Duo, fold and unfold
+> turn on the matte, try both sizes, and save again. On an iPhone Duo, fold and unfold
 > while a photo is open.
 
 **Feedback email**: your own address.
