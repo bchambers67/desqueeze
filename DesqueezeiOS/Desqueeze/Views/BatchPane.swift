@@ -152,11 +152,15 @@ private struct ItemFactorSheet: View {
             }
 
             FactorSlider(factor: $factor)
+
+            SheetDoneButton { dismiss() }
         }
-        .padding(20)
+        .padding(.horizontal, 20)
+        .padding(.top, 22)
+        .padding(.bottom, 12)
         .ignoresSafeArea(.container, edges: .horizontal)
         .onChange(of: factor) { _, new in choose(Squeeze(factor: new)) }
-        .presentationDetents([.height(240)])
+        .fittedSheet()
         .presentationDragIndicator(.visible)
     }
 }
