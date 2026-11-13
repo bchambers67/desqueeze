@@ -25,9 +25,15 @@ final class AppModel {
     // Held here rather than in a view: a fold rebuilds the views, and an open
     // inspector or a running save must not reset when it does.
     var isInspecting = false
-    var isChoosingFactor = false
-    /// The docked slider on an open Duo held sideways; shown until dismissed.
-    var isFactorDockShown = true
+    /// Whether the factor panel is open, once the owner has said. Until
+    /// then it follows the layout: open beside a photo on an open Duo held
+    /// sideways, where there is room, and closed elsewhere.
+    var factorPanelChoice: Bool?
+
+    func showsFactorPanel(besideSideBar: Bool) -> Bool {
+        factorPanelChoice ?? (besideSideBar && hasContent)
+    }
+
     var isShowingSettings = false
 
     /// Settings. Each is kept between launches.

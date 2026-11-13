@@ -33,6 +33,7 @@ enum BarEdge {
 /// background.
 struct BottomBarItems: ToolbarContent {
     let model: AppModel
+    let panelShown: Bool
 
     var body: some ToolbarContent {
         // Grouped by what they act on: the queue, the correction, the result.
@@ -45,7 +46,7 @@ struct BottomBarItems: ToolbarContent {
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
-            FactorButton(model: model)
+            FactorButton(model: model, panelShown: panelShown)
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         if model.mode == .single {
@@ -72,6 +73,7 @@ struct BottomBarItems: ToolbarContent {
 /// render, and morph, as a single layer.
 struct SideBar: View {
     let model: AppModel
+    let panelShown: Bool
     /// Room left at the top for the clock and status icons, which an open Duo
     /// draws in this same strip.
     var topClearance: CGFloat = 20
@@ -105,7 +107,7 @@ struct SideBar: View {
 
                 Spacer(minLength: 0)
 
-                FactorButton(model: model, togglesDock: true)
+                FactorButton(model: model, panelShown: panelShown, iconOnly: true)
                     .buttonStyle(.glass)
 
                 Spacer(minLength: 0)
@@ -197,25 +199,21 @@ private struct SettingsButton: View {
     }
 }
 
-/// The squeeze factor control's button.
+/// The squeeze factor control's button: it opens and closes the factor panel.
 ///
-/// Along the bottom it shows the factor and opens the slider in a sheet. In
-/// the side bar there is no room for a number, and the slider is docked on
-/// screen with the number beside it, so the button is a symbol, a frame
-/// opening outward from its centre line, that shows or hides the dock.
+/// Along the bottom it shows the factor. In the side bar there is no room for
+/// a number, so it is a symbol, a frame opening outward from its centre line,
+/// and the panel shows the number.
 private struct FactorButton: View {
     let model: AppModel
-    var togglesDock = false
+    let panelShown: Bool
+    var iconOnly = false
 
     var body: some View {
         Button {
-            if togglesDock {
-                model.isFactorDockShown.toggle()
-            } else {
-                model.isChoosingFactor = true
-            }
+            model.factorPanelChoice = !panelShown
         } label: {
-            if togglesDock {
+            if iconOnly {
                 Label("Squeeze factor", systemImage: "arrow.left.and.line.vertical.and.arrow.right")
                     .labelStyle(.iconOnly)
             } else {
@@ -227,14 +225,17 @@ private struct FactorButton: View {
                     .padding(.horizontal, 4)
             }
         }
+        // Lit while its panel is open, as the one thing that closes it.
+        .foregroundStyle(panelShown ? Brand.accent : Brand.primary)
         .accessibilityLabel("Squeeze factor")
         .accessibilityValue(String(format: "%.2f", model.session.squeeze.factor))
+        .accessibilityAddTraits(panelShown ? .isSelected : [])
         .disabled(model.isWorking)
     }
 }
 
 /// The slider wired to the session: the factor it shows is the session's, and
-/// moving it re-renders. Used in the sheet and in the dock.
+/// moving it re-renders.
 struct FactorControl: View {
     let model: AppModel
     @State private var factor: Double
@@ -272,32 +273,6 @@ struct FactorControl: View {
     }
 }
 
-/// The factor slider in a sheet exactly as tall as its contents, so it covers
-/// no more of the photograph than it has to.
-struct FactorSheet: View {
-    let model: AppModel
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(spacing: 14) {
-            FactorControl(model: model)
-            // The sheet can cover the action bar on a small display, so it
-            // carries its own way out.
-            SheetDoneButton { dismiss() }
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 22)
-        .padding(.bottom, 12)
-        // The sheet spans the screen, so its content may too. A cover
-        // display reserves a strip down one side that would otherwise
-        // squeeze the slider.
-        .ignoresSafeArea(.container, edges: .horizontal)
-        .fittedSheet()
-        .presentationBackgroundInteraction(.enabled)
-        .presentationDragIndicator(.visible)
-    }
-}
-
 struct SheetDoneButton: View {
     let action: () -> Void
 
@@ -328,9 +303,13 @@ extension View {
     func fittedSheet() -> some View { modifier(FittedSheet()) }
 }
 
-/// The factor slider docked along the bottom, for an open iPhone Duo held
-/// sideways, where there is room to keep it on screen beside the photograph.
-struct FactorDock: View {
+/// The factor slider in a glass panel above the action bar.
+///
+/// It is part of the screen, not a sheet over it: the bar stays in reach
+/// below, the photograph stays in view above, and the panel takes the space
+/// between. It grows out of the factor button that opens it, the way a folder
+/// opens on the Home Screen, and shrinks back into it.
+struct FactorPanel: View {
     let model: AppModel
 
     var body: some View {
@@ -342,6 +321,27 @@ struct FactorDock: View {
             .glassEffect(.regular, in: .rect(cornerRadius: 26))
             .padding(.horizontal, Brand.spacingMD)
             .padding(.bottom, 10)
+    }
+}
+
+/// How the panel arrives and leaves: scaled up from the button, sharpening
+/// and fading in as it grows.
+struct ZoomFromButton: ViewModifier {
+    let progress: Double
+    let anchor: UnitPoint
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(0.12 + 0.88 * progress, anchor: anchor)
+            .opacity(progress)
+            .blur(radius: (1 - progress) * 10)
+    }
+}
+
+extension AnyTransition {
+    static func zoom(from anchor: UnitPoint) -> AnyTransition {
+        .modifier(active: ZoomFromButton(progress: 0, anchor: anchor),
+                  identity: ZoomFromButton(progress: 1, anchor: anchor))
     }
 }
 
