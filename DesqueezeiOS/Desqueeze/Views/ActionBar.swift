@@ -41,7 +41,7 @@ struct BottomBarItems: ToolbarContent {
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
-            FactorMenu(model: model)
+            FactorButton(model: model)
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         if model.mode == .single {
@@ -80,7 +80,7 @@ struct SideBar: View {
 
                 Spacer(minLength: 0)
 
-                FactorMenu(model: model)
+                FactorButton(model: model)
                     .buttonStyle(.glass)
 
                 Spacer(minLength: 0)
@@ -138,49 +138,125 @@ private struct ClearButton: View {
     }
 }
 
-/// The squeeze factor: the current value as the label, the glass as the menu.
-private struct FactorMenu: View {
+/// The squeeze factor: shows the current value, and opens the factor sheet.
+private struct FactorButton: View {
     let model: AppModel
-    private var session: Session { model.session }
 
     var body: some View {
-        Menu {
-            if model.mode == .single, let suggestion = model.suggestion {
-                Section("Read from faces") {
-                    Button {
-                        Task { await model.useSuggestion() }
-                    } label: {
-                        Label(String(format: "Use %.2f×", suggestion), systemImage: "face.dashed")
-                    }
-                }
-            }
-            Section(model.mode == .batch ? "Batch factor" : "Squeeze factor") {
-                ForEach(SqueezePreset.selectable) { preset in
-                    Toggle(isOn: Binding(
-                        get: { session.preset == preset },
-                        set: { _ in Task { await session.choose(preset) } }
-                    )) {
-                        Text(preset.label)
-                        Text(preset.hint.capitalized)
-                    }
-                }
-            }
-            Section {
-                Button {
-                    model.isEnteringCustom = true
-                } label: {
-                    Label("Custom…", systemImage: "number")
-                }
-            }
+        Button {
+            model.isChoosingFactor = true
         } label: {
-            Text(String(format: "%.2f×", session.squeeze.factor))
+            Text(String(format: "%.2f×", model.session.squeeze.factor))
                 .font(Brand.mono(15, weight: .medium))
                 .monospacedDigit()
                 .padding(.horizontal, 4)
         }
         .accessibilityLabel("Squeeze factor")
-        .accessibilityValue(String(format: "%.2f", session.squeeze.factor))
+        .accessibilityValue(String(format: "%.2f", model.session.squeeze.factor))
         .disabled(model.isWorking)
+    }
+}
+
+/// Every factor on one sheet, as targets big enough for a thumb.
+///
+/// Nothing here scrolls: the nine presets are a 3 × 3 grid, and a custom
+/// factor is nudged with buttons rather than typed, so there is no list to
+/// drag through and no keyboard to bring up.
+struct FactorSheet: View {
+    let model: AppModel
+    private var session: Session { model.session }
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+
+    var body: some View {
+        VStack(spacing: 18) {
+            Text(model.mode == .batch ? "Batch factor" : "Squeeze factor")
+                .font(Brand.sans(15, weight: .medium))
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if model.mode == .single, let suggestion = model.suggestion {
+                Button {
+                    Task { await model.useSuggestion() }
+                } label: {
+                    Label(String(format: "Use %.2f×, read from faces", suggestion), systemImage: "face.dashed")
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                }
+                .buttonStyle(.bordered)
+            }
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(SqueezePreset.selectable) { preset in
+                    tile(preset)
+                }
+            }
+
+            nudger
+        }
+        .controlSize(.large)
+        .padding(20)
+        .presentationDetents([.height(model.mode == .single && model.suggestion != nil ? 470 : 410)])
+        .presentationDragIndicator(.visible)
+    }
+
+    @ViewBuilder
+    private func tile(_ preset: SqueezePreset) -> some View {
+        let label = VStack(spacing: 3) {
+            Text(preset.label)
+                .font(Brand.mono(17, weight: .medium))
+            Text(preset.hint.capitalized)
+                .font(Brand.sans(10))
+                .opacity(0.75)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, minHeight: 48)
+
+        // The chosen factor is the one filled, tinted control on the sheet.
+        if session.preset == preset {
+            Button { } label: { label }
+                .buttonStyle(.borderedProminent)
+                .tint(Brand.coral)
+                .accessibilityAddTraits(.isSelected)
+        } else {
+            Button {
+                Task { await session.choose(preset) }
+            } label: { label }
+                .buttonStyle(.bordered)
+        }
+    }
+
+    /// A custom factor, nudged in hundredths or twentieths.
+    private var nudger: some View {
+        HStack(spacing: 10) {
+            step(-0.05, "minus.circle.fill", "Down 0.05")
+            step(-0.01, "minus", "Down 0.01")
+
+            VStack(spacing: 2) {
+                Text(String(format: "%.2f×", session.squeeze.factor))
+                    .font(Brand.mono(20, weight: .medium))
+                    .monospacedDigit()
+                Text(session.preset == .custom ? "Custom" : "Fine-tune")
+                    .font(Brand.sans(10))
+                    .opacity(0.75)
+            }
+            .frame(maxWidth: .infinity)
+
+            step(0.01, "plus", "Up 0.01")
+            step(0.05, "plus.circle.fill", "Up 0.05")
+        }
+    }
+
+    private func step(_ delta: Double, _ symbol: String, _ name: String) -> some View {
+        Button {
+            let next = ((session.squeeze.factor + delta) * 100).rounded() / 100
+            Task { await model.useTyped(String(format: "%.2f", next)) }
+        } label: {
+            Label(name, systemImage: symbol)
+                .labelStyle(.iconOnly)
+                .frame(width: 30, height: 30)
+        }
+        .buttonStyle(.bordered)
+        .buttonRepeatBehavior(.enabled)
     }
 }
 
