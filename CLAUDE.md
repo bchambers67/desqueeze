@@ -40,6 +40,10 @@ or removing a Swift file or asset in `DesqueezeiOS/Desqueeze`, regenerate it:
 cd DesqueezeiOS && python3 generate_project.py "$PWD"
 ```
 
+The project has three targets: the app, and the `PhotoEdit` and `Share`
+extensions under `DesqueezeiOS/Extensions`. The generator lists which app
+files the extensions also compile, in `SHARED`.
+
 The owner's signing team is set in the generator. Do not hand-edit the project
 file; change the generator instead.
 
