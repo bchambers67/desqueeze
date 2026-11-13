@@ -62,3 +62,17 @@ The workflow is named Default, in the Xcode Cloud product named Desqueeze.
   the External Testers group in App Store Connect when one is worth sharing.
 - Changes outside `DesqueezeiOS/`, such as Windows, web, brand or docs, do
   not start an iOS build.
+
+## Adding an app extension
+
+Xcode Cloud cannot register a new bundle identifier, and its export step
+fails with "Automatic signing cannot register bundle identifier" until one
+exists. Before merging a new extension target, have the owner register its
+identifier at developer.apple.com under Identifiers, as an explicit App ID
+with no capabilities. The two existing extensions are registered:
+`com.chambersandlight.stillscope.share` and
+`com.chambersandlight.stillscope.photoedit`.
+
+Compile and archive errors show on the Xcode Cloud build page. Export and
+signing errors do not: they are only in the build's downloadable "Logs for
+Desqueeze archive", in `xcodebuild-export-archive.log`.
