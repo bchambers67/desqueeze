@@ -29,7 +29,8 @@ struct RootView: View {
                     // edge, so it runs into the strip and starts below them.
                     .overlay(alignment: .trailing) {
                         if edge == .trailing {
-                            SideBar(model: model, topClearance: bar.topClearance, width: bar.width)
+                            SideBar(model: model, topClearance: bar.topClearance,
+                                    width: bar.width, centreShift: bar.centreShift)
                         }
                     }
                     .ignoresSafeArea(.container, edges: edge == .trailing ? .trailing : [])
