@@ -20,6 +20,14 @@ struct RootView: View {
             NavigationStack {
                 canvas
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // Sideways on an open Duo the slider stays on screen,
+                    // under the photograph, instead of in a sheet.
+                    .safeAreaInset(edge: .bottom, spacing: 0) {
+                        if edge == .trailing, model.isFactorDockShown, model.hasContent {
+                            FactorDock(model: model)
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                        }
+                    }
                     // The content layer keeps the brand ground and runs to
                     // every edge, beneath the glass.
                     .padding(.trailing, edge == .trailing ? bar.width : 0)
@@ -40,6 +48,9 @@ struct RootView: View {
                     }
                     .toolbar(.hidden, for: .navigationBar)
                     .animation(.smooth(duration: 0.3), value: edge)
+                    .animation(.smooth(duration: 0.25), value: model.isFactorDockShown)
+                    // The sheet belongs to the bottom bar; the dock replaces it.
+                    .onChange(of: edge) { _, _ in model.isChoosingFactor = false }
                     .animation(.smooth(duration: 0.2), value: model.notice)
             }
             // Renders are sized for the surface showing them. This fires again
