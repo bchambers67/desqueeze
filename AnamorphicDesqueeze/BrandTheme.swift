@@ -3,58 +3,57 @@ import AppKit
 
 /// Chambers & Light brand system.
 ///
-/// Tokens mirror the authoritative definitions published at chambersandlight.com
-/// (`:root` custom properties). The palette follows a darkroom metaphor: the
-/// `chamber` holds the image, `paper` receives it, `halide` is the light‑sensitive
-/// layer, `grain` the texture, and `safelight` the only illumination safe to work by.
+/// Tokens come from the C&L brand guide: four colours, one sans, one mono.
+/// Nothing outside that table is used.
+///
+/// Two layers, two sets of rules. The content layer — the photograph, its
+/// readouts, the batch list — follows the guide: chamber ground, tight
+/// corners, hairlines, no shadows or gradients. The toolbar and inspector that
+/// frame it are the system's Liquid Glass, with the system's shapes; the brand
+/// reaches them only as the coral tint on the primary action.
 enum Brand {
 
     // MARK: - Palette
 
-    /// `--chamber` · warm near‑black. Primary background.
-    static let chamber       = Color(hex: "#16110F")
-    /// `--pine` · deep green‑black. Raised surfaces and panels.
-    static let pine          = Color(hex: "#1C2723")
-    /// `--paper` · warm bone. Primary text.
-    static let paper         = Color(hex: "#ECEAE1")
-    /// `--halide` · pale mint. Highlights and active text.
-    static let halide        = Color(hex: "#C7D9CE")
-    /// `--halide-deep` · sage. Secondary text.
-    static let halideDeep    = Color(hex: "#98B1A3")
-    /// `--grain` · warm mid grey. Tertiary text and disabled states.
-    static let grain         = Color(hex: "#6E665F")
-    /// `--safelight` · darkroom red. Primary accent and calls to action.
-    static let safelight     = Color(hex: "#E63E2D")
-    /// `--safelight-deep` · deeper red. Pressed and hover states.
-    static let safelightDeep = Color(hex: "#C22E1F")
+    /// Chamber · the brand's near-black. Never `#000000`.
+    static let chamber  = Color(hex: "#201612")
+    /// Coral · accent only: rules, the active state, the primary action.
+    static let coral    = Color(hex: "#FF6748")
+    /// Silver · borders, dividers, secondary text.
+    static let silver   = Color(hex: "#C2C1BA")
+    /// White · text on chamber.
+    static let white    = Color(hex: "#FFFFFF")
+    /// Errors get their own red: coral sits too close to a warning colour to
+    /// double as one.
+    static let error    = Color(hex: "#D32F2F")
 
-    /// `--edge-light` · hairline rule on dark ground.
-    static let edgeLight     = Color(white: 0.925, opacity: 0.16)
-    /// `--edge` · hairline rule on paper ground.
-    static let edge          = Color(hex: "#16110F").opacity(0.14)
+    /// Hairline rule on chamber ground: silver, heavily reduced.
+    static let edgeLight = silver.opacity(0.22)
 
     // MARK: - Semantic aliases
+    //
+    // The views bind to these, so the palette can change in one place.
 
     static let backgroundPrimary   = chamber
-    static let backgroundSecondary = Color(hex: "#1A1512")   // chamber, one step raised
-    static let surface             = pine
-    static let surfaceElevated     = Color(hex: "#243029")   // pine, one step raised
-    static let accent              = safelight
-    static let textPrimary         = paper
-    static let textSecondary       = halideDeep
-    static let textTertiary        = grain
+    static let backgroundSecondary = Color(hex: "#2B1F1A")   // chamber, one step raised
+    static let surface             = Color(hex: "#2B1F1A")
+    static let surfaceElevated     = Color(hex: "#362822")   // chamber, two steps raised
+    static let accent              = coral
+    static let textPrimary         = white
+    static let textSecondary       = silver
+    static let textTertiary        = silver.opacity(0.6)
     static let border              = edgeLight
-    static let success             = halideDeep
-    static let danger              = safelight
+    static let success             = silver
+    static let danger              = error
 
     // MARK: - Typography
+    //
+    // One sans family carries display and body; a monospace is used sparingly
+    // for figures, in the manner of frame-edge markings.
 
-    /// `--f-display` · Bodoni Moda / Didot. Wordmark and display copy only.
-    private static let displayStack = ["Bodoni Moda", "Bodoni 72", "Didot", "Georgia"]
-    /// `--f-grotesk` · Archivo. All interface copy.
-    private static let groteskStack = ["Archivo", "Helvetica Neue"]
-    /// `--f-mono` · Space Mono. Numeric and technical readouts.
-    private static let monoStack    = ["Space Mono", "Menlo", "SF Mono"]
+    private static let displayStack = ["Neue Haas Grotesk Display Pro", "Helvetica Neue", "Inter"]
+    private static let groteskStack = ["Neue Haas Grotesk Text Pro", "Helvetica Neue", "Inter"]
+    private static let monoStack    = ["Space Mono", "IBM Plex Mono", "Menlo"]
 
     /// Returns the first installed face in `names`, falling back to the system face.
     private static func resolve(_ names: [String],
@@ -68,7 +67,7 @@ enum Brand {
     }
 
     static func display(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        resolve(displayStack, size: size, weight: weight, fallback: .serif)
+        resolve(displayStack, size: size, weight: weight, fallback: .default)
     }
 
     static func grotesk(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
@@ -89,14 +88,14 @@ enum Brand {
 
     // MARK: - Tracking
     //
-    // The brand sets uppercase labels between .1em and .22em. SwiftUI tracking is
+    // The guide sets headings between .05em and .15em. SwiftUI tracking is
     // absolute, so these are expressed as a multiple of the type size at call sites.
 
     static func tracking(_ em: CGFloat, at size: CGFloat) -> CGFloat { em * size }
 
-    static let trackWordmark: CGFloat = 0.22   // em — the C H A M B E R S lockup
-    static let trackLabel:    CGFloat = 0.18   // em — section labels
-    static let trackMeta:     CGFloat = 0.12   // em — metadata rows
+    static let trackWordmark: CGFloat = 0.15   // em — the wordmark
+    static let trackLabel:    CGFloat = 0.10   // em — section labels
+    static let trackMeta:     CGFloat = 0.05   // em — metadata rows
 
     // MARK: - Metrics
 
@@ -111,8 +110,6 @@ enum Brand {
     static let radiusMD: CGFloat = 3
     static let radiusLG: CGFloat = 4
 
-    /// `--ratio-pano` · 65 : 24, the house panoramic crop.
-    static let ratioPano: CGFloat = 65.0 / 24.0
 }
 
 extension Color {
@@ -137,31 +134,30 @@ extension Color {
 
 // MARK: - Brand devices
 
-/// The safelight rule — a 26 × 2 pt bar used to open sections, per the site's
-/// section-heading treatment.
+/// A coral rule, used to open a section.
 struct SafelightRule: View {
     var width: CGFloat = 26
     var body: some View {
         Rectangle()
-            .fill(Brand.safelight)
+            .fill(Brand.coral)
             .frame(width: width, height: 2)
     }
 }
 
-/// The safelight dot — an 8 pt indicator marking a live or active state.
+/// A coral dot marking a live or active state.
 struct SafelightDot: View {
     var size: CGFloat = 8
     var body: some View {
         Circle()
-            .fill(Brand.safelight)
+            .fill(Brand.coral)
             .frame(width: size, height: size)
     }
 }
 
-/// The letter-spaced house lockup: C H A M B E R S  &  L I G H T
+/// The letterspaced text wordmark.
 struct Wordmark: View {
     var size: CGFloat = 8
-    var color: Color = Brand.halideDeep
+    var color: Color = Brand.silver
     var body: some View {
         Text("CHAMBERS & LIGHT")
             .font(Brand.grotesk(size, weight: .semibold))

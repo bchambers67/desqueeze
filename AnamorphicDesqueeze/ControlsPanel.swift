@@ -18,7 +18,6 @@ struct ControlsPanel: View {
             }
             .padding(Brand.spacingLG)
         }
-        .background(Brand.backgroundSecondary)
     }
 
     // MARK: - Brand Header
