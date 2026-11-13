@@ -147,9 +147,30 @@ final class AppModel {
         await scanRecent()
     }
 
-    /// Looks for squeezed photos, when that is switched on and nothing is open.
-    func scanRecent() async {
-        guard findsSqueezed, RecentScanner.hasAccess, !isScanning, !hasContent else { return }
+    /// The same check the app makes when it comes forward, asked for by hand,
+    /// and it says what it found either way.
+    func rescan() async {
+        guard findsSqueezed, !isScanning else { return }
+        guard RecentScanner.hasAccess else {
+            notice = Notice(text: "StillScope needs access to your photos to find squeezed ones. Allow it in Settings › Privacy › Photos.", isError: true)
+            return
+        }
+        await scanRecent(askedFor: true)
+        switch found.count {
+        case 0:
+            notice = Notice(text: "No squeezed photos found in the last two weeks.", isError: false)
+        case let count where hasContent:
+            // The review button is on the empty screen, behind what is open.
+            notice = Notice(text: "Found \(count) squeezed photo\(count == 1 ? "" : "s"). Clear to review.", isError: false)
+        default:
+            notice = nil
+        }
+    }
+
+    /// Looks for squeezed photos, when that is switched on. Left to itself it
+    /// waits until nothing is open; asked for by hand it runs regardless.
+    func scanRecent(askedFor: Bool = false) async {
+        guard findsSqueezed, RecentScanner.hasAccess, !isScanning, askedFor || !hasContent else { return }
         isScanning = true
         defer { isScanning = false }
         let skipping = handled, learned = corrections

@@ -40,6 +40,7 @@ struct BottomBarItems: ToolbarContent {
         ToolbarItemGroup(placement: .bottomBar) {
             PhotosButton(model: model)
             if model.hasContent { ClearButton(model: model) }
+            if model.findsSqueezed { RescanButton(model: model) }
             SettingsButton(model: model)
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
@@ -97,6 +98,7 @@ struct SideBar: View {
                 Group {
                     PhotosButton(model: model)
                     if model.hasContent { ClearButton(model: model) }
+                    if model.findsSqueezed { RescanButton(model: model) }
                     SettingsButton(model: model)
                 }
                 .buttonStyle(.glass)
@@ -160,6 +162,26 @@ private struct ClearButton: View {
             Label("Clear", systemImage: "trash").labelStyle(.iconOnly)
         }
         .disabled(model.isWorking)
+    }
+}
+
+/// Checks recent photos again for ones that need correcting. It appears only
+/// while that feature is switched on in Settings.
+private struct RescanButton: View {
+    let model: AppModel
+
+    var body: some View {
+        Button {
+            Task { await model.rescan() }
+        } label: {
+            if model.isScanning {
+                ProgressView()
+            } else {
+                Label("Check recent photos", systemImage: "arrow.triangle.2.circlepath")
+                    .labelStyle(.iconOnly)
+            }
+        }
+        .disabled(model.isScanning || model.isWorking)
     }
 }
 
