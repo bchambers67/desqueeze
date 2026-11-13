@@ -18,7 +18,10 @@ struct RootView: View {
             let bar = SideBar.metrics(trailingInset: proxy.safeAreaInsets.trailing)
             // Popped out on request over a bottom bar; always there beside
             // the side bar.
-            let panelPopped = edge == .bottom && model.isFactorPanelOpen
+            // A slab phone held sideways has no room under the system
+            // toolbar, so it gets a bar of its own with the panel inside.
+            let sideways = edge == .bottom && proxy.size.width > proxy.size.height
+            let panelPopped = edge == .bottom && !sideways && model.isFactorPanelOpen
 
             NavigationStack {
                 canvas
@@ -52,13 +55,17 @@ struct RootView: View {
                                 .transition(.zoom(from: .bottom))
                         }
                     }
+                    .overlay(alignment: .bottom) {
+                        if sideways { LandscapeBar(model: model, open: model.isFactorPanelOpen) }
+                    }
                     .toolbar {
-                        if edge == .bottom { BottomBarItems(model: model, panelShown: panelPopped) }
+                        if edge == .bottom && !sideways { BottomBarItems(model: model, panelShown: panelPopped) }
                     }
                     .toolbar(.hidden, for: .navigationBar)
                     .animation(.smooth(duration: 0.3), value: edge)
                     // A spring with a little give, like a folder opening.
                     .animation(.spring(response: 0.42, dampingFraction: 0.8), value: panelPopped)
+                    .animation(.spring(response: 0.42, dampingFraction: 0.8), value: model.isFactorPanelOpen)
                     .animation(.smooth(duration: 0.2), value: model.notice)
             }
             // Renders are sized for the surface showing them. This fires again

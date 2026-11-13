@@ -129,6 +129,76 @@ struct SideBar: View {
     }
 }
 
+// MARK: - Sideways on a phone: the bar with the panel inside it
+
+/// The action bar for a slab phone held sideways. There the system toolbar
+/// leaves no room to grow, so the bar is drawn here, and the factor control
+/// opens in its middle: the buttons either side slide out to the left and
+/// right, and the slider takes the space they leave.
+///
+/// It floats over the photograph, so nothing beneath it moves.
+struct LandscapeBar: View {
+    let model: AppModel
+    let open: Bool
+
+    var body: some View {
+        GlassEffectContainer(spacing: 12) {
+            HStack(alignment: .bottom, spacing: 12) {
+                HStack(spacing: 6) {
+                    PhotosButton(model: model)
+                    if model.hasContent { ClearButton(model: model) }
+                    if model.findsSqueezed { RescanButton(model: model) }
+                    SettingsButton(model: model)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+
+                if open {
+                    HStack(alignment: .top, spacing: 8) {
+                        FactorControl(model: model)
+                        Button {
+                            model.isFactorPanelOpen = false
+                        } label: {
+                            Label("Close", systemImage: "xmark").labelStyle(.iconOnly)
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.circle)
+                    }
+                    .padding(.leading, 20)
+                    .padding(.trailing, 10)
+                    .padding(.top, 12)
+                    .padding(.bottom, 4)
+                    .frame(maxWidth: 560)
+                    .glassEffect(.regular, in: .rect(cornerRadius: 26))
+                    .transition(.opacity.combined(with: .scale(scale: 0.6, anchor: .bottom)))
+                } else {
+                    Spacer(minLength: 0)
+                    FactorButton(model: model, panelShown: false)
+                        .buttonStyle(.glass)
+                        .transition(.opacity)
+                    Spacer(minLength: 0)
+                }
+
+                HStack(spacing: 6) {
+                    if model.mode == .single {
+                        InspectButton(model: model)
+                        ShareButton(model: model)
+                    }
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+
+                SaveButton(model: model)
+                    .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.circle)
+            }
+            .controlSize(.large)
+            .padding(.horizontal, Brand.spacingMD)
+            .padding(.bottom, 10)
+        }
+    }
+}
+
 // MARK: - The actions
 
 private struct PhotosButton: View {
