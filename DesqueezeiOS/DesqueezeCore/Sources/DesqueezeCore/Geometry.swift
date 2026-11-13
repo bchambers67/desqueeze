@@ -48,8 +48,10 @@ public struct Matte: Equatable, Sendable {
     public let fraction: Double
     public init(fraction: Double) { self.fraction = fraction }
 
-    /// The matte the app offers: a twentieth of the long edge.
-    public static let standard = Matte(fraction: 0.05)
+    /// The two mattes the app offers: a fiftieth of the long edge, and a
+    /// twentieth.
+    public static let small = Matte(fraction: 0.02)
+    public static let medium = Matte(fraction: 0.05)
 
     /// The border's width in pixels for a frame of this size.
     public func border(for frame: PixelSize) -> Int {
