@@ -86,13 +86,18 @@ final class AppModel {
         }
     }
 
-    /// A factor typed by hand. One that cannot be read is reported, and the
-    /// factor in use stays as it was.
-    func useTyped(_ text: String) async {
-        await session.type(text)
-        notice = session.typedFactorIsValid
-            ? nil
-            : Notice(text: "“\(text)” is not a factor. Try something like 1.5.", isError: true)
+    /// A factor from the slider. On a stop point it is that preset; anywhere
+    /// else it is a custom factor.
+    func use(factor: Double) async {
+        guard abs(factor - session.squeeze.factor) > 0.001 else { return }
+        let onStop = SqueezePreset.selectable.first { preset in
+            preset.factor.map { abs($0 - factor) < 0.005 } ?? false
+        }
+        if let onStop {
+            await session.choose(onStop)
+        } else {
+            await session.type(String(format: "%.2f", factor))
+        }
     }
 
     /// Runs one output action at a time, and says so while it does.

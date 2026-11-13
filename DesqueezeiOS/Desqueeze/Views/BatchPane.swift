@@ -31,9 +31,9 @@ struct BatchPane: View {
         }
         .background(Brand.chamber)
         .sheet(item: $editing) { item in
-            ItemFactorSheet(name: item.name, current: item.squeeze) { squeeze in
+            ItemFactorSheet(name: item.name, current: item.squeeze,
+                            batchFactor: model.session.squeeze.factor) { squeeze in
                 batch.setSqueeze(squeeze, for: item.id)
-                editing = nil
             }
         }
     }
@@ -76,7 +76,7 @@ struct BatchPane: View {
     }
 
     /// Each photo follows the batch unless given a factor of its own. The
-    /// button opens a sheet of tiles; there is no menu to scroll.
+    /// button opens the factor slider; there is no menu to scroll.
     private func factorMenu(_ item: Batch.Item) -> some View {
         Button {
             editing = item
@@ -108,53 +108,43 @@ struct BatchPane: View {
     }
 }
 
-/// One photo's factor: follow the batch, or take a preset of its own.
+/// One photo's factor: its own, on the slider, or back to following the batch.
 private struct ItemFactorSheet: View {
     let name: String
-    let current: Squeeze?
+    let follows: Bool
     let choose: (Squeeze?) -> Void
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+    @Environment(\.dismiss) private var dismiss
+    @State private var factor: Double
 
-    var body: some View {
-        VStack(spacing: 18) {
-            Text(name)
-                .font(Brand.mono(13))
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            tile("Follow batch", selected: current == nil) { choose(nil) }
-
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(SqueezePreset.selectable) { preset in
-                    if let factor = preset.factor {
-                        tile(preset.label, selected: current?.factor == factor) {
-                            choose(Squeeze(factor: factor))
-                        }
-                    }
-                }
-            }
-        }
-        .controlSize(.large)
-        .padding(20)
-        .presentationDetents([.height(360)])
-        .presentationDragIndicator(.visible)
+    init(name: String, current: Squeeze?, batchFactor: Double, choose: @escaping (Squeeze?) -> Void) {
+        self.name = name
+        self.follows = current == nil
+        self.choose = choose
+        _factor = State(initialValue: FactorSlider.clamped(current?.factor ?? batchFactor))
     }
 
-    @ViewBuilder
-    private func tile(_ title: String, selected: Bool, action: @escaping () -> Void) -> some View {
-        let label = Text(title)
-            .font(Brand.mono(16, weight: .medium))
-            .frame(maxWidth: .infinity, minHeight: 36)
-        if selected {
-            Button(action: action) { label }
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.coral)
-                .accessibilityAddTraits(.isSelected)
-        } else {
-            Button(action: action) { label }
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Text(name)
+                    .font(Brand.mono(13))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Spacer()
+                Button("Follow batch") {
+                    choose(nil)
+                    dismiss()
+                }
                 .buttonStyle(.bordered)
+                .disabled(follows)
+            }
+
+            FactorSlider(factor: $factor)
         }
+        .padding(20)
+        .onChange(of: factor) { _, new in choose(Squeeze(factor: new)) }
+        .presentationDetents([.height(240)])
+        .presentationDragIndicator(.visible)
     }
 }

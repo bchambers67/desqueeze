@@ -157,103 +157,136 @@ private struct FactorButton: View {
     }
 }
 
-/// Every factor on one sheet, as targets big enough for a thumb.
-///
-/// Nothing here scrolls: the nine presets are a 3 × 3 grid, and a custom
-/// factor is nudged with buttons rather than typed, so there is no list to
-/// drag through and no keyboard to bring up.
+/// The factor, on a slider, in a short sheet that leaves the photo in view.
 struct FactorSheet: View {
     let model: AppModel
-    private var session: Session { model.session }
+    @State private var factor: Double
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+    init(model: AppModel) {
+        self.model = model
+        _factor = State(initialValue: FactorSlider.clamped(model.session.squeeze.factor))
+    }
+
+    private var hasSuggestion: Bool { model.mode == .single && model.suggestion != nil }
 
     var body: some View {
-        VStack(spacing: 18) {
-            Text(model.mode == .batch ? "Batch factor" : "Squeeze factor")
-                .font(Brand.sans(15, weight: .medium))
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            if model.mode == .single, let suggestion = model.suggestion {
+        VStack(spacing: 16) {
+            if hasSuggestion, let suggestion = model.suggestion {
                 Button {
                     Task { await model.useSuggestion() }
                 } label: {
                     Label(String(format: "Use %.2f×, read from faces", suggestion), systemImage: "face.dashed")
-                        .frame(maxWidth: .infinity, minHeight: 32)
+                        .frame(maxWidth: .infinity, minHeight: 28)
                 }
                 .buttonStyle(.bordered)
             }
 
-            LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(SqueezePreset.selectable) { preset in
-                    tile(preset)
-                }
-            }
-
-            nudger
+            FactorSlider(factor: $factor)
         }
-        .controlSize(.large)
         .padding(20)
-        .presentationDetents([.height(model.mode == .single && model.suggestion != nil ? 470 : 410)])
+        .onChange(of: factor) { _, new in
+            Task { await model.use(factor: new) }
+        }
+        // The suggestion changes the factor from outside the slider.
+        .onChange(of: model.session.squeeze.factor) { _, new in
+            if abs(new - factor) > 0.004 { factor = FactorSlider.clamped(new) }
+        }
+        .presentationDetents([.height(hasSuggestion ? 270 : 200)])
+        .presentationBackgroundInteraction(.enabled)
         .presentationDragIndicator(.visible)
     }
+}
 
-    @ViewBuilder
-    private func tile(_ preset: SqueezePreset) -> some View {
-        let label = VStack(spacing: 3) {
-            Text(preset.label)
-                .font(Brand.mono(17, weight: .medium))
-            Text(preset.hint.capitalized)
-                .font(Brand.sans(10))
-                .opacity(0.75)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity, minHeight: 48)
+/// A squeeze factor on a slider, with the lens presets as its stop points.
+///
+/// The slider moves in hundredths. Each preset is marked beneath the track,
+/// and arriving on one gives a light selection tap, so the common factors can
+/// be found by feel while every value in between stays reachable.
+struct FactorSlider: View {
+    @Binding var factor: Double
 
-        // The chosen factor is the one filled, tinted control on the sheet.
-        if session.preset == preset {
-            Button { } label: { label }
-                .buttonStyle(.borderedProminent)
-                .tint(Brand.coral)
-                .accessibilityAddTraits(.isSelected)
-        } else {
-            Button {
-                Task { await session.choose(preset) }
-            } label: { label }
-                .buttonStyle(.bordered)
-        }
+    static let range: ClosedRange<Double> = 1.0...2.0
+    static let stops: [SqueezePreset] = SqueezePreset.selectable.filter { $0.factor != nil }
+
+    static func clamped(_ value: Double) -> Double {
+        let bounded = min(max(value, range.lowerBound), range.upperBound)
+        return (bounded * 100).rounded() / 100
     }
 
-    /// A custom factor, nudged in hundredths or twentieths.
-    private var nudger: some View {
-        HStack(spacing: 10) {
-            step(-0.05, "minus.circle.fill", "Down 0.05")
-            step(-0.01, "minus", "Down 0.01")
+    /// The preset the thumb is resting on, if any.
+    private var stop: SqueezePreset? {
+        Self.stops.first { abs(($0.factor ?? 0) - factor) < 0.005 }
+    }
 
-            VStack(spacing: 2) {
-                Text(String(format: "%.2f×", session.squeeze.factor))
-                    .font(Brand.mono(20, weight: .medium))
+    /// Roughly half the system thumb: how far the track's ends sit inside the
+    /// slider's frame.
+    private let trackInset: CGFloat = 14
+    private let labelled: Set<SqueezePreset> = [.x133, .x150, .x175, .x200]
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(String(format: "%.2f×", factor))
+                    .font(Brand.mono(26, weight: .medium))
                     .monospacedDigit()
-                Text(session.preset == .custom ? "Custom" : "Fine-tune")
-                    .font(Brand.sans(10))
-                    .opacity(0.75)
+                    .contentTransition(.numericText())
+                Spacer()
+                Text(stop?.hint.capitalized ?? "Custom")
+                    .font(Brand.sans(12))
+                    .foregroundStyle(stop == nil ? Brand.silver : Brand.coral)
             }
-            .frame(maxWidth: .infinity)
 
-            step(0.01, "plus", "Up 0.01")
-            step(0.05, "plus.circle.fill", "Up 0.05")
+            HStack(spacing: 12) {
+                nudge(-0.01, "minus", "Down 0.01")
+                Slider(value: $factor, in: Self.range, step: 0.01) {
+                    Text("Squeeze factor")
+                }
+                .tint(Brand.coral)
+                .accessibilityValue(String(format: "%.2f", factor))
+                .background(alignment: .bottom) { ticks.offset(y: 22) }
+                nudge(0.01, "plus", "Up 0.01")
+            }
+            .padding(.bottom, 24)
         }
+        // A tap on arriving at a stop point, and none on leaving it.
+        .sensoryFeedback(.selection, trigger: stop) { _, new in new != nil }
     }
 
-    private func step(_ delta: Double, _ symbol: String, _ name: String) -> some View {
+    /// A mark under the track for each preset; a tap on one jumps to it.
+    private var ticks: some View {
+        GeometryReader { proxy in
+            let span = proxy.size.width - trackInset * 2
+            ForEach(Self.stops) { preset in
+                let value = preset.factor ?? 1
+                let x = trackInset + span * (value - Self.range.lowerBound)
+                    / (Self.range.upperBound - Self.range.lowerBound)
+                VStack(spacing: 3) {
+                    Rectangle()
+                        .fill(stop == preset ? Brand.coral : Brand.silver)
+                        .frame(width: 1, height: 7)
+                    if labelled.contains(preset) {
+                        Text(String(format: "%.2f", value))
+                            .font(Brand.mono(9))
+                            .foregroundStyle(stop == preset ? Brand.white : Brand.silver)
+                            .fixedSize()
+                    }
+                }
+                .frame(width: 1, alignment: .top)
+                .position(x: x, y: 12)
+            }
+        }
+        .frame(height: 24)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func nudge(_ delta: Double, _ symbol: String, _ name: String) -> some View {
         Button {
-            let next = ((session.squeeze.factor + delta) * 100).rounded() / 100
-            Task { await model.useTyped(String(format: "%.2f", next)) }
+            factor = Self.clamped(factor + delta)
         } label: {
             Label(name, systemImage: symbol)
                 .labelStyle(.iconOnly)
-                .frame(width: 30, height: 30)
+                .frame(width: 36, height: 36)
         }
         .buttonStyle(.bordered)
         .buttonRepeatBehavior(.enabled)
