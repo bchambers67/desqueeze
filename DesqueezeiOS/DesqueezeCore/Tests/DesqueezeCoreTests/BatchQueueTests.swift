@@ -63,6 +63,16 @@ struct BatchQueueTests {
         #expect(shelf.saved.first?.file == Fixture.jpeg(Fixture.app1(width: 9000, height: 4000), Fixture.jfif))
     }
 
+    @Test("a batch run with a matte borders every photo and records the larger size")
+    func mattes() async {
+        let renderer = FakeRenderer()
+        let queue = BatchQueue(renderer: renderer), shelf = Shelf()
+        queue.add(name: "a.jpg") { self.photo }
+        await queue.run(squeeze: Squeeze(factor: 1.5), matte: Matte(fraction: 0.05), saving: shelf.save)
+        #expect(renderer.mattes == [Matte(fraction: 0.05)])
+        #expect(shelf.saved.first?.file == Fixture.jpeg(Fixture.app1(width: 9900, height: 4900), Fixture.jfif))
+    }
+
     @Test("running again retries what failed and does not save finished photos twice")
     func retries() async {
         let queue = queue(), shelf = Shelf()

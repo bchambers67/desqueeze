@@ -63,10 +63,10 @@ actor CoreImageRenderer: FrameRenderer {
     /// is what keeps date, camera, lens and location on a HEIC or RAW source.
     /// (A JPEG source goes one better afterwards: `CaptureMetadata` swaps in
     /// its original Exif block byte for byte, maker notes included.)
-    private func metadata(from original: CIImage, squeeze: Squeeze) -> [String: Any] {
+    private func metadata(from original: CIImage, size: PixelSize) -> [String: Any] {
         var properties = original.properties
-        let width = Int((original.extent.width * squeeze.factor).rounded())
-        let height = Int(original.extent.height.rounded())
+        let width = size.width
+        let height = size.height
 
         // Rotation is baked into the pixels by now; say so, or every viewer
         // rotates the export a second time.
@@ -105,9 +105,20 @@ actor CoreImageRenderer: FrameRenderer {
         return Frame(image: cg)
     }
 
-    func export(_ source: Data, squeeze: Squeeze) async throws -> Data {
+    func export(_ source: Data, squeeze: Squeeze, matte: Matte?) async throws -> Data {
         let original = try image(from: source)
-        let output = widened(original, by: squeeze).settingProperties(metadata(from: original, squeeze: squeeze))
+        var output = widened(original, by: squeeze)
+        var size = PixelSize(width: Int(output.extent.width.rounded()), height: Int(output.extent.height.rounded()))
+
+        if let matte {
+            // The frame set on white paper, the border equal on every side.
+            let border = CGFloat(matte.border(for: size))
+            let paper = CIImage(color: .white).cropped(to: output.extent.insetBy(dx: -border, dy: -border))
+            output = output.composited(over: paper)
+            size = matte.outputSize(for: size)
+        }
+
+        output = output.settingProperties(metadata(from: original, size: size))
         let quality = CIImageRepresentationOption(rawValue: kCGImageDestinationLossyCompressionQuality as String)
         guard let jpeg = context.jpegRepresentation(of: output, colorSpace: outputSpace, options: [quality: 0.92]) else {
             throw Failure.renderFailed

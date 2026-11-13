@@ -19,23 +19,22 @@ struct InspectorView: View {
     @State private var zoomPercent = 100
 
     var body: some View {
-        VStack(spacing: 0) {
-            bar
-            Hairline()
-            ZStack {
-                Brand.chamber
-                if let frame {
-                    ZoomableImage(image: frame.image, displayScale: displayScale,
-                                  command: $command, zoomPercent: $zoomPercent)
-                } else if let failure {
-                    Text(failure).font(Brand.sans(13)).foregroundStyle(Brand.error)
-                } else {
-                    ProgressView().tint(Brand.coral)
-                }
+        ZStack {
+            Brand.chamber.ignoresSafeArea()
+            if let frame {
+                ZoomableImage(image: frame.image, displayScale: displayScale,
+                              command: $command, zoomPercent: $zoomPercent)
+                    .ignoresSafeArea()
+            } else if let failure {
+                Text(failure).font(Brand.sans(13)).foregroundStyle(Brand.error)
+            } else {
+                ProgressView().tint(Brand.coral)
             }
         }
-        .background(Brand.chamber)
+        // The controls float over the photograph in one glass layer.
+        .overlay(alignment: .top) { bar }
         .preferredColorScheme(.dark)
+        .tint(Brand.white)
         .task {
             do { frame = try await session.inspectionFrame() }
             catch { failure = error.localizedDescription }
@@ -43,38 +42,39 @@ struct InspectorView: View {
     }
 
     private var bar: some View {
-        HStack(spacing: Brand.spacingMD) {
-            if let frame {
-                FrameMark(text: "\(frame.image.width) × \(frame.image.height)")
-            }
-            Spacer()
-            FrameMark(text: "\(zoomPercent)%")
-            barButton("FIT") { command = .fit }
-            barButton("1:1") { command = .actualPixels }
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundStyle(Brand.white)
-                    .frame(width: 34, height: 30)
-                    .overlay(Rectangle().stroke(Brand.hairline, lineWidth: 1))
-            }
-            .accessibilityLabel("Close")
-        }
-        .padding(.horizontal, Brand.spacingMD)
-        .padding(.vertical, Brand.spacingSM)
-    }
+        GlassEffectContainer(spacing: 12) {
+            HStack(spacing: 12) {
+                Text("\(zoomPercent)%")
+                    .font(Brand.mono(13, weight: .medium))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .padding(.horizontal, 14)
+                    .frame(minWidth: 72, minHeight: 44)
+                    .glassEffect(.regular, in: .capsule)
+                    .accessibilityLabel("Zoom \(zoomPercent) percent")
 
-    private func barButton(_ title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(Brand.mono(11))
-                .tracking(Brand.tracking(Brand.trackLabel, at: 11))
-                .foregroundStyle(Brand.white)
-                .padding(.horizontal, 10)
-                .frame(height: 30)
-                .overlay(Rectangle().stroke(Brand.hairline, lineWidth: 1))
+                Spacer(minLength: 0)
+
+                Button { command = .fit } label: {
+                    Label("Fit to screen", systemImage: "arrow.down.right.and.arrow.up.left")
+                        .labelStyle(.iconOnly)
+                }
+                Button { command = .actualPixels } label: {
+                    Text("1:1")
+                        .font(Brand.mono(13, weight: .medium))
+                        .fixedSize()
+                }
+                .accessibilityLabel("Actual pixels")
+                Button { dismiss() } label: {
+                    Label("Close", systemImage: "xmark").labelStyle(.iconOnly)
+                }
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .controlSize(.large)
+            .padding(.horizontal, Brand.spacingMD)
+            .padding(.top, Brand.spacingSM)
         }
-        .buttonStyle(.plain)
     }
 }
 
@@ -134,9 +134,15 @@ private struct ZoomableImage: UIViewRepresentable {
 
     func updateUIView(_ scroll: FittingScrollView, context: Context) {
         if let command {
-            switch command {
-            case .fit:          scroll.setZoomScale(context.coordinator.fitScale, animated: true)
-            case .actualPixels: scroll.setZoomScale(1, animated: true)
+            let target: CGFloat = switch command {
+            case .fit:          context.coordinator.fitScale
+            case .actualPixels: 1
+            }
+            // A spring, not the scroll view's own linear zoom: it eases in and
+            // settles, and the re-centring animates along with it.
+            UIView.animate(withDuration: 0.45, delay: 0, usingSpringWithDamping: 0.86,
+                           initialSpringVelocity: 0, options: [.allowUserInteraction, .beginFromCurrentState]) {
+                scroll.zoomScale = target
             }
             DispatchQueue.main.async { self.command = nil }
         }

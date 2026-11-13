@@ -39,3 +39,26 @@ public struct Squeeze: Equatable, Sendable {
         self.factor = min(max(value, Self.typedRange.lowerBound), Self.typedRange.upperBound)
     }
 }
+
+/// A plain border around an exported frame, as a print is matted.
+///
+/// The border is the same width on every side, a fraction of the frame's
+/// long edge, so a wide frame and an upright one are matted alike.
+public struct Matte: Equatable, Sendable {
+    public let fraction: Double
+    public init(fraction: Double) { self.fraction = fraction }
+
+    /// The matte the app offers: a twentieth of the long edge.
+    public static let standard = Matte(fraction: 0.05)
+
+    /// The border's width in pixels for a frame of this size.
+    public func border(for frame: PixelSize) -> Int {
+        Int((Double(max(frame.width, frame.height)) * fraction).rounded())
+    }
+
+    /// The frame's size once matted.
+    public func outputSize(for frame: PixelSize) -> PixelSize {
+        let border = border(for: frame)
+        return PixelSize(width: frame.width + border * 2, height: frame.height + border * 2)
+    }
+}

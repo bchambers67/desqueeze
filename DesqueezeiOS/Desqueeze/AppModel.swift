@@ -28,6 +28,16 @@ final class AppModel {
     var isChoosingFactor = false
     /// The docked slider on an open Duo held sideways; shown until dismissed.
     var isFactorDockShown = true
+    var isShowingSettings = false
+
+    /// Settings. Each is kept between launches.
+    var addsMatte: Bool {
+        didSet {
+            UserDefaults.standard.set(addsMatte, forKey: Self.matteKey)
+            session.matte = addsMatte ? .standard : nil
+        }
+    }
+    private static let matteKey = "export.addsMatte"
     var sharedFile: SharedFile?
     private(set) var isWorking = false
 
@@ -49,6 +59,8 @@ final class AppModel {
         let renderer = CoreImageRenderer()
         session = Session(renderer: renderer)
         batch = Batch(renderer: renderer)
+        addsMatte = UserDefaults.standard.bool(forKey: Self.matteKey)
+        session.matte = addsMatte ? .standard : nil
     }
 
     // MARK: - Intake
@@ -166,7 +178,7 @@ final class AppModel {
 
     func runBatch() async {
         notice = nil
-        await batch.run(squeeze: session.squeeze) { name, file in
+        await batch.run(squeeze: session.squeeze, matte: session.matte) { name, file in
             try await PhotoLibraryWriter.save(jpeg: file, named: name)
         }
         let failed = batch.items.count - batch.finishedCount

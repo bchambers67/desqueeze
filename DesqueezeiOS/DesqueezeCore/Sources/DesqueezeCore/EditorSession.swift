@@ -8,8 +8,9 @@ public protocol FrameRenderer: Sendable {
     func size(of source: Data) async throws -> PixelSize
     /// The corrected frame, scaled so its longest edge is at most `longestEdge`.
     func preview(of source: Data, squeeze: Squeeze, longestEdge: Int) async throws -> Frame
-    /// The corrected frame at full size, encoded as JPEG.
-    func export(_ source: Data, squeeze: Squeeze) async throws -> Data
+    /// The corrected frame at full size, inside `matte` if there is one,
+    /// encoded as JPEG.
+    func export(_ source: Data, squeeze: Squeeze, matte: Matte?) async throws -> Data
 }
 
 /// One photograph being corrected.
@@ -31,6 +32,10 @@ public final class EditorSession<Renderer: FrameRenderer> {
     public private(set) var typedFactorIsValid = true
 
     public private(set) var isRendering = false
+
+    /// A border for exports. It is not drawn on the preview, which shows the
+    /// photograph alone.
+    public var matte: Matte?
 
     public var hasPhoto: Bool { source != nil }
 
@@ -77,8 +82,8 @@ public final class EditorSession<Renderer: FrameRenderer> {
     /// The corrected photo at full size, as JPEG, with capture metadata kept.
     public func export() async throws -> Data {
         guard let source, let size = outputSize else { throw NothingOpen() }
-        let jpeg = try await renderer.export(source, squeeze: squeeze)
-        return CaptureMetadata.carry(from: source, onto: jpeg, size: size)
+        let jpeg = try await renderer.export(source, squeeze: squeeze, matte: matte)
+        return CaptureMetadata.carry(from: source, onto: jpeg, size: matte?.outputSize(for: size) ?? size)
     }
 
     /// The display showing the preview changed size, as when a Duo is folded

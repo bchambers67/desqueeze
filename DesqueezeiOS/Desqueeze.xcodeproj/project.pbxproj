@@ -19,6 +19,7 @@
 		9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729E7EA7D7C368ED72BF9567 /* InspectorView.swift */; };
 		DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577BC15846CD67CA3BFE4338 /* PreviewPane.swift */; };
 		D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6795F82E61A2E6B03DFFCD1C /* RootView.swift */; };
+		93DA51FDFE1ACF64BA681FD6 /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */; };
 		9E0C54E4573EBB5A160F5621 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */; };
 		B470063E3A315C50793EED81 /* DesqueezeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2E82B89D92189E65115417C3 /* DesqueezeCore */; };
 /* End PBXBuildFile section */
@@ -37,6 +38,7 @@
 		729E7EA7D7C368ED72BF9567 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		577BC15846CD67CA3BFE4338 /* PreviewPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
 		6795F82E61A2E6B03DFFCD1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 		9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26FDEE6E8D53D799B185CBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		16CE6AF2820C26A77C21C652 /* DesqueezeCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesqueezeCore; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 				729E7EA7D7C368ED72BF9567 /* InspectorView.swift */,
 				577BC15846CD67CA3BFE4338 /* PreviewPane.swift */,
 				6795F82E61A2E6B03DFFCD1C /* RootView.swift */,
+				9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -203,6 +206,7 @@
 				9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */,
 				DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */,
 				D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */,
+				93DA51FDFE1ACF64BA681FD6 /* SettingsSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

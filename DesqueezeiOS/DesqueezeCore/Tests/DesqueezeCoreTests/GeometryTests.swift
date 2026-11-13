@@ -34,4 +34,13 @@ struct GeometryTests {
     func clamps(text: String, expected: Double) {
         #expect(Squeeze(typed: text)?.factor == expected)
     }
+
+    @Test("a 5% matte adds a twentieth of the long edge to every side")
+    func matte() {
+        let matte = Matte(fraction: 0.05)
+        #expect(matte.border(for: PixelSize(width: 6000, height: 4000)) == 300)
+        #expect(matte.outputSize(for: PixelSize(width: 6000, height: 4000)) == PixelSize(width: 6600, height: 4600))
+        // Upright frames take the border from their height, the long edge.
+        #expect(matte.outputSize(for: PixelSize(width: 3000, height: 4000)) == PixelSize(width: 3400, height: 4400))
+    }
 }

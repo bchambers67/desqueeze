@@ -40,6 +40,7 @@ struct BottomBarItems: ToolbarContent {
         ToolbarItemGroup(placement: .bottomBar) {
             PhotosButton(model: model)
             if model.hasContent { ClearButton(model: model) }
+            SettingsButton(model: model)
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
@@ -96,6 +97,7 @@ struct SideBar: View {
                 Group {
                     PhotosButton(model: model)
                     if model.hasContent { ClearButton(model: model) }
+                    SettingsButton(model: model)
                 }
                 .buttonStyle(.glass)
 
@@ -158,6 +160,18 @@ private struct ClearButton: View {
             Label("Clear", systemImage: "trash").labelStyle(.iconOnly)
         }
         .disabled(model.isWorking)
+    }
+}
+
+private struct SettingsButton: View {
+    let model: AppModel
+
+    var body: some View {
+        Button {
+            model.isShowingSettings = true
+        } label: {
+            Label("Settings", systemImage: "gearshape").labelStyle(.iconOnly)
+        }
     }
 }
 
