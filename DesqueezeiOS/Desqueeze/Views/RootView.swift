@@ -1,74 +1,72 @@
 import SwiftUI
-import PhotosUI
 
-/// Root layout.
+/// Root layout: the photograph fills the screen, and the controls float over
+/// it in a single Liquid Glass layer.
 ///
-/// The Duo presents two very different canvases — a 5.4" outer display folded
-/// and a 7.6" inner display open — and switches between them live. Rather than
-/// branch on device or on measured point sizes, this branches on the horizontal
-/// size class, which is what actually changes, and which also covers iPad and
-/// every future geometry without modification.
-///
-/// Apple publishes no hinge-state or fold API, so nothing here reads one.
+/// On an open iPhone Duo that layer is a bar down the right side; on every
+/// other device it is the system toolbar along the bottom. Folding or opening
+/// a Duo moves it between the two while the app runs. Apple publishes no hinge
+/// or fold API, so nothing here reads one: `BarEdge` goes by the window's size.
 struct RootView: View {
-    @State private var model = EditorModel()
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Bindable var model: AppModel
 
-    private var isWide: Bool { horizontalSizeClass == .regular }
+    @Environment(\.displayScale) private var displayScale
+    @State private var customDraft = ""
 
     var body: some View {
         GeometryReader { proxy in
-            Group {
-                if isWide {
-                    wideLayout
-                } else {
-                    narrowLayout
-                }
+            let edge = BarEdge.resolve(for: proxy.size)
+
+            NavigationStack {
+                canvas
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // The content layer keeps the brand ground and runs to
+                    // every edge, beneath the glass.
+                    .background(Brand.chamber.ignoresSafeArea())
+                    .safeAreaInset(edge: .trailing, spacing: 0) {
+                        if edge == .trailing { SideBar(model: model) }
+                    }
+                    .overlay(alignment: .top) { StatusChip(model: model) }
+                    .toolbar {
+                        if edge == .bottom { BottomBarItems(model: model) }
+                    }
+                    .toolbar(.hidden, for: .navigationBar)
+                    .animation(.smooth(duration: 0.3), value: edge)
+                    .animation(.smooth(duration: 0.2), value: model.notice)
             }
-            .background(Brand.chamber)
-            // Track the surface actually in use so preview renders are sized
-            // for it; this fires again when the device is folded or unfolded.
-            .onChange(of: proxy.size, initial: true) { _, size in
-                model.updatePreviewBudget(
-                    forLongestEdge: max(size.width, size.height),
-                    scale: UIScreen.main.scale
-                )
+            // Renders are sized for the surface showing them. This fires again
+            // when the device is folded or opened, and the session re-renders
+            // for the new display while keeping the photo and the factor.
+            .task(id: proxy.size) {
+                let longest = max(proxy.size.width, proxy.size.height) * displayScale
+                await model.session.fit(longestEdge: max(1200, Int(longest * 1.25)))
             }
-            // The fold is an animated resize; matching it keeps the panes from
-            // snapping into place a frame late.
-            .animation(.smooth(duration: 0.28), value: isWide)
         }
         .preferredColorScheme(.dark)
-        .tint(Brand.coral)
-    }
-
-    // MARK: - Unfolded: image and controls side by side
-
-    private var wideLayout: some View {
-        HStack(spacing: 0) {
-            PreviewPane(model: model)
-                .frame(maxWidth: .infinity)
-
-            Rectangle()
-                .fill(Brand.hairline)
-                .frame(width: Brand.hairlineWidth)
-
-            ControlsPane(model: model)
-                .frame(width: 320)
+        .tint(Brand.white)
+        .fullScreenCover(isPresented: $model.isInspecting) {
+            InspectorView(session: model.session)
+        }
+        .sheet(item: $model.sharedFile) { file in
+            ActivitySheet(url: file.url)
+        }
+        .alert("Custom factor", isPresented: $model.isEnteringCustom) {
+            TextField("1.33", text: $customDraft)
+                .keyboardType(.decimalPad)
+            Button("Cancel", role: .cancel) {}
+            Button("Use") {
+                Task { await model.useTyped(customDraft) }
+            }
+        } message: {
+            Text("Between 1.00 and 3.00.")
         }
     }
 
-    // MARK: - Folded: image above, controls beneath
-
-    private var narrowLayout: some View {
-        VStack(spacing: 0) {
-            PreviewPane(model: model)
-                .frame(maxHeight: .infinity)
-
-            Hairline()
-
-            ControlsPane(model: model)
-                .frame(maxHeight: 340)
+    @ViewBuilder
+    private var canvas: some View {
+        switch model.mode {
+        case .single: PreviewPane(model: model)
+        case .batch:  BatchPane(model: model)
         }
     }
 }

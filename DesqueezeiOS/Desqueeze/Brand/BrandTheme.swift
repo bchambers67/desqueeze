@@ -11,6 +11,12 @@ import UIKit
 /// decks, and gallery materials" and sets documents on white. A photo-judging
 /// surface is gallery context, and a neutral dark ground avoids casting the
 /// image being evaluated, so this app sits on chamber throughout.
+///
+/// Two layers, two sets of rules. The content layer — the photograph, its
+/// readouts, the batch list — follows the guide to the letter: chamber ground,
+/// square corners, hairlines, no shadows or gradients. The control layer that
+/// floats above it is the system's Liquid Glass, with the system's shapes; the
+/// brand reaches it only as the one coral tint on the primary action.
 enum Brand {
 
     // MARK: - Palette

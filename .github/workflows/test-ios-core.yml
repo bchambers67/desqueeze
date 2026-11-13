@@ -1,0 +1,31 @@
+# Runs the DesqueezeCore test suite on every change to the iOS client.
+#
+# The package holds the iOS app's logic and has no UIKit, Core Image or Vision
+# in it, so it builds and tests on Linux. The app target itself needs Xcode and
+# is not built here.
+
+name: iOS core tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'DesqueezeiOS/**'
+      - '.github/workflows/test-ios-core.yml'
+  pull_request:
+    paths:
+      - 'DesqueezeiOS/**'
+      - '.github/workflows/test-ios-core.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: swift:6.1
+    steps:
+      - uses: actions/checkout@v4
+      - name: swift test
+        working-directory: DesqueezeiOS/DesqueezeCore
+        run: swift test

@@ -1,13 +1,13 @@
 import Foundation
 
 /// Anamorphic squeeze factors, in lockstep with the macOS and Windows clients.
-enum SqueezePreset: String, CaseIterable, Identifiable, Sendable {
+public enum SqueezePreset: String, CaseIterable, Identifiable, Sendable {
     case x125, x133, x150, x155, x160, x165, x175, x180, x200, custom
 
-    var id: String { rawValue }
+    public var id: String { rawValue }
 
     /// `nil` for `.custom`, whose value comes from the entry field.
-    var factor: Double? {
+    public var factor: Double? {
         switch self {
         case .x125: 1.25
         case .x133: 1.33
@@ -22,13 +22,13 @@ enum SqueezePreset: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
-    var label: String {
+    public var label: String {
         guard let f = factor else { return "Custom" }
         return String(format: "%.2f×", f)
     }
 
     /// The glass each factor corresponds to. Shown as a frame-edge annotation.
-    var hint: String {
+    public var hint: String {
         switch self {
         case .x125: "ULTRA STARLESS"
         case .x133: "HAWK · LOMO"
@@ -44,7 +44,7 @@ enum SqueezePreset: String, CaseIterable, Identifiable, Sendable {
     }
 
     /// Presets offered as rows; `.custom` is presented separately.
-    static var selectable: [SqueezePreset] {
+    public static var selectable: [SqueezePreset] {
         allCases.filter { $0 != .custom }
     }
 }
