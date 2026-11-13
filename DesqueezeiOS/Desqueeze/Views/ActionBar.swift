@@ -250,21 +250,60 @@ struct FactorControl: View {
     }
 }
 
-/// The factor slider in a short sheet that leaves the photo in view.
+/// The factor slider in a sheet exactly as tall as its contents, so it covers
+/// no more of the photograph than it has to.
 struct FactorSheet: View {
     let model: AppModel
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        FactorControl(model: model)
-            .padding(20)
-            // The sheet spans the screen, so its content may too. A cover
-            // display reserves a strip down one side that would otherwise
-            // squeeze the slider.
-            .ignoresSafeArea(.container, edges: .horizontal)
-            .presentationDetents([.height(FactorControl.hasSuggestion(model) ? 270 : 200)])
-            .presentationBackgroundInteraction(.enabled)
-            .presentationDragIndicator(.visible)
+        VStack(spacing: 14) {
+            FactorControl(model: model)
+            // The sheet can cover the action bar on a small display, so it
+            // carries its own way out.
+            SheetDoneButton { dismiss() }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 22)
+        .padding(.bottom, 12)
+        // The sheet spans the screen, so its content may too. A cover
+        // display reserves a strip down one side that would otherwise
+        // squeeze the slider.
+        .ignoresSafeArea(.container, edges: .horizontal)
+        .fittedSheet()
+        .presentationBackgroundInteraction(.enabled)
+        .presentationDragIndicator(.visible)
     }
+}
+
+struct SheetDoneButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text("Done")
+                .font(Brand.sans(15, weight: .medium))
+                .frame(maxWidth: .infinity, minHeight: 30)
+        }
+        .buttonStyle(.bordered)
+        .tint(Brand.white)
+    }
+}
+
+/// Sizes a sheet to the height of its content.
+private struct FittedSheet: ViewModifier {
+    @State private var height: CGFloat = 220
+
+    func body(content: Content) -> some View {
+        content
+            .fixedSize(horizontal: false, vertical: true)
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
+            .presentationDetents([.height(height)])
+    }
+}
+
+extension View {
+    func fittedSheet() -> some View { modifier(FittedSheet()) }
 }
 
 /// The factor slider docked along the bottom, for an open iPhone Duo held
