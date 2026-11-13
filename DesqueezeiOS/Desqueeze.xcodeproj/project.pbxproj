@@ -7,43 +7,43 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */; };
-		4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A8A670FF04B283780D9A67 /* FaceEstimator.swift */; };
-		DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */; };
 		23E29E917B353CC25AE73862 /* Thumbnailer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */; };
-		97072BA9276C863DDD24E740 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5650F65F933ADEFD15FD877 /* AppModel.swift */; };
-		C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D6210A0C9331BB3D874A7B /* BrandTheme.swift */; };
-		C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */; };
 		29BE1E7FAE3923F78EEB92E2 /* ActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A686FB922363CCD771D011D /* ActionBar.swift */; };
+		4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A8A670FF04B283780D9A67 /* FaceEstimator.swift */; };
 		50565145AD73F9B69A1372E6 /* BatchPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A84CC9232B7469B0C8C57D /* BatchPane.swift */; };
+		65F834C62FDE5AB88E43B6AB /* CoreImageRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */; };
 		9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 729E7EA7D7C368ED72BF9567 /* InspectorView.swift */; };
-		DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577BC15846CD67CA3BFE4338 /* PreviewPane.swift */; };
-		D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6795F82E61A2E6B03DFFCD1C /* RootView.swift */; };
 		93DA51FDFE1ACF64BA681FD6 /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */; };
+		97072BA9276C863DDD24E740 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5650F65F933ADEFD15FD877 /* AppModel.swift */; };
 		9E0C54E4573EBB5A160F5621 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */; };
-		E7A4DB31B7711884AA210878 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2FB13A70B2FAD9CB7AF0EC1E /* PrivacyInfo.xcprivacy */; };
 		B470063E3A315C50793EED81 /* DesqueezeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2E82B89D92189E65115417C3 /* DesqueezeCore */; };
+		C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */; };
+		C7D1BC633E463331FB1C5301 /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D6210A0C9331BB3D874A7B /* BrandTheme.swift */; };
+		D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6795F82E61A2E6B03DFFCD1C /* RootView.swift */; };
+		DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */; };
+		DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577BC15846CD67CA3BFE4338 /* PreviewPane.swift */; };
+		E7A4DB31B7711884AA210878 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2FB13A70B2FAD9CB7AF0EC1E /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		15A84CC9232B7469B0C8C57D /* BatchPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchPane.swift; sourceTree = "<group>"; };
+		16CE6AF2820C26A77C21C652 /* DesqueezeCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesqueezeCore; sourceTree = "<group>"; };
+		1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
+		26FDEE6E8D53D799B185CBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2FB13A70B2FAD9CB7AF0EC1E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		38A007151ABE87CC01A5B6E9 /* Desqueeze.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Desqueeze.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImageRenderer.swift; sourceTree = "<group>"; };
-		86A8A670FF04B283780D9A67 /* FaceEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceEstimator.swift; sourceTree = "<group>"; };
 		49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
 		4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thumbnailer.swift; sourceTree = "<group>"; };
-		F5650F65F933ADEFD15FD877 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
-		75D6210A0C9331BB3D874A7B /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
-		1F1E9539F7BE19E2777D8F4D /* DesqueezeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesqueezeApp.swift; sourceTree = "<group>"; };
-		5A686FB922363CCD771D011D /* ActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBar.swift; sourceTree = "<group>"; };
-		15A84CC9232B7469B0C8C57D /* BatchPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchPane.swift; sourceTree = "<group>"; };
-		729E7EA7D7C368ED72BF9567 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		577BC15846CD67CA3BFE4338 /* PreviewPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewPane.swift; sourceTree = "<group>"; };
+		5A686FB922363CCD771D011D /* ActionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionBar.swift; sourceTree = "<group>"; };
 		6795F82E61A2E6B03DFFCD1C /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		729E7EA7D7C368ED72BF9567 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		75D6210A0C9331BB3D874A7B /* BrandTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandTheme.swift; sourceTree = "<group>"; };
+		86A8A670FF04B283780D9A67 /* FaceEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceEstimator.swift; sourceTree = "<group>"; };
+		8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImageRenderer.swift; sourceTree = "<group>"; };
 		9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 		9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		2FB13A70B2FAD9CB7AF0EC1E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		26FDEE6E8D53D799B185CBE8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		16CE6AF2820C26A77C21C652 /* DesqueezeCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = DesqueezeCore; sourceTree = "<group>"; };
+		F5650F65F933ADEFD15FD877 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,13 +58,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D103645A7B5AB4394B88D427 = {
+		0500089CBF0A8CDDA7483BA4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1CDB0BEF8ECF3DDAB2CD4BC8 /* Desqueeze */,
-				16CE6AF2820C26A77C21C652 /* DesqueezeCore */,
-				0500089CBF0A8CDDA7483BA4 /* Products */,
+				38A007151ABE87CC01A5B6E9 /* Desqueeze.app */,
 			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		1CDB0BEF8ECF3DDAB2CD4BC8 /* Desqueeze */ = {
@@ -80,17 +79,6 @@
 				2FB13A70B2FAD9CB7AF0EC1E /* PrivacyInfo.xcprivacy */,
 			);
 			path = Desqueeze;
-			sourceTree = "<group>";
-		};
-		F329258BCDA6E1179F365E9E /* Adapters */ = {
-			isa = PBXGroup;
-			children = (
-				8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */,
-				86A8A670FF04B283780D9A67 /* FaceEstimator.swift */,
-				49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */,
-				4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */,
-			);
-			path = Adapters;
 			sourceTree = "<group>";
 		};
 		26113218D32C87985E6545C1 /* Brand */ = {
@@ -114,12 +102,24 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
-		0500089CBF0A8CDDA7483BA4 /* Products */ = {
+		D103645A7B5AB4394B88D427 = {
 			isa = PBXGroup;
 			children = (
-				38A007151ABE87CC01A5B6E9 /* Desqueeze.app */,
+				1CDB0BEF8ECF3DDAB2CD4BC8 /* Desqueeze */,
+				16CE6AF2820C26A77C21C652 /* DesqueezeCore */,
+				0500089CBF0A8CDDA7483BA4 /* Products */,
 			);
-			name = Products;
+			sourceTree = "<group>";
+		};
+		F329258BCDA6E1179F365E9E /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */,
+				86A8A670FF04B283780D9A67 /* FaceEstimator.swift */,
+				49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */,
+				4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */,
+			);
+			path = Adapters;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -311,20 +311,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		812314D856B639773231C926 /* Build configuration list for PBXProject "Desqueeze" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				08A8D745E6D2F7503EE67BD5 /* Debug */,
-				44D3323D9E0FBC44342D5AD1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		0DC14BCB1536FCF5F33DB2B7 /* Build configuration list for PBXNativeTarget "Desqueeze" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				66E5F20B33386BD1E7723871 /* Debug */,
 				F0D944C295A3D6BE8BBF7B03 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		812314D856B639773231C926 /* Build configuration list for PBXProject "Desqueeze" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				08A8D745E6D2F7503EE67BD5 /* Debug */,
+				44D3323D9E0FBC44342D5AD1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

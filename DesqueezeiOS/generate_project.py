@@ -156,7 +156,40 @@ w(f"\t\t{oid('dep','core')} /* DesqueezeCore */ = {{\n\t\t\tisa = XCSwiftPackage
 w("/* End XCSwiftPackageProductDependency section */")
 
 w(f"\t}};\n\trootObject = {oid('project')} /* Project object */;\n}}")
-(ROOT / "Desqueeze.xcodeproj" / "project.pbxproj").write_text("\n".join(L) + "\n")
+
+def in_xcode_order(text):
+    """Sort the objects in each section by id, as Xcode does when it saves.
+
+    Xcode rewrites the project file in this order whenever it touches it. If
+    the generator used any other order, every pull would meet a locally
+    modified project file even though nothing in it had changed.
+    """
+    import re
+    out, section, entry = [], None, None
+    start = re.compile(r"^\t\t([0-9A-F]{24}) ")
+    def flush():
+        nonlocal section, entry
+        if entry: section.append(entry)
+        entry = None
+    for line in text.split("\n"):
+        if line.startswith("/* Begin ") and line.endswith(" section */"):
+            out.append(line); section = []; continue
+        if line.startswith("/* End ") and section is not None:
+            flush()
+            for e in sorted(section, key=lambda e: start.match(e[0]).group(1)):
+                out.extend(e)
+            out.append(line); section = None; continue
+        if section is None:
+            out.append(line)
+        elif start.match(line):
+            flush(); entry = [line]
+        elif entry is not None:
+            entry.append(line)
+        else:
+            out.append(line)
+    return "\n".join(out)
+
+(ROOT / "Desqueeze.xcodeproj" / "project.pbxproj").write_text(in_xcode_order("\n".join(L)) + "\n")
 print("sources:", len(sources), "groups:", [str(g) for g in groups])
 
 # A shared scheme, committed with the project. Xcode Cloud and any other
