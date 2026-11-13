@@ -34,7 +34,17 @@ The bundle identifier is permanent once a build is uploaded. Change it in
 If the name StillScope is taken on the App Store, App Store Connect says so
 here. The name on the store can differ from the name under the icon.
 
-## Each upload
+## Automatic builds
+
+Xcode Cloud now does the upload. Every push to `main` that changes a file
+under `DesqueezeiOS/` is archived and sent to the Internal Test group, about
+ten to fifteen minutes later. To start one by hand, open Xcode's Report
+navigator, choose the Cloud tab, and use Start Build on the Default workflow.
+
+The manual steps below still work and are only needed if Xcode Cloud is
+unavailable.
+
+## Each upload by hand
 
 1. In Xcode, set the run destination to **Any iOS Device (arm64)**.
 2. Choose **Product › Archive**. The Organizer window opens when it finishes.
