@@ -65,6 +65,22 @@ final class AppModel {
 
     // MARK: - Intake
 
+    /// An image file another app asked StillScope to open.
+    func open(_ url: URL) async {
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url) else {
+            notice = Notice(text: "That file could not be opened.", isError: true)
+            return
+        }
+        notice = nil
+        thumbnailing?.cancel()
+        thumbnails = [:]
+        batch.clear()
+        await session.open(data)
+        suggestion = await FaceEstimator.suggestion(for: data)
+    }
+
     func take(_ picked: [PhotosPickerItem]) async {
         notice = nil
         suggestion = nil

@@ -8,6 +8,10 @@ struct DesqueezeApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(model: model)
+                // An image file handed over by Files, Mail or another app.
+                .onOpenURL { url in
+                    Task { await model.open(url) }
+                }
         }
     }
 }

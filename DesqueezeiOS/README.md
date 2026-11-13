@@ -162,3 +162,23 @@ Worth looking at for this app specifically:
 - **SwiftUI document support** with direct disk access, for open-in-place
   editing rather than copying bytes through the picker.
 - **App Intents View Annotations**, to make the corrected frame addressable.
+
+## From other apps
+
+StillScope can be reached without opening it first.
+
+- **Share sheet.** In any app that shares a photo, choose StillScope from the
+  share sheet. A small editor opens over that app with the photo and the
+  factor slider, and Save to Photos writes the corrected copy to the library.
+  This is the `Share` extension in `Extensions/Share`.
+- **Edit in Photos.** In the Photos app, open a photo, tap Edit, then the
+  extensions button, and choose StillScope. The correction is saved onto the
+  photo itself. Photos keeps the original, so Revert undoes it, and the factor
+  is stored with the photo. This is the `PhotoEdit` extension in
+  `Extensions/PhotoEdit`.
+- **Open in.** Files, Mail and other apps that hold an image file offer Open in
+  StillScope, which opens the file in the full app.
+
+Both extensions show `QuickEditor`, compiled from the same source as the app's
+slider and renderer. They are built in Swift 5 mode because the extension
+hosts pass completion handlers that predate `Sendable`.
