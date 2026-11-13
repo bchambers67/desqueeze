@@ -22,6 +22,7 @@ w("/* Begin PBXBuildFile section */")
 for s in sources:
     w(f"\t\t{oid('build', str(s))} /* {s.name} in Sources */ = {{isa = PBXBuildFile; fileRef = {oid('file', str(s))} /* {s.name} */; }};")
 w(f"\t\t{oid('build','assets')} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {oid('file','assets')} /* Assets.xcassets */; }};")
+w(f"\t\t{oid('build','privacy')} /* PrivacyInfo.xcprivacy in Resources */ = {{isa = PBXBuildFile; fileRef = {oid('file','privacy')} /* PrivacyInfo.xcprivacy */; }};")
 w(f"\t\t{oid('build','core')} /* DesqueezeCore in Frameworks */ = {{isa = PBXBuildFile; productRef = {oid('dep','core')} /* DesqueezeCore */; }};")
 w("/* End PBXBuildFile section */\n")
 
@@ -30,6 +31,7 @@ w(f"\t\t{oid('product')} /* Desqueeze.app */ = {{isa = PBXFileReference; explici
 for s in sources:
     w(f"\t\t{oid('file', str(s))} /* {s.name} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {s.name}; sourceTree = \"<group>\"; }};")
 w(f"\t\t{oid('file','assets')} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};")
+w(f"\t\t{oid('file','privacy')} /* PrivacyInfo.xcprivacy */ = {{isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = \"<group>\"; }};")
 w(f"\t\t{oid('file','plist')} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};")
 w(f"\t\t{oid('file','corepkg')} /* DesqueezeCore */ = {{isa = PBXFileReference; lastKnownFileType = wrapper; path = DesqueezeCore; sourceTree = \"<group>\"; }};")
 w("/* End PBXFileReference section */\n")
@@ -42,7 +44,7 @@ w("/* Begin PBXGroup section */")
 w(f"\t\t{oid('group','root')} = {{\n\t\t\tisa = PBXGroup;\n\t\t\tchildren = (\n\t\t\t\t{oid('group','app')} /* Desqueeze */,\n\t\t\t\t{oid('file','corepkg')} /* DesqueezeCore */,\n\t\t\t\t{oid('group','products')} /* Products */,\n\t\t\t);\n\t\t\tsourceTree = \"<group>\";\n\t\t}};")
 kids = [f"\t\t\t\t{oid('file', str(s))} /* {s.name} */," for s in sources if str(s.parent) == "."]
 kids += [f"\t\t\t\t{oid('group', str(g))} /* {g} */," for g in groups]
-kids += [f"\t\t\t\t{oid('file','assets')} /* Assets.xcassets */,", f"\t\t\t\t{oid('file','plist')} /* Info.plist */,"]
+kids += [f"\t\t\t\t{oid('file','assets')} /* Assets.xcassets */,", f"\t\t\t\t{oid('file','plist')} /* Info.plist */,", f"\t\t\t\t{oid('file','privacy')} /* PrivacyInfo.xcprivacy */,"]
 w(f"\t\t{oid('group','app')} /* Desqueeze */ = {{\n\t\t\tisa = PBXGroup;\n\t\t\tchildren = (\n" + "\n".join(kids) + f"\n\t\t\t);\n\t\t\tpath = Desqueeze;\n\t\t\tsourceTree = \"<group>\";\n\t\t}};")
 for g in groups:
     kids = [f"\t\t\t\t{oid('file', str(s))} /* {s.name} */," for s in sources if s.parent == g]
@@ -108,7 +110,7 @@ w(f"""\t\t{oid('project')} /* Project object */ = {{
 w("/* End PBXProject section */\n")
 
 w("/* Begin PBXResourcesBuildPhase section */")
-w(f"\t\t{oid('phase','resources')} /* Resources */ = {{\n\t\t\tisa = PBXResourcesBuildPhase;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t\t{oid('build','assets')} /* Assets.xcassets in Resources */,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;\n\t\t}};")
+w(f"\t\t{oid('phase','resources')} /* Resources */ = {{\n\t\t\tisa = PBXResourcesBuildPhase;\n\t\t\tbuildActionMask = 2147483647;\n\t\t\tfiles = (\n\t\t\t\t{oid('build','assets')} /* Assets.xcassets in Resources */,\n\t\t\t\t{oid('build','privacy')} /* PrivacyInfo.xcprivacy in Resources */,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;\n\t\t}};")
 w("/* End PBXResourcesBuildPhase section */\n")
 
 w("/* Begin PBXSourcesBuildPhase section */")
@@ -132,7 +134,7 @@ release = common + [("COPY_PHASE_STRIP", "NO"), ("DEBUG_INFORMATION_FORMAT", '"d
 target = [("CODE_SIGN_STYLE", "Automatic"), ("CURRENT_PROJECT_VERSION", "1"), ("DEVELOPMENT_TEAM", "FZ6W4MM7UN"),
           ("ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon"), ("ENABLE_PREVIEWS", "YES"), ("GENERATE_INFOPLIST_FILE", "NO"), ("INFOPLIST_FILE", "Desqueeze/Info.plist"),
           ("LD_RUNPATH_SEARCH_PATHS", '(\n\t\t\t\t\t"$(inherited)",\n\t\t\t\t\t"@executable_path/Frameworks",\n\t\t\t\t)'),
-          ("MARKETING_VERSION", "0.2"), ("PRODUCT_BUNDLE_IDENTIFIER", "com.chambersandlight.desqueeze"),
+          ("MARKETING_VERSION", "1.0"), ("PRODUCT_BUNDLE_IDENTIFIER", "com.chambersandlight.stillscope"),
           ("PRODUCT_NAME", '"$(TARGET_NAME)"'), ("SWIFT_EMIT_LOC_STRINGS", "YES"), ("TARGETED_DEVICE_FAMILY", '"1,2"')]
 
 w("/* Begin XCBuildConfiguration section */")

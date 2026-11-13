@@ -36,6 +36,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Desqueeze-Windows
-          path: dist-ci/Desqueeze.exe
+          name: StillScope-Windows
+          path: dist-ci/StillScope.exe
           retention-days: 90
