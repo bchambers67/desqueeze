@@ -114,7 +114,7 @@ enum RecentScanner {
             let resources = PHAssetResource.assetResources(for: asset)
             candidates.append(Candidate(
                 id: asset.localIdentifier,
-                name: resources.first { $0.type == .photo }?.originalFilename,
+                name: resources.first { $0.type == .photo }?.filename,
                 size: PixelSize(width: asset.pixelWidth, height: asset.pixelHeight),
                 taken: asset.creationDate,
                 isScreenshot: asset.mediaSubtypes.contains(.photoScreenshot),
