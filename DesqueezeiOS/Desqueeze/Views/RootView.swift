@@ -11,7 +11,6 @@ struct RootView: View {
     @Bindable var model: AppModel
 
     @Environment(\.displayScale) private var displayScale
-    @State private var customDraft = ""
 
     var body: some View {
         GeometryReader { proxy in
@@ -50,15 +49,8 @@ struct RootView: View {
         .sheet(item: $model.sharedFile) { file in
             ActivitySheet(url: file.url)
         }
-        .alert("Custom factor", isPresented: $model.isEnteringCustom) {
-            TextField("1.33", text: $customDraft)
-                .keyboardType(.decimalPad)
-            Button("Cancel", role: .cancel) {}
-            Button("Use") {
-                Task { await model.useTyped(customDraft) }
-            }
-        } message: {
-            Text("Between 1.00 and 3.00.")
+        .sheet(isPresented: $model.isChoosingFactor) {
+            FactorSheet(model: model)
         }
     }
 

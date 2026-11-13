@@ -108,8 +108,10 @@ hairlines, coral as punctuation only.
 layer, following Apple's *Adopting Liquid Glass*: the system toolbar along the
 bottom on iPhone, and on an open iPhone Duo a bar down the right side, built
 from the system's glass button styles in a single `GlassEffectContainer`. Icons
-carry accessibility labels; the factor, being text, has a group to itself; coral
-appears once, on Save. The brand's square corners and flat surfaces hold for the
+carry accessibility labels; the factor, being text, has a group to itself. Its
+button opens a short sheet with a slider from 1.00 to 2.00 in hundredths. The
+nine lens presets are stop points marked under the track, and arriving on one
+gives a light haptic tap. Coral marks Save and the factor. The brand's square corners and flat surfaces hold for the
 content layer beneath; the glass layer keeps the system's shapes.
 
 `BarEdge` decides the side from the window's size, not from a device check or a

@@ -41,7 +41,7 @@ struct BottomBarItems: ToolbarContent {
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
-            FactorMenu(model: model)
+            FactorButton(model: model)
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         if model.mode == .single {
@@ -80,7 +80,7 @@ struct SideBar: View {
 
                 Spacer(minLength: 0)
 
-                FactorMenu(model: model)
+                FactorButton(model: model)
                     .buttonStyle(.glass)
 
                 Spacer(minLength: 0)
@@ -138,49 +138,158 @@ private struct ClearButton: View {
     }
 }
 
-/// The squeeze factor: the current value as the label, the glass as the menu.
-private struct FactorMenu: View {
+/// The squeeze factor: shows the current value, and opens the factor sheet.
+private struct FactorButton: View {
     let model: AppModel
-    private var session: Session { model.session }
 
     var body: some View {
-        Menu {
-            if model.mode == .single, let suggestion = model.suggestion {
-                Section("Read from faces") {
-                    Button {
-                        Task { await model.useSuggestion() }
-                    } label: {
-                        Label(String(format: "Use %.2f×", suggestion), systemImage: "face.dashed")
-                    }
-                }
-            }
-            Section(model.mode == .batch ? "Batch factor" : "Squeeze factor") {
-                ForEach(SqueezePreset.selectable) { preset in
-                    Toggle(isOn: Binding(
-                        get: { session.preset == preset },
-                        set: { _ in Task { await session.choose(preset) } }
-                    )) {
-                        Text(preset.label)
-                        Text(preset.hint.capitalized)
-                    }
-                }
-            }
-            Section {
-                Button {
-                    model.isEnteringCustom = true
-                } label: {
-                    Label("Custom…", systemImage: "number")
-                }
-            }
+        Button {
+            model.isChoosingFactor = true
         } label: {
-            Text(String(format: "%.2f×", session.squeeze.factor))
+            Text(String(format: "%.2f×", model.session.squeeze.factor))
                 .font(Brand.mono(15, weight: .medium))
                 .monospacedDigit()
                 .padding(.horizontal, 4)
         }
         .accessibilityLabel("Squeeze factor")
-        .accessibilityValue(String(format: "%.2f", session.squeeze.factor))
+        .accessibilityValue(String(format: "%.2f", model.session.squeeze.factor))
         .disabled(model.isWorking)
+    }
+}
+
+/// The factor, on a slider, in a short sheet that leaves the photo in view.
+struct FactorSheet: View {
+    let model: AppModel
+    @State private var factor: Double
+
+    init(model: AppModel) {
+        self.model = model
+        _factor = State(initialValue: FactorSlider.clamped(model.session.squeeze.factor))
+    }
+
+    private var hasSuggestion: Bool { model.mode == .single && model.suggestion != nil }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            if hasSuggestion, let suggestion = model.suggestion {
+                Button {
+                    Task { await model.useSuggestion() }
+                } label: {
+                    Label(String(format: "Use %.2f×, read from faces", suggestion), systemImage: "face.dashed")
+                        .frame(maxWidth: .infinity, minHeight: 28)
+                }
+                .buttonStyle(.bordered)
+            }
+
+            FactorSlider(factor: $factor)
+        }
+        .padding(20)
+        .onChange(of: factor) { _, new in
+            Task { await model.use(factor: new) }
+        }
+        // The suggestion changes the factor from outside the slider.
+        .onChange(of: model.session.squeeze.factor) { _, new in
+            if abs(new - factor) > 0.004 { factor = FactorSlider.clamped(new) }
+        }
+        .presentationDetents([.height(hasSuggestion ? 270 : 200)])
+        .presentationBackgroundInteraction(.enabled)
+        .presentationDragIndicator(.visible)
+    }
+}
+
+/// A squeeze factor on a slider, with the lens presets as its stop points.
+///
+/// The slider moves in hundredths. Each preset is marked beneath the track,
+/// and arriving on one gives a light selection tap, so the common factors can
+/// be found by feel while every value in between stays reachable.
+struct FactorSlider: View {
+    @Binding var factor: Double
+
+    static let range: ClosedRange<Double> = 1.0...2.0
+    static let stops: [SqueezePreset] = SqueezePreset.selectable.filter { $0.factor != nil }
+
+    static func clamped(_ value: Double) -> Double {
+        let bounded = min(max(value, range.lowerBound), range.upperBound)
+        return (bounded * 100).rounded() / 100
+    }
+
+    /// The preset the thumb is resting on, if any.
+    private var stop: SqueezePreset? {
+        Self.stops.first { abs(($0.factor ?? 0) - factor) < 0.005 }
+    }
+
+    /// Roughly half the system thumb: how far the track's ends sit inside the
+    /// slider's frame.
+    private let trackInset: CGFloat = 14
+    private let labelled: Set<SqueezePreset> = [.x133, .x150, .x175, .x200]
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(String(format: "%.2f×", factor))
+                    .font(Brand.mono(26, weight: .medium))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                Spacer()
+                Text(stop?.hint.capitalized ?? "Custom")
+                    .font(Brand.sans(12))
+                    .foregroundStyle(stop == nil ? Brand.silver : Brand.coral)
+            }
+
+            HStack(spacing: 12) {
+                nudge(-0.01, "minus", "Down 0.01")
+                Slider(value: $factor, in: Self.range, step: 0.01) {
+                    Text("Squeeze factor")
+                }
+                .tint(Brand.coral)
+                .accessibilityValue(String(format: "%.2f", factor))
+                .background(alignment: .bottom) { ticks.offset(y: 22) }
+                nudge(0.01, "plus", "Up 0.01")
+            }
+            .padding(.bottom, 24)
+        }
+        // A tap on arriving at a stop point, and none on leaving it.
+        .sensoryFeedback(.selection, trigger: stop) { _, new in new != nil }
+    }
+
+    /// A mark under the track for each preset; a tap on one jumps to it.
+    private var ticks: some View {
+        GeometryReader { proxy in
+            let span = proxy.size.width - trackInset * 2
+            ForEach(Self.stops) { preset in
+                let value = preset.factor ?? 1
+                let x = trackInset + span * (value - Self.range.lowerBound)
+                    / (Self.range.upperBound - Self.range.lowerBound)
+                VStack(spacing: 3) {
+                    Rectangle()
+                        .fill(stop == preset ? Brand.coral : Brand.silver)
+                        .frame(width: 1, height: 7)
+                    if labelled.contains(preset) {
+                        Text(String(format: "%.2f", value))
+                            .font(Brand.mono(9))
+                            .foregroundStyle(stop == preset ? Brand.white : Brand.silver)
+                            .fixedSize()
+                    }
+                }
+                .frame(width: 1, alignment: .top)
+                .position(x: x, y: 12)
+            }
+        }
+        .frame(height: 24)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func nudge(_ delta: Double, _ symbol: String, _ name: String) -> some View {
+        Button {
+            factor = Self.clamped(factor + delta)
+        } label: {
+            Label(name, systemImage: symbol)
+                .labelStyle(.iconOnly)
+                .frame(width: 36, height: 36)
+        }
+        .buttonStyle(.bordered)
+        .buttonRepeatBehavior(.enabled)
     }
 }
 
