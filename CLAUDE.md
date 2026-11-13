@@ -42,3 +42,19 @@ cd DesqueezeiOS && python3 generate_project.py "$PWD"
 
 The owner's signing team is set in the generator. Do not hand-edit the project
 file; change the generator instead.
+
+## iOS delivery
+
+Xcode Cloud archives the iOS app and sends it to the Internal Test group in
+TestFlight on every push to `main` that changes a file under `DesqueezeiOS/`.
+The workflow is named Default, in the Xcode Cloud product named Desqueeze.
+
+- Every merge that touches `DesqueezeiOS/` ships a build to testers. Group
+  related iOS changes into one pull request so testers are not sent a string
+  of half-steps, and so the monthly compute allowance lasts.
+- Xcode Cloud assigns build numbers. `CURRENT_PROJECT_VERSION` in
+  `generate_project.py` only matters for an archive made by hand in Xcode.
+- External testers do not get builds automatically. The owner adds a build to
+  the External Testers group in App Store Connect when one is worth sharing.
+- Changes outside `DesqueezeiOS/`, such as Windows, web, brand or docs, do
+  not start an iOS build.
