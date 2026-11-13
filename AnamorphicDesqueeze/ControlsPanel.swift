@@ -32,7 +32,7 @@ struct ControlsPanel: View {
                         .font(Brand.grotesk(8, weight: .semibold))
                         .tracking(2.5)
                         .foregroundColor(Brand.accent)
-                    Text("Desqueeze")
+                    Text("StillScope")
                         .font(Brand.display(18))
                         .foregroundColor(Brand.textPrimary)
                 }

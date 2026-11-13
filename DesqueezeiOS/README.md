@@ -1,4 +1,4 @@
-# Desqueeze for iOS
+# StillScope for iOS
 
 Anamorphic correction on iPhone and iPad, built for iOS 27 and the iPhone Duo.
 

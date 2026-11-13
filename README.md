@@ -1,4 +1,6 @@
-# Desqueeze — A Chambers & Light Tool
+# StillScope — A Chambers & Light Tool
+
+StillScope was called Desqueeze until November 2026. Folder, project and module names in this repository still use the old name.
 
 A native macOS app for correcting horizontally-squeezed anamorphic photographs from digital sources, with a matching Windows client.
 
@@ -89,6 +91,11 @@ app draws no backgrounds behind them. The brand's flat, tight-cornered rules
 hold for the content layer; coral reaches the glass once, as the tint on Export.
 
 The Windows and web clients have not been moved to this palette yet.
+
+## Brand package
+
+`brand/StillScope/` holds the StillScope name, mark, wordmark, colours and the
+layered app icon for Apple's Icon Composer. See its README.
 
 ## App icon
 
