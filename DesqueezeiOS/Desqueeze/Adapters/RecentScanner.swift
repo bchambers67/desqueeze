@@ -31,33 +31,50 @@ enum RecentScanner {
     /// Photos from the last `days` that look squeezed, newest first, and the
     /// identifiers of those examined and found ordinary, so they need not be
     /// examined again.
-    static func scan(days: Int = 14, limit: Int = 60, skipping handled: Set<String>,
+    ///
+    /// `dealtWith` photos are never looked at again. `passedOver` ones were
+    /// found ordinary earlier, and are looked at again only if a photo the
+    /// owner corrected since was taken alongside them: that is new evidence.
+    static func scan(days: Int = 14, limit: Int = 60, dealtWith: Set<String>, passedOver: Set<String> = [],
                      corrections: [PictureSignals.Correction] = []) async -> (found: [Found], ordinary: [String]) {
         var found: [Found] = []
         var ordinary: [String] = []
 
-        for candidate in recent(days: days, limit: limit) where !handled.contains(candidate.id) {
+        for candidate in recent(days: days, limit: limit) where !dealtWith.contains(candidate.id) {
             guard !Task.isCancelled else { break }
             if candidate.isScreenshot || candidate.isEdited {
                 ordinary.append(candidate.id)
+                continue
+            }
+            // Taken alongside a photo the owner corrected. That needs no
+            // reading of the picture, and so no download: a photo still in
+            // iCloud can be recognised all the same.
+            let session = candidate.taken.flatMap {
+                PictureSignals.sessionFactor(taken: $0, size: candidate.size, corrections: corrections)
+            }
+            if passedOver.contains(candidate.id), session == nil { continue }
+            if let session {
+                let facts = PhotoFacts(
+                    name: candidate.name, size: candidate.size, lensModel: nil, faceFactor: nil,
+                    sessionFactor: session, isScreenshot: false, isEdited: false)
+                if let verdict = SqueezeDetector.verdict(for: facts) {
+                    found.append(Found(id: candidate.id, name: candidate.name ?? "Photo.jpg", factor: verdict.factor))
+                } else {
+                    ordinary.append(candidate.id)
+                }
                 continue
             }
             // Photos still in iCloud are skipped for now, not written off:
             // scanning must not start downloads.
             guard let data = await data(for: candidate.id, allowNetwork: false) else { continue }
 
-            // A photo from the same few minutes as one the owner corrected
-            // needs no further reading.
-            let session = candidate.taken.flatMap {
-                PictureSignals.sessionFactor(taken: $0, size: candidate.size, corrections: corrections)
-            }
-            let picture = session == nil ? await PictureReader.readings(for: data) : PictureReader.Readings()
-            let faces = session == nil ? await FaceEstimator.suggestion(for: data) : nil
+            let picture = await PictureReader.readings(for: data)
+            let faces = await FaceEstimator.suggestion(for: data)
 
             let facts = PhotoFacts(
                 name: candidate.name, size: candidate.size, lensModel: lensModel(in: data),
                 faceFactor: faces, textFactor: picture.text, bodyFactor: picture.body,
-                detailFactor: picture.detail, sessionFactor: session,
+                detailFactor: picture.detail,
                 isScreenshot: false, isEdited: false)
 
             if let verdict = SqueezeDetector.verdict(for: facts) {
