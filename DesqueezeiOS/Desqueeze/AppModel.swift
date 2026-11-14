@@ -112,7 +112,6 @@ final class AppModel {
     var mode: Mode { batch.items.isEmpty ? .single : .batch }
     enum Mode { case single, batch }
 
-    static let batchLimit = 36
 
     /// Whether there is anything to act on: an open photo or a queued batch.
     var hasContent: Bool { session.hasPhoto || !batch.items.isEmpty }
@@ -241,7 +240,7 @@ final class AppModel {
     /// Puts the photos the scan found into the batch, each with the factor
     /// the scan read for it.
     func queueFound() {
-        let photos = Array(found.prefix(Self.batchLimit))
+        let photos = found
         guard !photos.isEmpty else { return }
         notice = nil
         suggestion = nil
@@ -273,7 +272,7 @@ final class AppModel {
             for (id, libraryID) in queued {
                 guard !Task.isCancelled else { return }
                 guard let data = await RecentScanner.data(for: libraryID, allowNetwork: true),
-                      let thumbnail = await Thumbnailer.thumbnail(of: data, longestEdge: 900),
+                      let thumbnail = await Thumbnailer.thumbnail(of: data, longestEdge: 600),
                       !Task.isCancelled
                 else { continue }
                 thumbnails[id] = thumbnail
@@ -330,7 +329,7 @@ final class AppModel {
             session.close()
             batch.clear()
             var queued: [(Batch.Item.ID, PhotosPickerItem)] = []
-            for (index, item) in picked.prefix(Self.batchLimit).enumerated() {
+            for (index, item) in picked.enumerated() {
                 // The picker gives no filename without library access, which
                 // this app does not ask for; number them instead.
                 let id = batch.add(name: String(format: "Photo-%02d.jpg", index + 1)) {
@@ -347,7 +346,7 @@ final class AppModel {
                 for (id, item) in queued {
                     guard !Task.isCancelled else { return }
                     guard let data = try? await item.loadTransferable(type: Data.self),
-                          let thumbnail = await Thumbnailer.thumbnail(of: data, longestEdge: 900),
+                          let thumbnail = await Thumbnailer.thumbnail(of: data, longestEdge: 600),
                           !Task.isCancelled
                     else { continue }
                     thumbnails[id] = thumbnail
