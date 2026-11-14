@@ -202,7 +202,7 @@ final class AppModel {
         await scanRecent(askedFor: true)
         switch found.count {
         case 0:
-            notice = Notice(text: "No squeezed photos found in the last two weeks.", isError: false)
+            notice = Notice(text: "No squeezed photos found in your recent photos.", isError: false)
         case let count where hasContent:
             // The review button is on the empty screen, behind what is open.
             notice = Notice(text: "Found \(count) squeezed photo\(count == 1 ? "" : "s"). Clear to review.", isError: false)
