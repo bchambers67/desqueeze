@@ -82,21 +82,16 @@ struct PreviewPane: View {
             }
 
             PhotosPicker(selection: $picked, maxSelectionCount: AppModel.batchLimit, matching: .images, photoLibrary: .shared()) {
-                VStack(spacing: Brand.spacingXS) {
-                    Text("CHOOSE PHOTOS")
-                        .font(Brand.sans(12, weight: .medium))
-                        .tracking(Brand.tracking(Brand.trackLabel, at: 12))
-                        .foregroundStyle(Brand.primary)
-                    Text("One to correct and inspect. Several for a batch.")
-                        .font(Brand.sans(13))
-                        .foregroundStyle(Brand.secondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(.horizontal, Brand.spacingLG)
-                .padding(.vertical, Brand.spacingMD)
-                .overlay(Rectangle().stroke(Brand.secondary, lineWidth: 1))
+                Text("CHOOSE PHOTOS")
+                    .font(Brand.sans(12, weight: .medium))
+                    .tracking(Brand.tracking(Brand.trackLabel, at: 12))
+                    .foregroundStyle(Brand.primary)
+                    .padding(.horizontal, Brand.spacingLG)
+                    .padding(.vertical, Brand.spacingSM)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
 
             // What a scan of recent photos turned up, when that is switched on.
             if !model.found.isEmpty {
@@ -113,10 +108,11 @@ struct PreviewPane: View {
                             .foregroundStyle(Brand.secondary)
                     }
                     .padding(.horizontal, Brand.spacingLG)
-                    .padding(.vertical, Brand.spacingMD)
-                    .overlay(Rectangle().stroke(Brand.accent, lineWidth: 1))
+                    .padding(.vertical, Brand.spacingSM)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.glass)
+                .buttonBorderShape(.roundedRectangle(radius: 26))
+                .controlSize(.large)
             } else if model.isScanning {
                 FrameMark(text: "CHECKING RECENT PHOTOS", size: 9)
             }
