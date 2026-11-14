@@ -142,9 +142,12 @@ struct LandscapeBar: View {
     let open: Bool
 
     var body: some View {
-        GlassEffectContainer(spacing: 12) {
-            HStack(alignment: .bottom, spacing: 12) {
-                HStack(spacing: 6) {
+        // A container of glass shapes melts any that sit within its spacing
+        // of one another into a single blob, which shows as notches where two
+        // buttons almost touch. Zero keeps every button its own shape.
+        GlassEffectContainer(spacing: 0) {
+            HStack(alignment: .bottom, spacing: 10) {
+                HStack(spacing: 8) {
                     PhotosButton(model: model)
                     if model.hasContent { ClearButton(model: model) }
                     if model.findsSqueezed { RescanButton(model: model) }
@@ -152,7 +155,13 @@ struct LandscapeBar: View {
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
+                .controlSize(.large)
+                .fixedSize()
 
+                // The middle gives way to the panel. The two clusters stay
+                // against the edges whether it is open or not: they only
+                // ever move outward, never in toward the centre.
+                Spacer(minLength: 0)
                 if open {
                     HStack(alignment: .top, spacing: 8) {
                         FactorControl(model: model)
@@ -169,30 +178,32 @@ struct LandscapeBar: View {
                     .padding(.top, 12)
                     .padding(.bottom, 4)
                     .frame(maxWidth: 560)
+                    .fixedSize(horizontal: false, vertical: true)
                     .glassEffect(.regular, in: .rect(cornerRadius: 26))
+                    .layoutPriority(-1)
                     .transition(.opacity.combined(with: .scale(scale: 0.6, anchor: .bottom)))
                 } else {
-                    Spacer(minLength: 0)
                     FactorButton(model: model, panelShown: false)
                         .buttonStyle(.glass)
+                        .controlSize(.large)
                         .transition(.opacity)
-                    Spacer(minLength: 0)
                 }
+                Spacer(minLength: 0)
 
-                HStack(spacing: 6) {
+                HStack(spacing: 8) {
                     if model.mode == .single {
                         InspectButton(model: model)
                         ShareButton(model: model)
                     }
+                    SaveButton(model: model)
+                        .buttonStyle(.glassProminent)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.circle)
-
-                SaveButton(model: model)
-                    .buttonStyle(.glassProminent)
-                    .buttonBorderShape(.circle)
+                .controlSize(.large)
+                .fixedSize()
             }
-            .controlSize(.large)
+            .frame(maxWidth: .infinity)
             .padding(.horizontal, Brand.spacingMD)
             .padding(.bottom, 10)
         }
