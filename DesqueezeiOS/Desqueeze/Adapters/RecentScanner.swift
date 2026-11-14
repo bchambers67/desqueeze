@@ -119,15 +119,18 @@ enum RecentScanner {
         let isEdited: Bool
     }
 
+    /// Photos recently added to the library, and photos recently taken.
+    ///
+    /// They are not the same set. A photo shot last week and saved today, from
+    /// a card or a message, was taken outside any recent window but is the
+    /// newest thing in the library, so Recently Added is read as well as the
+    /// capture date. Newest first within each, no duplicates.
     private static func recent(days: Int, limit: Int) -> [Candidate] {
-        let options = PHFetchOptions()
-        let since = Date().addingTimeInterval(-Double(days) * 86_400)
-        options.predicate = NSPredicate(format: "creationDate > %@", since as NSDate)
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
-        options.fetchLimit = limit
-
+        var seen = Set<String>()
         var candidates: [Candidate] = []
-        PHAsset.fetchAssets(with: .image, options: options).enumerateObjects { asset, _, _ in
+
+        func take(_ asset: PHAsset) {
+            guard seen.insert(asset.localIdentifier).inserted else { return }
             let resources = PHAssetResource.assetResources(for: asset)
             candidates.append(Candidate(
                 id: asset.localIdentifier,
@@ -137,6 +140,23 @@ enum RecentScanner {
                 isScreenshot: asset.mediaSubtypes.contains(.photoScreenshot),
                 isEdited: resources.contains { $0.type == .adjustmentData }))
         }
+
+        // Recently Added is kept in the order photos arrived.
+        if let album = PHAssetCollection.fetchAssetCollections(
+            with: .smartAlbum, subtype: .smartAlbumRecentlyAdded, options: nil).firstObject {
+            let options = PHFetchOptions()
+            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
+            options.fetchLimit = limit
+            PHAsset.fetchAssets(in: album, options: options).enumerateObjects { asset, _, _ in take(asset) }
+        }
+
+        let options = PHFetchOptions()
+        let since = Date().addingTimeInterval(-Double(days) * 86_400)
+        options.predicate = NSPredicate(format: "creationDate > %@", since as NSDate)
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        options.fetchLimit = limit
+        PHAsset.fetchAssets(with: .image, options: options).enumerateObjects { asset, _, _ in take(asset) }
+
         return candidates
     }
 
