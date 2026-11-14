@@ -2,8 +2,8 @@
 
 Anamorphic correction on iPhone and iPad, built for iOS 27 and the iPhone Duo.
 
-Corrects one photo with live preview and pixel-level inspection, or a batch of
-up to 36. Suggests a factor from the faces in the frame, keeps capture metadata
+Corrects one photo with live preview and pixel-level inspection, or a batch of any
+size. Suggests a factor from the faces in the frame, keeps capture metadata
 on export, and saves to the photo library or the share sheet.
 
 ## Requirements
