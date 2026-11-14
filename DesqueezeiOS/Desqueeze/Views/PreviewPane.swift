@@ -51,15 +51,6 @@ struct PreviewPane: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Inspect the corrected photo")
-
-            HStack(alignment: .bottom) {
-                Spacer()
-                FrameMark(text: "TAP TO INSPECT", size: 9)
-                    .padding(.horizontal, Brand.spacingSM)
-                    .padding(.vertical, 5)
-                    .background(Brand.ground.opacity(0.85))
-            }
-            .padding(Brand.spacingMD)
         }
     }
 
