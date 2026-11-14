@@ -25,7 +25,7 @@ struct SettingsSheet: View {
                 }
 
                 section("EXPORT",
-                        note: "Saved and shared photos get a white border on every side: 2% of the long edge for small, 5% for medium. The preview shows the photo without it.") {
+                        note: "Saved and shared photos get a white border on every side: 2% of the long edge for small, 5% for medium.") {
                     Toggle("Add a matte", isOn: $model.addsMatte)
                     if model.addsMatte {
                         Picker("Matte size", selection: $model.matteSize) {
