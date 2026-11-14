@@ -151,12 +151,14 @@ final class AppModel {
     }
 
     /// Notes that a library photo was corrected at `factor`.
-    private func learn(from libraryID: String?, factor: Double) {
+    @discardableResult
+    private func learn(from libraryID: String?, factor: Double) -> Bool {
         guard findsSqueezed, RecentScanner.hasAccess, let libraryID,
-              let correction = RecentScanner.correction(for: libraryID, factor: factor) else { return }
+              let correction = RecentScanner.correction(for: libraryID, factor: factor) else { return false }
         remember([libraryID])
         let all = Array((corrections + [correction]).suffix(200))
         UserDefaults.standard.set(try? JSONEncoder().encode(all), forKey: Self.correctionsKey)
+        return true
     }
 
     private func startFinding() async {
@@ -199,9 +201,9 @@ final class AppModel {
         guard findsSqueezed, RecentScanner.hasAccess, !isScanning, askedFor || !hasContent else { return }
         isScanning = true
         defer { isScanning = false }
-        let skipping = dealtWith.union(foundOrdinary), learned = corrections
+        let done = dealtWith, passedOver = foundOrdinary, learned = corrections
         let result = await Task.detached(priority: .utility) {
-            await RecentScanner.scan(skipping: skipping, corrections: learned)
+            await RecentScanner.scan(dealtWith: done, passedOver: passedOver, corrections: learned)
         }.value
         rememberOrdinary(result.ordinary)
         found = result.found
@@ -375,8 +377,15 @@ final class AppModel {
         do {
             let name = String(format: "desqueeze_%.2fx.jpg", session.squeeze.factor)
             try await PhotoLibraryWriter.save(jpeg: try await session.export(), named: name)
-            learn(from: openLibraryID, factor: session.squeeze.factor)
+            let learned = learn(from: openLibraryID, factor: session.squeeze.factor)
             notice = Notice(text: "Saved to your library.", isError: false)
+            if learned {
+                // Others from the same session can be recognised now.
+                await scanRecent(askedFor: true)
+                if !found.isEmpty {
+                    notice = Notice(text: "Saved. Found \(found.count) more from the same session. Clear to review.", isError: false)
+                }
+            }
         } catch {
             notice = Notice(text: error.localizedDescription, isError: true)
         }
