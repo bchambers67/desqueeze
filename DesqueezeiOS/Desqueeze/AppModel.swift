@@ -24,6 +24,7 @@ final class AppModel {
     /// `noticeLifetime`, or sooner when something replaces it.
     private(set) var notice: Notice? { didSet { scheduleNoticeExpiry() } }
     private var noticeExpiry: Task<Void, Never>?
+    private var lastTally = RecentScanner.Tally()
     static let noticeLifetime: Duration = .seconds(5)
 
     // Held here rather than in a view: a fold rebuilds the views, and an open
@@ -202,7 +203,14 @@ final class AppModel {
         await scanRecent(askedFor: true)
         switch found.count {
         case 0:
-            notice = Notice(text: "No squeezed photos found in your recent photos.", isError: false)
+            // Say what was seen, so that a miss can be told from a scan that
+            // never saw the photos.
+            let seen = lastTally
+            var text = "None found. Looked at \(seen.total - seen.dealtWith) of \(seen.total)"
+            text += seen.dealtWith > 0 ? " (\(seen.dealtWith) done)." : "."
+            text += " \(corrections.count) corrected remembered."
+            if RecentScanner.hasLimitedAccess { text += " Photos access is limited." }
+            notice = Notice(text: text, isError: false)
         case let count where hasContent:
             // The review button is on the empty screen, behind what is open.
             notice = Notice(text: "Found \(count) squeezed photo\(count == 1 ? "" : "s"). Clear to review.", isError: false)
@@ -227,6 +235,7 @@ final class AppModel {
         }.value
         rememberOrdinary(result.ordinary)
         found = result.found
+        lastTally = result.tally
     }
 
     /// Puts the photos the scan found into the batch, each with the factor
@@ -399,6 +408,9 @@ final class AppModel {
             try await PhotoLibraryWriter.save(jpeg: try await session.export(), named: name)
             let learned = learn(from: openLibraryID, factor: session.squeeze.factor)
             notice = Notice(text: "Saved to your library.", isError: false)
+            if !learned && findsSqueezed {
+                notice = Notice(text: "Saved, but not linked to your library, so its session cannot be matched.", isError: true)
+            }
             if learned {
                 // Others from the same session can be recognised now.
                 await scanRecent(askedFor: true)

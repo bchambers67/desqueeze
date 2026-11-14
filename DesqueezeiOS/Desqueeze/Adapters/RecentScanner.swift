@@ -23,6 +23,22 @@ enum RecentScanner {
         return status == .authorized || status == .limited
     }
 
+    /// Limited access shows the scan only the photos the owner picked for the
+    /// app, which hides the rest of a session.
+    static var hasLimitedAccess: Bool {
+        PHPhotoLibrary.authorizationStatus(for: .readWrite) == .limited
+    }
+
+    /// What a scan saw, so that a scan that finds nothing can say why.
+    struct Tally: Sendable, Equatable {
+        /// Photos in the recent lists.
+        var total = 0
+        /// Left alone because the owner had already dealt with them.
+        var dealtWith = 0
+        /// Matched against a photo the owner corrected.
+        var matchedSession = 0
+    }
+
     static func requestAccess() async -> Bool {
         let status = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
         return status == .authorized || status == .limited
@@ -36,11 +52,16 @@ enum RecentScanner {
     /// found ordinary earlier, and are looked at again only if a photo the
     /// owner corrected since was taken alongside them: that is new evidence.
     static func scan(days: Int = 14, limit: Int = 60, dealtWith: Set<String>, passedOver: Set<String> = [],
-                     corrections: [PictureSignals.Correction] = []) async -> (found: [Found], ordinary: [String]) {
+                     corrections: [PictureSignals.Correction] = []) async -> (found: [Found], ordinary: [String], tally: Tally) {
         var found: [Found] = []
         var ordinary: [String] = []
+        var tally = Tally()
 
-        for candidate in recent(days: days, limit: limit) where !dealtWith.contains(candidate.id) {
+        let candidates = recent(days: days, limit: limit)
+        tally.total = candidates.count
+        tally.dealtWith = candidates.filter { dealtWith.contains($0.id) }.count
+
+        for candidate in candidates where !dealtWith.contains(candidate.id) {
             guard !Task.isCancelled else { break }
             if candidate.isScreenshot || candidate.isEdited {
                 ordinary.append(candidate.id)
@@ -54,6 +75,7 @@ enum RecentScanner {
             }
             if passedOver.contains(candidate.id), session == nil { continue }
             if let session {
+                tally.matchedSession += 1
                 let facts = PhotoFacts(
                     name: candidate.name, size: candidate.size, lensModel: nil, faceFactor: nil,
                     sessionFactor: session, isScreenshot: false, isEdited: false)
@@ -83,7 +105,7 @@ enum RecentScanner {
                 ordinary.append(candidate.id)
             }
         }
-        return (found, ordinary)
+        return (found, ordinary, tally)
     }
 
     /// A photo's bytes, as it currently stands in the library.
