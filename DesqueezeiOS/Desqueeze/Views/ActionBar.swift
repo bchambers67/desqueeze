@@ -476,7 +476,14 @@ struct StatusChip: View {
 
     var body: some View {
         if let notice = model.notice {
-            Label(notice.text, systemImage: notice.isError ? "exclamationmark.triangle" : "checkmark")
+            HStack(spacing: 8) {
+                if notice.isBusy {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Image(systemName: notice.isError ? "exclamationmark.triangle" : "checkmark")
+                }
+                Text(notice.text)
+            }
                 .font(Brand.sans(13))
                 .foregroundStyle(notice.isError ? Brand.error : Brand.primary)
                 .padding(.horizontal, 16)
