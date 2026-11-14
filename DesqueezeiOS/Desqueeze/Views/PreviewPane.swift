@@ -113,8 +113,6 @@ struct PreviewPane: View {
                 .buttonStyle(.glass)
                 .buttonBorderShape(.roundedRectangle(radius: 26))
                 .controlSize(.large)
-            } else if model.isScanning {
-                FrameMark(text: "CHECKING RECENT PHOTOS", size: 9)
             }
 
             if let failure = session.failure {

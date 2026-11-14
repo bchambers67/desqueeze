@@ -20,7 +20,11 @@ final class AppModel {
     /// A preview of each queued photo, as shot. Absent until it has loaded.
     private(set) var thumbnails: [Batch.Item.ID: CoreImageRenderer.Frame] = [:]
     private var thumbnailing: Task<Void, Never>?
-    private(set) var notice: Notice?
+    /// What the status chip says. Every notice leaves by itself after
+    /// `noticeLifetime`, or sooner when something replaces it.
+    private(set) var notice: Notice? { didSet { scheduleNoticeExpiry() } }
+    private var noticeExpiry: Task<Void, Never>?
+    static let noticeLifetime: Duration = .seconds(5)
 
     // Held here rather than in a view: a fold rebuilds the views, and an open
     // inspector or a running save must not reset when it does.
@@ -89,6 +93,18 @@ final class AppModel {
     struct Notice: Equatable {
         var text: String
         var isError: Bool
+        /// Work under way rather than a result: shown with a spinner.
+        var isBusy = false
+    }
+
+    private func scheduleNoticeExpiry() {
+        noticeExpiry?.cancel()
+        guard notice != nil else { return }
+        noticeExpiry = Task { [weak self] in
+            try? await Task.sleep(for: Self.noticeLifetime)
+            guard !Task.isCancelled else { return }
+            self?.notice = nil
+        }
     }
 
     /// One photo opens in the editor; several become a batch.
@@ -200,7 +216,11 @@ final class AppModel {
     func scanRecent(askedFor: Bool = false) async {
         guard findsSqueezed, RecentScanner.hasAccess, !isScanning, askedFor || !hasContent else { return }
         isScanning = true
-        defer { isScanning = false }
+        notice = Notice(text: "Checking recent photos…", isError: false, isBusy: true)
+        defer {
+            isScanning = false
+            if notice?.isBusy == true { notice = nil }
+        }
         let done = dealtWith, passedOver = foundOrdinary, learned = corrections
         let result = await Task.detached(priority: .utility) {
             await RecentScanner.scan(dealtWith: done, passedOver: passedOver, corrections: learned)
