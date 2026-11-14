@@ -46,6 +46,17 @@ struct RootView: View {
                     }
                     .ignoresSafeArea(.container, edges: edge == .trailing ? .trailing : [])
                     .overlay(alignment: .top) { StatusChip(model: model) }
+                    // Tapping anywhere else puts the panel away. This sits
+                    // under the panel and the bars, so they still take their
+                    // own taps.
+                    .overlay {
+                        if edge == .bottom && model.isFactorPanelOpen {
+                            Color.clear
+                                .contentShape(Rectangle())
+                                .onTapGesture { model.isFactorPanelOpen = false }
+                                .accessibilityHidden(true)
+                        }
+                    }
                     // Elsewhere the panel floats over the content, just above
                     // the bar, growing out of the factor button at the bar's
                     // centre. It is an overlay so that nothing under it moves.
