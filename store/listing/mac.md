@@ -1,7 +1,10 @@
 # Mac App Store listing
 
-The macOS app is `AnamorphicDesqueeze` (bundle `com.chambersandlight.desqueeze`), a separate app
-from the iOS one. See the checklist for the items it still needs before it can be submitted.
+The macOS app is `AnamorphicDesqueeze`. It shares the iOS app's bundle ID,
+`com.chambersandlight.stillscope`, so it is added to the **same App Store Connect record** as the
+macOS platform: one app, one purchase on iPhone, iPad, iPhone Duo and Mac (universal purchase).
+The name, price and availability are shared; the Mac keeps its own screenshots and its own
+version text. See the checklist for the items it still needs before it can be submitted.
 
 | Field | Value | Limit |
 |---|---|---|

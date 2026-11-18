@@ -52,21 +52,27 @@ this folder or in the app.
 
 The macOS app has not been through any of this yet:
 
-- [ ] **you** Decide the bundle ID. The Mac app is `com.chambersandlight.desqueeze`; the iOS app
-      is `com.chambersandlight.stillscope`. Different IDs means two separate App Store records
-      and two purchases. Matching them (Mac as `com.chambersandlight.stillscope`) makes one
-      record with universal purchase. Tell me and I will change the project.
-- [ ] **you** Register the Mac App ID, and create a Mac App Store distribution certificate and
+- [x] One purchase across Apple platforms: the Mac app now uses the iOS bundle ID
+      (`com.chambersandlight.stillscope`), so it goes in the same App Store Connect record as a
+      macOS platform, with universal purchase. A person who buys once has it on every Apple device.
+- [ ] **you** In App Store Connect, open the StillScope app and add the macOS platform (the "+"
+      beside the platform list, then macOS). Do not create a second app. The name and price carry
+      over.
+- [ ] **you** Make sure the App ID `com.chambersandlight.stillscope` is enabled for macOS (Xcode's
+      automatic signing does this), and create a Mac App Store distribution certificate and
       installer certificate (Xcode can do this under Signing).
 - [ ] Add a privacy manifest (`PrivacyInfo.xcprivacy`, no tracking, no collected data) to the
       Mac target; it has none.
-- [ ] Add `ITSAppUsesNonExemptEncryption = NO` to the Mac target so uploads do not ask.
+- [x] `ITSAppUsesNonExemptEncryption = NO` is in the Mac Info.plist, so uploads do not ask.
 - [ ] Confirm the sandbox entitlements: it has app-sandbox and user-selected read/write only,
       which is all it needs.
 - [ ] Archive in Xcode (Product > Archive > Distribute > App Store Connect). Xcode Cloud has no
       Mac workflow yet.
-- [ ] Create the Mac record, paste `listing/mac.md`, upload the 2880 x 1800 screenshots.
+- [ ] On the macOS version of the record, paste `listing/mac.md` and upload the 2880 x 1800
+      screenshots.
 
 ## 5. Not covered
 
-Windows (Microsoft Store) and the website are not part of this package; ask if you want them.
+One purchase works across Apple platforms only. Microsoft Store purchases are separate and cannot
+be linked to an App Store purchase; if you want Windows buyers covered, it would need its own price
+or a free tier. Windows and the website are not part of this package; ask if you want them.
