@@ -169,9 +169,13 @@ struct LandscapeBar: View {
                             model.isFactorPanelOpen = false
                         } label: {
                             Label("Close", systemImage: "xmark").labelStyle(.iconOnly)
+                                .foregroundStyle(Brand.primary)
+                                .frame(width: 44, height: 44)
+                                .contentShape(Circle())
                         }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.circle)
+                        .buttonStyle(.plain)
+                        // A trace of the safelight red marks it as the way out.
+                        .glassEffect(.regular.tint(Brand.error.opacity(Brand.closeTint)).interactive(), in: .circle)
                     }
                     .padding(.leading, 20)
                     .padding(.trailing, 10)
@@ -298,7 +302,10 @@ private struct FactorButton: View {
         Button {
             model.isFactorPanelOpen.toggle()
         } label: {
-            Text(String(format: "%.2f×", model.session.squeeze.factor))
+            // With a batch whose photos differ, there is no one factor to show.
+            Text(model.mode == .batch && model.selectionFactor == nil
+                 ? "Mixed" : String(format: "%.2f×", model.mode == .batch
+                    ? model.selectionFactor ?? model.session.squeeze.factor : model.session.squeeze.factor))
                 .font(Brand.mono(15, weight: .medium))
                 .monospacedDigit()
                 .lineLimit(1)
@@ -475,7 +482,7 @@ private struct SaveButton: View {
             }
         }
         .tint(Brand.accent)
-        .disabled(!model.hasContent || model.isWorking)
+        .disabled(!model.hasContent || model.isWorking || (model.mode == .batch && model.batch.selectedCount == 0))
     }
 }
 

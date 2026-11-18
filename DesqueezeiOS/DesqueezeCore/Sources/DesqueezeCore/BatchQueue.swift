@@ -19,6 +19,8 @@ public final class BatchQueue<Renderer: FrameRenderer> {
         public internal(set) var state: State = .waiting
         /// This photo's own factor, when it differs from the batch.
         public internal(set) var squeeze: Squeeze?
+        /// Whether a factor change and a save take this photo in.
+        public internal(set) var isSelected = true
         let load: @Sendable () async throws -> Data
     }
 
@@ -48,7 +50,31 @@ public final class BatchQueue<Renderer: FrameRenderer> {
         items[index].squeeze = squeeze
     }
 
-    /// Corrects each unfinished photo and hands the result to `save`. A call
+    public func setSelected(_ selected: Bool, for id: Item.ID) {
+        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        items[index].isSelected = selected
+    }
+
+    public func selectAll(_ selected: Bool) {
+        for index in items.indices { items[index].isSelected = selected }
+    }
+
+    public var selectedCount: Int { items.count(where: { $0.isSelected }) }
+
+    /// A new factor for the selection. Selected photos take it. A photo left
+    /// out that was following the batch is pinned to the factor it had, so
+    /// that moving the slider does not reach it; one with its own keeps that.
+    public func apply(_ new: Squeeze, replacing old: Squeeze) {
+        for index in items.indices where items[index].state != .done {
+            if items[index].isSelected {
+                items[index].squeeze = new
+            } else if items[index].squeeze == nil {
+                items[index].squeeze = old
+            }
+        }
+    }
+
+    /// Corrects each selected, unfinished photo and hands the result to `save`. A call
     /// made while a run is under way returns at once.
     public func run(squeeze: Squeeze, matte: Matte? = nil, saving save: (_ name: String, _ file: Data) async throws -> Void) async {
         guard !isRunning else { return }
@@ -57,7 +83,7 @@ public final class BatchQueue<Renderer: FrameRenderer> {
 
         // Walked by identity, not position: the list can change under a run,
         // and an index taken before an await may not mean the same photo after.
-        for id in items.filter({ $0.state != .done }).map(\.id) {
+        for id in items.filter({ $0.isSelected && $0.state != .done }).map(\.id) {
             guard let item = items.first(where: { $0.id == id }) else { continue }
             setState(.working, for: id)
             do {

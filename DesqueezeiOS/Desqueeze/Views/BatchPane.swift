@@ -5,7 +5,9 @@ import SwiftUI
 ///
 /// Each tile is the photo's thumbnail given the shape of its factor. Moving
 /// the slider reshapes all of them at once; nothing is re-rendered to do it.
-/// A photo follows the batch factor unless a tap gives it one of its own.
+/// The slider changes the photos that are selected, all of them to begin with;
+/// a tap on a tile selects or deselects it, and a tap on its factor opens a
+/// slider for that photo alone.
 struct BatchPane: View {
     let model: AppModel
 
@@ -18,12 +20,14 @@ struct BatchPane: View {
 
     var body: some View {
         ScrollView {
+            selectionBar
             LazyVGrid(columns: columns, spacing: Brand.spacingMD) {
                 ForEach(batch.items) { item in
                     tile(item)
                 }
             }
-            .padding(Brand.spacingMD)
+            .padding(.horizontal, Brand.spacingMD)
+            .padding(.bottom, Brand.spacingMD)
         }
         .background(Brand.ground)
         .sheet(item: $editing) { item in
@@ -34,13 +38,32 @@ struct BatchPane: View {
         }
     }
 
+    /// How many are selected, and a way to take in all or none.
+    private var selectionBar: some View {
+        HStack(spacing: Brand.spacingMD) {
+            Text("\(batch.selectedCount) of \(batch.items.count) selected")
+                .font(Brand.mono(12))
+                .foregroundStyle(Brand.secondary)
+            Spacer()
+            Button("Select all") { model.selectAll(true) }
+                .disabled(batch.selectedCount == batch.items.count)
+            Button("None") { model.selectAll(false) }
+                .disabled(batch.selectedCount == 0)
+        }
+        .font(Brand.sans(13))
+        .tint(Brand.accent)
+        .padding(.horizontal, Brand.spacingMD)
+        .padding(.top, Brand.spacingMD)
+        .disabled(batch.isRunning)
+    }
+
     private func tile(_ item: Batch.Item) -> some View {
         let factor = (item.squeeze ?? model.session.squeeze).factor
         let locked = batch.isRunning || item.state == .done
 
         return VStack(spacing: 6) {
             Button {
-                editing = item
+                model.toggleSelected(item.id)
             } label: {
                 ZStack {
                     if let frame = model.thumbnails[item.id] {
@@ -48,7 +71,7 @@ struct BatchPane: View {
                         Image(decorative: frame.image, scale: 1)
                             .resizable()
                             .aspectRatio(shot * factor, contentMode: .fit)
-                            .opacity(item.state == .done ? 0.55 : 1)
+                            .opacity(item.state == .done ? 0.55 : item.isSelected ? 1 : 0.35)
                     } else {
                         ProgressView().tint(Brand.accent)
                     }
@@ -60,8 +83,9 @@ struct BatchPane: View {
             .buttonStyle(.plain)
             .disabled(locked)
             .accessibilityLabel("\(item.name), \(String(format: "%.2f", factor)) times")
-            .accessibilityHint("Sets this photo's own factor")
-            .overlay(alignment: .topLeading) { stateMark(item.state).padding(8) }
+            .accessibilityAddTraits(item.isSelected ? .isSelected : [])
+            .accessibilityHint("Selects or deselects this photo")
+            .overlay(alignment: .topLeading) { stateMark(item).padding(8) }
             .overlay(alignment: .topTrailing) {
                 Button {
                     model.removeFromBatch(item.id)
@@ -75,18 +99,23 @@ struct BatchPane: View {
                 .accessibilityLabel("Remove \(item.name)")
             }
             .overlay(alignment: .bottomTrailing) {
-                // Only a photo with its own factor is marked; the rest follow
-                // the slider and need no label.
-                if let own = item.squeeze {
-                    Text(String(format: "%.2f×", own.factor))
+                // Every photo shows its factor. A tap opens it for this photo
+                // alone.
+                Button {
+                    editing = item
+                } label: {
+                    Text(String(format: "%.2f×", factor))
                         .font(Brand.mono(11))
                         .foregroundStyle(Brand.primary)
                         .padding(.horizontal, 7)
                         .frame(height: 22)
                         .background(Brand.ground.opacity(0.85))
-                        .overlay(Rectangle().stroke(Brand.accent, lineWidth: 1))
+                        .overlay(Rectangle().stroke(item.squeeze == nil ? Brand.secondary : Brand.accent, lineWidth: 1))
                         .padding(8)
                 }
+                .buttonStyle(.plain)
+                .disabled(locked)
+                .accessibilityLabel("Set the factor for \(item.name)")
             }
 
             if case .failed(let reason) = item.state {
@@ -99,10 +128,13 @@ struct BatchPane: View {
     }
 
     @ViewBuilder
-    private func stateMark(_ state: Batch.Item.State) -> some View {
-        switch state {
+    private func stateMark(_ item: Batch.Item) -> some View {
+        switch item.state {
         case .waiting:
-            EmptyView()
+            Image(systemName: item.isSelected ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 18))
+                .foregroundStyle(item.isSelected ? Brand.accent : Brand.secondary)
+                .accessibilityHidden(true)
         case .working:
             ProgressView().controlSize(.small).tint(Brand.accent)
         case .done:
