@@ -240,10 +240,12 @@ private struct ClearButton: View {
     let model: AppModel
 
     var body: some View {
-        Button(role: .destructive) {
+        // Clearing puts the photos away; it deletes nothing, so no trash can
+        // and no destructive styling.
+        Button {
             model.reset()
         } label: {
-            Label("Clear", systemImage: "trash").labelStyle(.iconOnly)
+            Label("Clear", systemImage: "xmark.circle").labelStyle(.iconOnly)
         }
         .disabled(model.isWorking)
     }
