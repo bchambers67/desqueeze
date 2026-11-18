@@ -13,7 +13,11 @@ struct DesqueezeApp: App {
                 // Each time the app comes forward, look for newly saved
                 // photos that need correcting, if that is switched on.
                 .onChange(of: scenePhase, initial: true) { _, phase in
-                    if phase == .active { Task { await model.scanRecent() } }
+                    if phase == .active {
+                        Task { await model.scanRecent() }
+                    } else {
+                        model.pauseBackgroundWork()
+                    }
                 }
                 .onOpenURL { url in
                     Task { await model.open(url) }
