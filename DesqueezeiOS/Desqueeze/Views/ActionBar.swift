@@ -141,6 +141,16 @@ struct LandscapeBar: View {
     let model: AppModel
     let open: Bool
 
+    @Environment(\.displayCornerRadius) private var corner
+
+    /// The margin to the screen edge. Next to a rounded corner it is the same
+    /// on both sides, and a button's own corner is the display's less that
+    /// margin, so the two curves share a centre (the concentric rule).
+    private var inset: CGFloat { corner > 0 ? 14 : Brand.spacingMD }
+    private var buttonShape: ButtonBorderShape {
+        corner > 0 ? .roundedRectangle(radius: max(corner - inset, 8)) : .circle
+    }
+
     var body: some View {
         // A container of glass shapes melts any that sit within its spacing
         // of one another into a single blob, which shows as notches where two
@@ -154,7 +164,7 @@ struct LandscapeBar: View {
                     SettingsButton(model: model)
                 }
                 .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
+                .buttonBorderShape(buttonShape)
                 .controlSize(.large)
                 .fixedSize()
 
@@ -203,13 +213,13 @@ struct LandscapeBar: View {
                         .buttonStyle(.glassProminent)
                 }
                 .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
+                .buttonBorderShape(buttonShape)
                 .controlSize(.large)
                 .fixedSize()
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, Brand.spacingMD)
-            .padding(.bottom, 10)
+            .padding(.horizontal, inset)
+            .padding(.bottom, corner > 0 ? inset : 10)
         }
     }
 }
