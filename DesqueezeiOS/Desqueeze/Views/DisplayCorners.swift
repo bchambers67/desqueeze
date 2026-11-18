@@ -22,8 +22,14 @@ enum DisplayCorners {
     /// The radius to clip the canvas to now: the window's on a square-cornered
     /// display, none elsewhere.
     static func radius() -> CGFloat {
-        isSquare() ? windowRadius : 0
+        guard isSquare() else { return 0 }
+        // An iOS app on a Mac is drawn at 77% ("scaled to match iPad"), so a
+        // point of the app is 0.77 of a Mac point. The window's radius is in
+        // Mac points; in the app's own points it is larger.
+        return ProcessInfo.processInfo.isiOSAppOnMac ? windowRadius / macScale : windowRadius
     }
+
+    private static let macScale: CGFloat = 0.77
 
     private static func isSquare() -> Bool {
         let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first

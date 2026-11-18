@@ -143,12 +143,15 @@ struct LandscapeBar: View {
 
     @Environment(\.displayCornerRadius) private var corner
 
-    /// The margin to the screen edge. Next to a rounded corner it is the same
-    /// on both sides, and a button's own corner is the display's less that
-    /// margin, so the two curves share a centre (the concentric rule).
-    private var inset: CGFloat { corner > 0 ? 14 : Brand.spacingMD }
-    private var buttonShape: ButtonBorderShape {
-        corner > 0 ? .roundedRectangle(radius: max(corner - inset, 8)) : .circle
+    /// The height of the bar's buttons, measured, since the system sizes them.
+    @State private var buttonHeight: CGFloat = 50
+
+    /// The margin to the screen edge. Next to a rounded corner it is the
+    /// same on the edge and the bottom, and sets each end button's centre on
+    /// the corner's own centre: the corner radius less the button's radius.
+    /// The two curves then share a centre, and the circle follows the corner.
+    private var inset: CGFloat {
+        corner > 0 ? max(corner - buttonHeight / 2, 6) : Brand.spacingMD
     }
 
     var body: some View {
@@ -164,9 +167,10 @@ struct LandscapeBar: View {
                     SettingsButton(model: model)
                 }
                 .buttonStyle(.glass)
-                .buttonBorderShape(buttonShape)
+                .buttonBorderShape(.circle)
                 .controlSize(.large)
                 .fixedSize()
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { buttonHeight = $0 }
 
                 // The middle gives way to the panel. The two clusters stay
                 // against the edges whether it is open or not: they only
@@ -213,7 +217,7 @@ struct LandscapeBar: View {
                         .buttonStyle(.glassProminent)
                 }
                 .buttonStyle(.glass)
-                .buttonBorderShape(buttonShape)
+                .buttonBorderShape(.circle)
                 .controlSize(.large)
                 .fixedSize()
             }
