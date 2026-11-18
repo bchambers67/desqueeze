@@ -36,3 +36,17 @@ enum DisplayCorners {
         return (scene?.keyWindow?.safeAreaInsets.bottom ?? 1) == 0
     }
 }
+
+private struct DisplayCornerRadiusKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 0
+}
+
+extension EnvironmentValues {
+    /// The corner radius the canvas is clipped to, or 0 when the display
+    /// supplies its own corners. Controls near a corner read it to sit
+    /// concentric with it.
+    var displayCornerRadius: CGFloat {
+        get { self[DisplayCornerRadiusKey.self] }
+        set { self[DisplayCornerRadiusKey.self] = newValue }
+    }
+}

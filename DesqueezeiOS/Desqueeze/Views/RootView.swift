@@ -96,6 +96,7 @@ struct RootView: View {
         .background(Color.black.ignoresSafeArea())
         .onGeometryChange(for: CGSize.self) { $0.size } action: { _ in cornerRadius = DisplayCorners.radius() }
         .animation(.smooth(duration: 0.25), value: cornerRadius)
+        .environment(\.displayCornerRadius, cornerRadius)
         .preferredColorScheme(.dark)
         .tint(Brand.primary)
         .fullScreenCover(isPresented: $model.isInspecting) {
