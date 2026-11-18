@@ -13,6 +13,7 @@
 		22CF822620D613C0286318E8 /* FactorSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAA04F13474329D8DAE86C26 /* FactorSlider.swift */; };
 		23E29E917B353CC25AE73862 /* Thumbnailer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B68ED677D61A9A05C68DC24 /* Thumbnailer.swift */; };
 		29BE1E7FAE3923F78EEB92E2 /* ActionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A686FB922363CCD771D011D /* ActionBar.swift */; };
+		314A89CB095B0216763623F9 /* DisplayCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD262428067EE115E1E96B7E /* DisplayCorners.swift */; };
 		47F3FBB91244760560932FBB /* QuickEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C568F2B94ED416E2ABB0F9A4 /* QuickEditor.swift */; };
 		4C59756225C84FD3A1849F2A /* DesqueezeCore in Frameworks */ = {isa = PBXBuildFile; productRef = EE6B718CBBC1CD5C7038B3D3 /* DesqueezeCore */; };
 		4E99E24668989236B6ECB30B /* FaceEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A8A670FF04B283780D9A67 /* FaceEstimator.swift */; };
@@ -101,6 +102,7 @@
 		8F52CACAA9E7CFE3E854C240 /* CoreImageRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreImageRenderer.swift; sourceTree = "<group>"; };
 		9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 		9EFEA10BD8558896BB6BA3CC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AD262428067EE115E1E96B7E /* DisplayCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayCorners.swift; sourceTree = "<group>"; };
 		AE130BDC3316B74D9F430B59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C2144583C39D4A7834711CEE /* PhotoEditingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditingViewController.swift; sourceTree = "<group>"; };
 		C568F2B94ED416E2ABB0F9A4 /* QuickEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEditor.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 			children = (
 				5A686FB922363CCD771D011D /* ActionBar.swift */,
 				15A84CC9232B7469B0C8C57D /* BatchPane.swift */,
+				AD262428067EE115E1E96B7E /* DisplayCorners.swift */,
 				EAA04F13474329D8DAE86C26 /* FactorSlider.swift */,
 				729E7EA7D7C368ED72BF9567 /* InspectorView.swift */,
 				577BC15846CD67CA3BFE4338 /* PreviewPane.swift */,
@@ -373,6 +376,7 @@
 				C2C1C56019E666A0B04EE031 /* DesqueezeApp.swift in Sources */,
 				29BE1E7FAE3923F78EEB92E2 /* ActionBar.swift in Sources */,
 				50565145AD73F9B69A1372E6 /* BatchPane.swift in Sources */,
+				314A89CB095B0216763623F9 /* DisplayCorners.swift in Sources */,
 				5FD41A0B72DDAAEC4677618A /* FactorSlider.swift in Sources */,
 				9032E1C04BF85AA9E1C6F5A5 /* InspectorView.swift in Sources */,
 				DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */,

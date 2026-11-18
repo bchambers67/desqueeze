@@ -12,6 +12,8 @@ struct RootView: View {
     @Bindable var model: AppModel
 
     @Environment(\.displayScale) private var displayScale
+    /// How far the canvas is rounded: only on a display with square corners.
+    @State private var cornerRadius: CGFloat = 0
 
     var body: some View {
         GeometryReader { proxy in
@@ -88,6 +90,12 @@ struct RootView: View {
                 await model.session.fit(longestEdge: max(1200, Int(longest * 1.25)))
             }
         }
+        // The mask reaches under the safe areas, so it rounds the display, not
+        // the content's own frame, and the content's layout is untouched.
+        .mask { RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).ignoresSafeArea() }
+        .background(Color.black.ignoresSafeArea())
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { _ in cornerRadius = DisplayCorners.radius() }
+        .animation(.smooth(duration: 0.25), value: cornerRadius)
         .preferredColorScheme(.dark)
         .tint(Brand.primary)
         .fullScreenCover(isPresented: $model.isInspecting) {
