@@ -35,7 +35,10 @@ actor CoreImageRenderer: FrameRenderer {
 
     /// One shared context: building a `CIContext` per render is expensive and
     /// throws away Core Image's cache of compiled kernels.
-    private let context = CIContext(options: [
+    ///
+    /// Made on first use, not at launch: building it opens the GPU and its
+    /// shader cache, which an app showing only its empty screen does not need.
+    private lazy var context = CIContext(options: [
         // Linear wide-gamut working space, so resampling does not clip
         // saturated colour on a P3 display.
         .workingColorSpace: CGColorSpace(name: CGColorSpace.extendedLinearDisplayP3) as Any,
