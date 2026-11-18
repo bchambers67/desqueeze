@@ -216,12 +216,37 @@ struct LandscapeBar: View {
 
 // MARK: - The actions
 
+/// The system photo picker, tied to the shared photo library only when that
+/// is needed.
+///
+/// Giving the picker the shared library lets it report each photo's library
+/// identifier, which the finder uses to learn from photos you correct. It
+/// also makes the app open the photo library's database as soon as the picker
+/// is on screen. On a Mac that database stays open while the app sits hidden,
+/// and the system ends an app it must suspend while one is open
+/// (exception code 0xDEAD10CC). So the library is used only while Find
+/// squeezed photos is on, the one feature that needs the identifiers.
+struct LibraryPhotosPicker<Label: View>: View {
+    @Binding var selection: [PhotosPickerItem]
+    let usesLibrary: Bool
+    @ViewBuilder let label: () -> Label
+
+    var body: some View {
+        if usesLibrary {
+            PhotosPicker(selection: $selection, maxSelectionCount: nil, matching: .images,
+                         photoLibrary: .shared(), label: label)
+        } else {
+            PhotosPicker(selection: $selection, maxSelectionCount: nil, matching: .images, label: label)
+        }
+    }
+}
+
 private struct PhotosButton: View {
     let model: AppModel
     @State private var picked: [PhotosPickerItem] = []
 
     var body: some View {
-        PhotosPicker(selection: $picked, maxSelectionCount: nil, matching: .images, photoLibrary: .shared()) {
+        LibraryPhotosPicker(selection: $picked, usesLibrary: model.findsSqueezed) {
             Label("Choose photos", systemImage: "photo.on.rectangle.angled")
                 .labelStyle(.iconOnly)
         }
