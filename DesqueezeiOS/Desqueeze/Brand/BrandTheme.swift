@@ -31,6 +31,10 @@ enum Brand {
     /// cannot be mistaken for anything else.
     static let error   = Color(hex: 0xE63E2D)
 
+    /// How much of the safelight red a close control's glass takes: a trace,
+    /// enough to read as the way out without turning the control red.
+    static let closeTint = 0.16
+
     // Derived steps, kept to blends of the ground so the palette stays closed.
     /// One step up from the ground, for raised rows and bars.
     static let groundRaised = Color(hex: 0x26332E)

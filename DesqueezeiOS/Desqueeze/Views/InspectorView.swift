@@ -69,7 +69,7 @@ struct InspectorView: View {
                 control("Actual pixels") { command = .actualPixels } label: {
                     Text("1:1").font(Brand.sans(15, weight: .medium))
                 }
-                control("Close") { dismiss() } label: {
+                control("Close", tint: Brand.error.opacity(Brand.closeTint)) { dismiss() } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .medium))
                 }
@@ -80,7 +80,7 @@ struct InspectorView: View {
         }
     }
 
-    private func control<Label: View>(_ name: String, action: @escaping () -> Void,
+    private func control<Label: View>(_ name: String, tint: Color? = nil, action: @escaping () -> Void,
                                       @ViewBuilder label: () -> Label) -> some View {
         Button(action: action) {
             label()
@@ -88,7 +88,7 @@ struct InspectorView: View {
                 .contentShape(Circle())
         }
         .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .circle)
+        .glassEffect(tint.map { Glass.regular.tint($0).interactive() } ?? .regular.interactive(), in: .circle)
         .accessibilityLabel(name)
     }
 }

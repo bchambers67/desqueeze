@@ -119,4 +119,45 @@ struct BatchQueueTests {
         #expect(shelf.saved.map(\.name) == ["a_desqueeze_2_00x.jpg", "c_desqueeze_2_00x.jpg"])
         #expect(queue.items.map(\.state) == [.done, .done])
     }
+
+    @Test("only selected photos are saved; the rest stay queued")
+    func savesSelection() async {
+        let queue = queue(), shelf = Shelf()
+        queue.add(name: "a.jpg") { self.photo }
+        queue.add(name: "b.jpg") { self.photo }
+        queue.setSelected(false, for: queue.items[0].id)
+
+        await queue.run(squeeze: Squeeze(factor: 2.0), saving: shelf.save)
+
+        #expect(shelf.saved.map(\.name) == ["b_desqueeze_2_00x.jpg"])
+        #expect(queue.items.map(\.state) == [.waiting, .done])
+    }
+
+    @Test("a new factor goes to the selected photos, and unselected ones keep what they had")
+    func appliesToSelection() {
+        let queue = queue()
+        queue.add(name: "a.jpg") { self.photo }
+        queue.add(name: "b.jpg") { self.photo }
+        queue.add(name: "c.jpg") { self.photo }
+        queue.setSqueeze(Squeeze(factor: 1.33), for: queue.items[1].id)
+        queue.setSelected(false, for: queue.items[1].id)
+        queue.setSelected(false, for: queue.items[2].id)
+
+        queue.apply(Squeeze(factor: 1.75), replacing: Squeeze(factor: 2.0))
+
+        // a is selected: new factor. b keeps its own. c followed the old batch factor.
+        #expect(queue.items.map { $0.squeeze?.factor } == [1.75, 1.33, 2.0])
+    }
+
+    @Test("selection can be set for all at once and counted")
+    func selectAll() {
+        let queue = queue()
+        queue.add(name: "a.jpg") { self.photo }
+        queue.add(name: "b.jpg") { self.photo }
+        #expect(queue.selectedCount == 2)
+        queue.selectAll(false)
+        #expect(queue.selectedCount == 0)
+        queue.selectAll(true)
+        #expect(queue.selectedCount == 2)
+    }
 }

@@ -365,9 +365,16 @@ final class AppModel {
     }
 
     /// A factor from the slider. On a stop point it is that preset; anywhere
-    /// else it is a custom factor.
+    /// else it is a custom factor. With a batch open it goes to the selected
+    /// photos, each of which may have had a different one before.
     func use(factor: Double) async {
         guard abs(factor - session.squeeze.factor) > 0.001 else { return }
+        let before = session.squeeze
+        await setSessionFactor(factor)
+        if mode == .batch { batch.apply(session.squeeze, replacing: before) }
+    }
+
+    private func setSessionFactor(_ factor: Double) async {
         let onStop = SqueezePreset.selectable.first { preset in
             preset.factor.map { abs($0 - factor) < 0.005 } ?? false
         }
@@ -376,6 +383,34 @@ final class AppModel {
         } else {
             await session.type(String(format: "%.2f", factor))
         }
+    }
+
+    // MARK: - Selection in a batch
+
+    /// The factor every selected photo shares, or `nil` when they differ or
+    /// none is selected.
+    var selectionFactor: Double? {
+        let chosen = batch.items.filter(\.isSelected)
+            .map { ($0.squeeze ?? session.squeeze).factor }
+        guard let first = chosen.first, chosen.allSatisfy({ abs($0 - first) < 0.005 }) else { return nil }
+        return first
+    }
+
+    func toggleSelected(_ id: Batch.Item.ID) {
+        guard let item = batch.items.first(where: { $0.id == id }) else { return }
+        batch.setSelected(!item.isSelected, for: id)
+        Task { await showSelectionFactor() }
+    }
+
+    func selectAll(_ selected: Bool) {
+        batch.selectAll(selected)
+        Task { await showSelectionFactor() }
+    }
+
+    /// Brings the slider to what the selection shares, without changing any photo.
+    private func showSelectionFactor() async {
+        guard let shared = selectionFactor, abs(shared - session.squeeze.factor) > 0.001 else { return }
+        await setSessionFactor(shared)
     }
 
     /// Runs one output action at a time, and says so while it does.
@@ -446,9 +481,9 @@ final class AppModel {
             learn(from: libraryIDs[item.id], factor: (item.squeeze ?? session.squeeze).factor)
         }
         remember(batch.items.filter { $0.state == .done }.compactMap { libraryIDs[$0.id] })
-        let failed = batch.items.count - batch.finishedCount
+        let failed = batch.items.count(where: { if case .failed = $0.state { true } else { false } })
         notice = failed == 0
             ? Notice(text: "\(batch.finishedCount) saved to your library.", isError: false)
-            : Notice(text: "\(failed) of \(batch.items.count) could not be saved. Run again to retry them.", isError: true)
+            : Notice(text: "\(failed) could not be saved. Run again to retry them.", isError: true)
     }
 }
