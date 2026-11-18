@@ -1,6 +1,7 @@
 import DesqueezeCore
 import PhotosUI
 import SwiftUI
+import UIKit
 
 typealias Session = EditorSession<CoreImageRenderer>
 typealias Batch = BatchQueue<CoreImageRenderer>
@@ -252,6 +253,17 @@ final class AppModel {
         }
     }
 
+    private var scanTask: Task<(found: [RecentScanner.Found], ordinary: [String], tally: RecentScanner.Tally), Never>?
+
+    /// Called when the app stops being the one in front. A scan in the middle of
+    /// reading the photo library must not be caught there when the system
+    /// suspends the app: a process suspended while it holds the library's files
+    /// open is ended by the system (exception code 0xDEAD10CC). The scan stops
+    /// at the next photo and keeps what it had.
+    func pauseBackgroundWork() {
+        scanTask?.cancel()
+    }
+
     /// Looks for squeezed photos, when that is switched on. Left to itself it
     /// waits until nothing is open; asked for by hand it runs regardless.
     func scanRecent(askedFor: Bool = false) async {
@@ -263,9 +275,12 @@ final class AppModel {
             if notice?.isBusy == true { notice = nil }
         }
         let done = dealtWith, passedOver = foundOrdinary, learned = corrections
-        let result = await Task.detached(priority: .utility) {
+        let task = Task.detached(priority: .utility) {
             await RecentScanner.scan(dealtWith: done, passedOver: passedOver, corrections: learned)
-        }.value
+        }
+        scanTask = task
+        let result = await task.value
+        scanTask = nil
         rememberOrdinary(result.ordinary)
         found = result.found
         lastTally = result.tally
@@ -451,7 +466,13 @@ final class AppModel {
     func perform(_ action: @MainActor () async -> Void) async {
         guard !isWorking else { return }
         isWorking = true
-        defer { isWorking = false }
+        // A save under way when the app leaves the front is allowed to finish
+        // rather than being frozen half-way through writing to the library.
+        let assertion = BackgroundAssertion("StillScope output")
+        defer {
+            assertion.end()
+            isWorking = false
+        }
         await action()
     }
 
@@ -519,5 +540,22 @@ final class AppModel {
         notice = failed == 0
             ? Notice(text: "\(batch.finishedCount) saved to your library.", isError: false)
             : Notice(text: "\(failed) could not be saved. Run again to retry them.", isError: true)
+    }
+}
+
+/// Asks the system for time to finish a piece of work after the app leaves
+/// the front, and gives it back when the work is done or time runs out.
+@MainActor
+final class BackgroundAssertion {
+    private var id = UIBackgroundTaskIdentifier.invalid
+
+    init(_ name: String) {
+        id = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in self?.end() }
+    }
+
+    func end() {
+        guard id != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(id)
+        id = .invalid
     }
 }
