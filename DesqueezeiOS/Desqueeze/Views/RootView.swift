@@ -1,3 +1,4 @@
+import DesqueezeCore
 import SwiftUI
 
 /// Root layout: the photograph fills the screen, and the controls float over
@@ -95,6 +96,9 @@ struct RootView: View {
         .sheet(item: $model.sharedFile) { file in
             ActivitySheet(url: file.url)
         }
+        .sheet(item: Binding(get: { model.welcome.map(WelcomeItem.init) }, set: { if $0 == nil { model.finishWelcome() } })) { item in
+            WelcomeFlow(plan: item.plan, version: AppModel.version) { model.finishWelcome() }
+        }
         .sheet(isPresented: $model.isShowingSettings) {
             SettingsSheet(model: model)
         }
@@ -107,4 +111,10 @@ struct RootView: View {
         case .batch:  BatchPane(model: model)
         }
     }
+}
+
+/// Gives the welcome plan an identity so a sheet can present it.
+private struct WelcomeItem: Identifiable, Equatable {
+    let plan: WelcomePlan
+    var id: String { "\(plan.showsWhatsNew)-\(plan.showsTour)" }
 }

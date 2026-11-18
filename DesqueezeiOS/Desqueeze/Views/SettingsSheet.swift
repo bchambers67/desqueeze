@@ -41,6 +41,10 @@ struct SettingsSheet: View {
                         note: "Checks the photos you recently added or took for photos shot through an anamorphic lens that have not been corrected, and offers to queue them. It goes by the lens the camera recorded, by the shape of faces, text and bodies, by the direction of fine detail, and by photos you have already corrected from the same session. Your photos stay on this device.") {
                     Toggle("Find squeezed photos", isOn: $model.findsSqueezed)
                 }
+
+                section("HELP", note: "") {
+                    Button("What's new and the tour") { model.replayWelcome() }
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
@@ -61,10 +65,12 @@ struct SettingsSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             SectionLabel(text: title)
             content()
-            Text(note)
-                .font(Brand.sans(12))
-                .foregroundStyle(Brand.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            if !note.isEmpty {
+                Text(note)
+                    .font(Brand.sans(12))
+                    .foregroundStyle(Brand.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }
