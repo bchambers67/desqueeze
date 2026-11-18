@@ -72,7 +72,7 @@ struct PreviewPane: View {
                 Rectangle().stroke(Brand.secondary, lineWidth: 1).frame(width: 68, height: 50)
             }
 
-            PhotosPicker(selection: $picked, maxSelectionCount: nil, matching: .images, photoLibrary: .shared()) {
+            LibraryPhotosPicker(selection: $picked, usesLibrary: model.findsSqueezed) {
                 Text("CHOOSE PHOTOS")
                     .font(Brand.sans(12, weight: .medium))
                     .tracking(Brand.tracking(Brand.trackLabel, at: 12))
