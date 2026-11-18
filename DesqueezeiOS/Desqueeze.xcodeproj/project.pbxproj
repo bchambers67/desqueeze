@@ -36,6 +36,7 @@
 		CA4FC4FA926B326EF34F029A /* QuickEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C568F2B94ED416E2ABB0F9A4 /* QuickEditor.swift */; };
 		CACA65BDF3CCEBF968A5A96D /* BrandTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75D6210A0C9331BB3D874A7B /* BrandTheme.swift */; };
 		D4C9C331B2E07385054A7BC3 /* QuickEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C568F2B94ED416E2ABB0F9A4 /* QuickEditor.swift */; };
+		D6C8C521A7BF878B7F48BAE3 /* WelcomeFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2BEA50BED89A955C51DF376 /* WelcomeFlow.swift */; };
 		D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6795F82E61A2E6B03DFFCD1C /* RootView.swift */; };
 		DA6317652C69FD33317B04B8 /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49221120156BD24ACA6241E1 /* PhotoLibraryWriter.swift */; };
 		DFF037DCD3D3EC346FD0725E /* PreviewPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 577BC15846CD67CA3BFE4338 /* PreviewPane.swift */; };
@@ -103,6 +104,7 @@
 		AE130BDC3316B74D9F430B59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C2144583C39D4A7834711CEE /* PhotoEditingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoEditingViewController.swift; sourceTree = "<group>"; };
 		C568F2B94ED416E2ABB0F9A4 /* QuickEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEditor.swift; sourceTree = "<group>"; };
+		E2BEA50BED89A955C51DF376 /* WelcomeFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeFlow.swift; sourceTree = "<group>"; };
 		EAA04F13474329D8DAE86C26 /* FactorSlider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FactorSlider.swift; sourceTree = "<group>"; };
 		EF3748222B6B0F600F58AC6A /* PhotoEdit.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PhotoEdit.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5650F65F933ADEFD15FD877 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 				C568F2B94ED416E2ABB0F9A4 /* QuickEditor.swift */,
 				6795F82E61A2E6B03DFFCD1C /* RootView.swift */,
 				9528DFDFC0EA8318CB537B2C /* SettingsSheet.swift */,
+				E2BEA50BED89A955C51DF376 /* WelcomeFlow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -376,6 +379,7 @@
 				47F3FBB91244760560932FBB /* QuickEditor.swift in Sources */,
 				D99155877A5B6F4DF6120C26 /* RootView.swift in Sources */,
 				93DA51FDFE1ACF64BA681FD6 /* SettingsSheet.swift in Sources */,
+				D6C8C521A7BF878B7F48BAE3 /* WelcomeFlow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

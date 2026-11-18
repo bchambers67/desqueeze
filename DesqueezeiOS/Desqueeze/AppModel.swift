@@ -116,6 +116,17 @@ final class AppModel {
     /// Whether there is anything to act on: an open photo or a queued batch.
     var hasContent: Bool { session.hasPhoto || !batch.items.isEmpty }
 
+    /// What the welcome shows right now, or `nil` when it is not on screen.
+    var welcome: WelcomePlan?
+
+    static let seenVersionKey = "welcome.seenVersion"
+    static let tourSeenKey = "welcome.tourSeen"
+
+    /// The version of the app that is running.
+    static var version: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0"
+    }
+
     init() {
         let renderer = CoreImageRenderer()
         session = Session(renderer: renderer)
@@ -125,6 +136,29 @@ final class AppModel {
         matteSize = UserDefaults.standard.string(forKey: Self.matteSizeKey).flatMap(MatteSize.init) ?? .medium
         findsSqueezed = UserDefaults.standard.bool(forKey: Self.findKey)
         applyMatte()
+        let plan = WelcomePlan.forLaunch(
+            version: Self.version,
+            lastSeenVersion: UserDefaults.standard.string(forKey: Self.seenVersionKey),
+            tourSeen: UserDefaults.standard.bool(forKey: Self.tourSeenKey))
+        welcome = plan.isEmpty ? nil : plan
+    }
+
+    /// Closing the welcome, finished or skipped, means it is not shown again
+    /// for this version, and the tour not at all.
+    func finishWelcome() {
+        UserDefaults.standard.set(Self.version, forKey: Self.seenVersionKey)
+        UserDefaults.standard.set(true, forKey: Self.tourSeenKey)
+        welcome = nil
+    }
+
+    /// From Settings: show what is new and the tour again.
+    func replayWelcome() {
+        isShowingSettings = false
+        Task {
+            // Let the settings sheet leave first; two sheets cannot trade places at once.
+            try? await Task.sleep(for: .milliseconds(450))
+            welcome = .everything
+        }
     }
 
     // MARK: - Finding squeezed photos
