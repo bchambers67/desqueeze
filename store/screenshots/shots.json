@@ -1,0 +1,52 @@
+{
+  "devices": {
+    "iphone": {
+      "label": "iPhone 6.9-inch display (required)", "size": [1320, 2868],
+      "shots": [
+        {"name": "empty",    "caption": "Correct anamorphic photos in a tap"},
+        {"name": "factor",   "caption": "Dial the squeeze to your lens"},
+        {"name": "photo",    "caption": "Live preview, true proportions"},
+        {"name": "inspect",  "caption": "Check detail at 1:1"},
+        {"name": "batch",    "caption": "Many photos, one go, or pick which"},
+        {"name": "detected", "caption": "Finds squeezed photos in your library"}
+      ]
+    },
+    "ipad": {
+      "label": "iPad 13-inch display (required if iPad is supported)", "size": [2752, 2064],
+      "shots": [
+        {"name": "photo",    "caption": "A bigger canvas for every correction"},
+        {"name": "factor",   "caption": "Dial the squeeze to your lens"},
+        {"name": "batch",    "caption": "Many photos, one go, or pick which"},
+        {"name": "inspect",  "caption": "Check detail at 1:1"}
+      ]
+    },
+    "duo-open-landscape": {
+      "label": "iPhone Duo, inner display, landscape", "size": [2853, 2007],
+      "shots": [
+        {"name": "photo",   "caption": "Made for the open Duo"},
+        {"name": "batch",   "caption": "Controls stay at the edge, the slider stays in reach"}
+      ]
+    },
+    "duo-open-portrait": {
+      "label": "iPhone Duo, inner display, portrait", "size": [2007, 2853],
+      "shots": [
+        {"name": "photo",   "caption": "Made for the open Duo"},
+        {"name": "factor",  "caption": "Dial the squeeze to your lens"}
+      ]
+    },
+    "duo-folded": {
+      "label": "iPhone Duo, outer display, portrait", "size": [1398, 2034],
+      "shots": [
+        {"name": "photo",   "caption": "Folded, it still fits your pocket and your workflow"},
+        {"name": "factor",  "caption": "Dial the squeeze to your lens"}
+      ]
+    },
+    "mac": {
+      "label": "Mac App Store, 16:10", "size": [2880, 1800],
+      "shots": [
+        {"name": "photo",   "caption": "Anamorphic correction on your Mac"},
+        {"name": "batch",   "caption": "Drop several photos, correct them all"}
+      ]
+    }
+  }
+}
