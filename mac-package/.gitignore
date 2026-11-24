@@ -1,0 +1,10 @@
+samples/*
+!samples/originals/
+samples/originals/*
+!samples/originals/.gitkeep
+captures/
+output/
+fastlane/screenshots/
+fastlane/report.xml
+*.p8
+__pycache__/
