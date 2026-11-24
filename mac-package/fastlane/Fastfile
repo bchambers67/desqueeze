@@ -1,0 +1,47 @@
+# Uploads listing text and screenshots to App Store Connect. It never submits
+# for review and never touches price or availability.
+#
+# Needs an App Store Connect API key (App Store Connect > Users and Access >
+# Integrations). Set, in the shell only, never in a file:
+#   ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH (path to the AuthKey_XXXX.p8)
+
+default_platform(:ios)
+
+def asc_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH"),
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc "Upload listing text only"
+  lane :metadata do
+    deliver(
+      api_key: asc_key,
+      metadata_path: "./fastlane/metadata",
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false
+    )
+  end
+
+  desc "Upload screenshots only (from fastlane/screenshots/en-US/<device>/)"
+  lane :screenshots do
+    deliver(
+      api_key: asc_key,
+      screenshots_path: "./fastlane/screenshots",
+      skip_binary_upload: true,
+      skip_metadata: true,
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true
+    )
+  end
+end

@@ -1,0 +1,26 @@
+Photographs shot through an anamorphic lens come out squeezed. StillScope stretches them back
+to their true proportions, so the frame you saw is the frame you keep.
+
+**Live correction.** Drag the factor slider and the preview follows at once. It snaps to the
+common lens squeezes, and holding between two of them lets you fine-tune.
+
+**Look closely.** Tap the photo to inspect it at 1:1, with pinch, pan and double-tap zoom.
+
+**Find the squeezed ones for you.** Switch on Find squeezed photos and StillScope looks through
+the photos you recently added or took, reading the lens the camera recorded, the shape of faces,
+text and people, and the photos you have already corrected from the same session. It offers
+to queue the ones that look squeezed. Everything happens on your device.
+
+**One photo or a whole shoot.** Open one photo, or as many as you like. Each can follow one
+factor, or take its own. Pick which photos to correct, and change the factor for all of the
+selected ones at once.
+
+**Keeps what the camera recorded.** Capture metadata travels with every saved photo. Add a thin
+white matte, small or medium, if you want a border.
+
+**Works where you do.** Use StillScope from the Share sheet in other apps, or edit directly
+inside Photos. It is built for iPhone, iPad and iPhone Duo: on an open Duo held sideways the
+controls sit at the edge and the factor slider stays on screen.
+
+**Private.** StillScope does not collect data, show ads or track you. Photos are processed on
+your device.

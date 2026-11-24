@@ -7,7 +7,7 @@ Character limits are Apple's. Counts are included so nothing is cut off.
 | App name | StillScope | 30 (10) |
 | Subtitle | Anamorphic de-squeeze | 30 (21) |
 | Promotional text | Shot through an anamorphic lens? StillScope widens your stills to their true proportions, live, and finds the squeezed photos in your library for you. | 170 (151) |
-| Keywords | anamorphic,desqueeze,de-squeeze,squeeze,widescreen,lens,cinema,stretch,aspect,batch,raw,heic | 100 (94) |
+| Keywords | anamorphic,desqueeze,de-squeeze,squeeze,widescreen,lens,cinema,stretch,aspect,batch,raw,heic | 100 (92) |
 | Primary category | Photo & Video | |
 | Secondary category | Graphics & Design | optional |
 | Copyright | © 2026 Chambers & Light LLC | |

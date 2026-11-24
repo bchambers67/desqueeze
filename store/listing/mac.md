@@ -11,7 +11,7 @@ version text. See the checklist for the items it still needs before it can be su
 | App name | StillScope | 30 |
 | Subtitle | Anamorphic de-squeeze | 30 |
 | Promotional text | Shot through an anamorphic lens? Drop your photos on StillScope and widen them to their true proportions, one at a time or several at once. | 170 (150) |
-| Keywords | anamorphic,desqueeze,de-squeeze,squeeze,widescreen,lens,cinema,stretch,aspect,batch,raw,heic | 100 (94) |
+| Keywords | anamorphic,desqueeze,de-squeeze,squeeze,widescreen,lens,cinema,stretch,aspect,batch,raw,heic | 100 (92) |
 | Primary category | Photography (already set in the project) | |
 | Copyright | © 2026 Chambers & Light LLC | |
 
