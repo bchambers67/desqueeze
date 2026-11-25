@@ -77,6 +77,9 @@ composed by `store/screenshots/compose.py`.
    $PWD/mac-package/samples/squeezed -shot <shot> -welcome.seenVersion 1.0 -welcome.tourSeen YES`.
    Devices and outputs (use the exact simulator names from `xcrun simctl list devices available`):
    - an iPhone 6.9-inch (Pro Max): `store/screenshots/captures/iphone/` (1320 x 2868)
+     Then `cp -R store/screenshots/captures/iphone store/screenshots/captures/iphone-medium`.
+     Apple's one required iPhone size is 1206 x 2622; it has the same proportions, so compose.py
+     scales the same captures to it.
    - an iPad 13-inch: `store/screenshots/captures/ipad/`, landscape (rotate the Simulator window
      with ⌘→ before capturing; `sips -g pixelWidth -g pixelHeight` must read 2752 x 2064)
    - iPhone Duo simulators, if Xcode has them: `duo-open-landscape` (2853 x 2007),
@@ -90,7 +93,10 @@ composed by `store/screenshots/compose.py`.
    status bar with the wrong time, placeholder or blank states, a notice chip, clipped controls,
    or anything that differs from how the real app looks. Fix the capture and repeat.
 7. Copy the approved outputs into `mac-package/fastlane/screenshots/en-US/` (fastlane picks the
-   device from the image size; give files an order prefix `01_`, `02_`, ...). Duo sizes are not
+   device from the image size; give files an order prefix `01_`, `02_`, ...). Copy both `iphone`
+   and `iphone-medium` outputs. If fastlane rejects or skips the 1206 x 2622 images, tell the owner
+   to upload `store/screenshots/output/iphone-medium/` by hand in App Store Connect; that size is
+   the required one. Duo sizes are not
    recognised by fastlane: leave them in `store/screenshots/output/` and tell the owner to upload
    those by hand if App Store Connect offers a Duo slot.
 8. Commit the debug-only screenshot mode in a pull request, `mac/screenshot-mode`. Do not commit

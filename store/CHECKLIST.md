@@ -11,9 +11,9 @@ this folder or in the app.
 - [x] Screenshot builder, captions and shot list: `screenshots/`
 - [ ] **you** Capture the screens in `screenshots/captures/SHOTLIST.md` on the current build, run
       `python3 compose.py`, and look at every output before uploading.
-- [ ] **you** Host the privacy policy at a public URL (chambersandlight.com is the obvious place)
+- [x] **you** Host the privacy policy at a public URL: https://chambersandlight.com/stillscope/privacy/
       and fill in the date and contact in it.
-- [ ] **you** Decide the support URL (a page, or a mailto is not accepted: it must be a web page).
+- [x] **you** Decide the support URL: https://chambersandlight.com/stillscope/support/
 - [ ] **you** Fill in the review contact (name, phone, email) in `listing/ios.md`.
 
 ## 2. App Store Connect, iOS app (you)
