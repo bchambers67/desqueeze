@@ -14,10 +14,19 @@ struct RootView: View {
     @Environment(\.displayScale) private var displayScale
     /// How far the canvas is rounded: only on a display with square corners.
     @State private var cornerRadius: CGFloat = 0
+    /// The window this is drawn in, once it is in one.
+    @State private var window: UIWindow?
+
+    /// The idiom of that window. For the moment at launch before the window
+    /// is known, the device's stands in, so the bar does not start on the
+    /// wrong edge and jump.
+    private var idiom: UIUserInterfaceIdiom {
+        window?.traitCollection.userInterfaceIdiom ?? UIDevice.current.userInterfaceIdiom
+    }
 
     var body: some View {
         GeometryReader { proxy in
-            let edge = BarEdge.resolve(for: proxy.size)
+            let edge = BarEdge.resolve(for: proxy.size, idiom: idiom)
             let bar = SideBar.metrics(trailingInset: proxy.safeAreaInsets.trailing)
             // Popped out on request over a bottom bar; always there beside
             // the side bar.
@@ -101,7 +110,13 @@ struct RootView: View {
         // the content's own frame, and the content's layout is untouched.
         .mask { RoundedRectangle(cornerRadius: cornerRadius, style: .continuous).ignoresSafeArea() }
         .background(Color.black.ignoresSafeArea())
-        .onGeometryChange(for: CGSize.self) { $0.size } action: { _ in cornerRadius = DisplayCorners.radius() }
+        .background {
+            WindowReader {
+                window = $0
+                cornerRadius = DisplayCorners.radius(in: $0)
+            }
+        }
+        .onGeometryChange(for: CGSize.self) { $0.size } action: { _ in cornerRadius = DisplayCorners.radius(in: window) }
         .animation(.smooth(duration: 0.25), value: cornerRadius)
         .environment(\.displayCornerRadius, cornerRadius)
         .preferredColorScheme(.dark)

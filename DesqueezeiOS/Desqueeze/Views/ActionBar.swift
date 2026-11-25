@@ -18,7 +18,7 @@ enum BarEdge {
     /// is at least `openDuoShortSide` points on its short side can only be an
     /// open Duo. Folded, its outer display is narrower than that.
     @MainActor
-    static func resolve(for size: CGSize, idiom: UIUserInterfaceIdiom = UIDevice.current.userInterfaceIdiom) -> BarEdge {
+    static func resolve(for size: CGSize, idiom: UIUserInterfaceIdiom) -> BarEdge {
         let isOpenDuo = idiom == .phone && min(size.width, size.height) >= openDuoShortSide
         return isOpenDuo && size.width > size.height ? .trailing : .bottom
     }

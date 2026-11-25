@@ -13,7 +13,8 @@ import UIKit
 /// Apple publishes no property for a display's own corner shape, so this goes
 /// by what is published: whether it is an iOS app running on a Mac, and, on
 /// iPad, whether the bottom edge needs room for a home indicator, which only
-/// rounded displays have.
+/// rounded displays have. All of it is asked of the window the canvas is in,
+/// not of the device or the app's first scene.
 @MainActor
 enum DisplayCorners {
     /// The corner of a macOS 26 window with toolbar controls, in points.
@@ -21,8 +22,8 @@ enum DisplayCorners {
 
     /// The radius to clip the canvas to now: the window's on a square-cornered
     /// display, none elsewhere.
-    static func radius() -> CGFloat {
-        guard isSquare() else { return 0 }
+    static func radius(in window: UIWindow?) -> CGFloat {
+        guard let window, isSquare(window) else { return 0 }
         // An iOS app on a Mac is drawn at 77% ("scaled to match iPad"), so a
         // point of the app is 0.77 of a Mac point. The window's radius is in
         // Mac points; in the app's own points it is larger.
@@ -31,15 +32,43 @@ enum DisplayCorners {
 
     private static let macScale: CGFloat = 0.77
 
-    private static func isSquare() -> Bool {
-        let scene = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first
+    private static func isSquare(_ window: UIWindow) -> Bool {
         if ProcessInfo.processInfo.isiOSAppOnMac {
             // A Mac window already has the system's corners. Only a full-screen
             // one fills the display with square ones.
-            return scene?.isFullScreen ?? false
+            return window.windowScene?.isFullScreen ?? false
         }
-        guard UIDevice.current.userInterfaceIdiom == .pad else { return false }
-        return (scene?.keyWindow?.safeAreaInsets.bottom ?? 1) == 0
+        guard window.traitCollection.userInterfaceIdiom == .pad else { return false }
+        return window.safeAreaInsets.bottom == 0
+    }
+}
+
+/// Reports the window a SwiftUI view is drawn in, and again if it moves to
+/// another. SwiftUI has no environment value for the window or its idiom.
+struct WindowReader: UIViewRepresentable {
+    let onChange: (UIWindow?) -> Void
+
+    func makeUIView(context: Context) -> Probe {
+        let probe = Probe()
+        probe.isUserInteractionEnabled = false
+        probe.onChange = onChange
+        return probe
+    }
+
+    func updateUIView(_ probe: Probe, context: Context) { probe.onChange = onChange }
+
+    final class Probe: UIView {
+        var onChange: ((UIWindow?) -> Void)?
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            // After the current pass: this can arrive while SwiftUI is still
+            // updating its views, when state must not change.
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                onChange?(window)
+            }
+        }
     }
 }
 
