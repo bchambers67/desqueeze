@@ -61,7 +61,7 @@ The macOS app has not been through any of this yet:
 - [ ] **you** Make sure the App ID `com.chambersandlight.stillscope` is enabled for macOS (Xcode's
       automatic signing does this), and create a Mac App Store distribution certificate and
       installer certificate (Xcode can do this under Signing).
-- [ ] Add a privacy manifest (`PrivacyInfo.xcprivacy`, no tracking, no collected data) to the
+- [x] Add a privacy manifest (`PrivacyInfo.xcprivacy`, no tracking, no collected data) to the
       Mac target; it has none.
 - [x] `ITSAppUsesNonExemptEncryption = NO` is in the Mac Info.plist, so uploads do not ask.
 - [ ] Confirm the sandbox entitlements: it has app-sandbox and user-selected read/write only,

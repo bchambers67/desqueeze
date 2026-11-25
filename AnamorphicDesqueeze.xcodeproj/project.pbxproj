@@ -15,6 +15,7 @@
 		CL000006 /* PreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100006 /* PreviewView.swift */; };
 		CL000007 /* ControlsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL100007 /* ControlsPanel.swift */; };
 		CL000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CL100008 /* Assets.xcassets */; };
+		CL000011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CL100011 /* PrivacyInfo.xcprivacy */; };
 		D3F766AD2FDD0B080094B480 /* SqueezeEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766AC2FDD0B080094B480 /* SqueezeEstimator.swift */; };
 		D3F766AF2FDD0D550094B480 /* BatchProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766AE2FDD0D550094B480 /* BatchProcessor.swift */; };
 		D3F766B12FDD0D750094B480 /* BatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F766B02FDD0D750094B480 /* BatchView.swift */; };
@@ -35,6 +36,7 @@
 		CL100008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		CL100009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CL100010 /* AnamorphicDesqueeze.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AnamorphicDesqueeze.entitlements; sourceTree = "<group>"; };
+		CL100011 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D3F766AC2FDD0B080094B480 /* SqueezeEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SqueezeEstimator.swift; sourceTree = "<group>"; };
 		D3F766AE2FDD0D550094B480 /* BatchProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchProcessor.swift; sourceTree = "<group>"; };
 		D3F766B02FDD0D750094B480 /* BatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatchView.swift; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 				CL100008 /* Assets.xcassets */,
 				CL100009 /* Info.plist */,
 				CL100010 /* AnamorphicDesqueeze.entitlements */,
+				CL100011 /* PrivacyInfo.xcprivacy */,
 				D3F766AC2FDD0B080094B480 /* SqueezeEstimator.swift */,
 				D3F766AE2FDD0D550094B480 /* BatchProcessor.swift */,
 				D3F766B02FDD0D750094B480 /* BatchView.swift */,
@@ -152,6 +155,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CL000008 /* Assets.xcassets in Resources */,
+				CL000011 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
