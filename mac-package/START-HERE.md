@@ -20,6 +20,9 @@ Read first: `CLAUDE.md` (repo rules), `store/CHECKLIST.md`, `store/README.md`.
   paste the API key or its variables. Use them only through the environment.
 - Do not invent facts about the app. If a screen or behaviour differs from the listing text in
   `store/listing/`, report it; do not change the text to fit without asking.
+- The working folder may hold the owner's other untracked files (for example a `Waist_level_camera/`
+  folder or Xcode Cloud settings). **Stage only the files you changed, by name.** Never `git add -A`
+  or `git add .`, and leave other untracked files alone.
 - If a step fails twice for the same reason, stop and report the cause. Do not loop.
 
 ## Phase 0. Preflight
