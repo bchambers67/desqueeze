@@ -142,6 +142,9 @@ final class AppModel {
             lastSeenVersion: UserDefaults.standard.string(forKey: Self.seenVersionKey),
             tourSeen: UserDefaults.standard.bool(forKey: Self.tourSeenKey))
         welcome = plan.isEmpty ? nil : plan
+        #if DEBUG
+        Task { await stageShot() }
+        #endif
     }
 
     /// Closing the welcome, finished or skipped, means it is not shown again
@@ -559,3 +562,45 @@ final class BackgroundAssertion {
         id = .invalid
     }
 }
+
+#if DEBUG
+/// Store screenshots. Debug builds only: `-shot-dir <folder of images>` and
+/// `-shot <empty|photo|factor|inspect|batch>` put the app in the state a
+/// screenshot needs, through the same paths a person would take.
+extension AppModel {
+    fileprivate func stageShot() async {
+        let defaults = UserDefaults.standard
+        guard let shot = defaults.string(forKey: "shot"), shot != "empty",
+              let folder = defaults.string(forKey: "shot-dir"),
+              let names = try? FileManager.default.contentsOfDirectory(atPath: folder)
+        else { return }
+        let files = names.sorted()
+            .map { URL(fileURLWithPath: folder).appendingPathComponent($0) }
+            .filter { ["jpg", "jpeg", "png", "heic", "tif", "tiff"].contains($0.pathExtension.lowercased()) }
+        guard let first = files.first else { return }
+
+        switch shot {
+        case "photo", "factor", "inspect":
+            await open(first)
+            await setSessionFactor(1.5)
+            isFactorPanelOpen = shot == "factor"
+            isInspecting = shot == "inspect"
+        case "batch":
+            await setSessionFactor(1.5)
+            for (index, file) in files.prefix(6).enumerated() {
+                let id = batch.add(name: file.lastPathComponent) { try Data(contentsOf: file) }
+                // The first four selected at the batch's factor; the rest left out, on their own.
+                if index >= 4 {
+                    batch.setSelected(false, for: id)
+                    batch.setSqueeze(Squeeze(factor: 1.33), for: id)
+                }
+                if let data = try? Data(contentsOf: file) {
+                    thumbnails[id] = await Thumbnailer.thumbnail(of: data, longestEdge: 600)
+                }
+            }
+        default:
+            break
+        }
+    }
+}
+#endif
