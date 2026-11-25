@@ -21,5 +21,7 @@ xcrun simctl terminate "$UDID" com.chambersandlight.stillscope 2>/dev/null || tr
 xcrun simctl launch "$UDID" com.chambersandlight.stillscope "$@" >/dev/null
 sleep "${SETTLE:-10}"
 mkdir -p "$OUT"
-xcrun simctl io "$UDID" screenshot "$OUT/$NAME.png"
+# An iPhone Duo has two screens, and simctl will not choose. SIM_DISPLAY names
+# one: 1 is the outer screen (folded), 3 the inner (open).
+xcrun simctl io "$UDID" screenshot ${SIM_DISPLAY:+--display="$SIM_DISPLAY"} "$OUT/$NAME.png"
 echo "$OUT/$NAME.png"
