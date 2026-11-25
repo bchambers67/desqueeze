@@ -66,11 +66,11 @@ StillScope needs no account and no login. To try it:
 
 Contact for review: [fill in: name, phone, email].
 
-## URLs (to supply)
+## URLs
 
-- Support URL: [fill in: a page with a contact route]
+- Support URL: https://chambersandlight.com/stillscope/support/
 - Marketing URL: [optional]
-- Privacy policy URL: [required; see ../privacy-policy.md for text to host]
+- Privacy policy URL: https://chambersandlight.com/stillscope/privacy/
 
 ## App Privacy answers
 

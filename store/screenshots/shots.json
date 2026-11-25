@@ -1,7 +1,18 @@
 {
   "devices": {
     "iphone": {
-      "label": "iPhone 6.9-inch display (required)", "size": [1320, 2868],
+      "label": "iPhone 6.9-inch display (accepted, not required)", "size": [1320, 2868],
+      "shots": [
+        {"name": "empty",    "caption": "Correct anamorphic photos in a tap"},
+        {"name": "factor",   "caption": "Dial the squeeze to your lens"},
+        {"name": "photo",    "caption": "Live preview, true proportions"},
+        {"name": "inspect",  "caption": "Check detail at 1:1"},
+        {"name": "batch",    "caption": "Many photos, one go, or pick which"},
+        {"name": "detected", "caption": "Finds squeezed photos in your library"}
+      ]
+    },
+    "iphone-medium": {
+      "label": "iPhone 6.3-inch display (required); reuses the iphone captures", "size": [1206, 2622],
       "shots": [
         {"name": "empty",    "caption": "Correct anamorphic photos in a tap"},
         {"name": "factor",   "caption": "Dial the squeeze to your lens"},
