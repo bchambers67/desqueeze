@@ -14,13 +14,18 @@ from PIL import Image, ImageDraw, ImageFont
 
 HERE = Path(__file__).parent
 PINE, PAPER, HALIDE = (0x1C, 0x27, 0x23), (0xEC, 0xEA, 0xE1), (0xC7, 0xD9, 0xCE)
-FONT = "/usr/share/fonts/opentype/inter/Inter-Medium.otf"
+# Inter where it is installed (Linux); on a Mac, Helvetica Neue Medium, the
+# face the app itself asks for first. (path, index within the file)
+FONTS = [("/usr/share/fonts/opentype/inter/Inter-Medium.otf", 0),
+         ("/System/Library/Fonts/HelveticaNeue.ttc", 10)]
 
 def font(size):
-    try:
-        return ImageFont.truetype(FONT, size)
-    except OSError:
-        return ImageFont.load_default()
+    for path, index in FONTS:
+        try:
+            return ImageFont.truetype(path, size, index=index)
+        except OSError:
+            continue
+    return ImageFont.load_default()
 
 def wrap(draw, text, fnt, width):
     lines, line = [], ""
