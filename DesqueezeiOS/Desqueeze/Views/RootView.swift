@@ -74,8 +74,12 @@ struct RootView: View {
                     }
                     .toolbar {
                         if edge == .bottom && !sideways {
+                            // A folded Duo keeps its status icons down the
+                            // trailing edge, and the system stacks the bar up
+                            // that edge, where every item fits.
                             BottomBarItems(model: model, panelShown: panelPopped,
-                                           folded: proxy.size.width < BottomBarItems.fullWidth)
+                                           folded: proxy.size.width < BottomBarItems.fullWidth
+                                               && proxy.safeAreaInsets.trailing == 0)
                         }
                     }
                     .toolbar(.hidden, for: .navigationBar)

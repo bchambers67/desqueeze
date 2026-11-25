@@ -34,9 +34,9 @@ enum BarEdge {
 struct BottomBarItems: ToolbarContent {
     let model: AppModel
     let panelShown: Bool
-    /// An iPhone's bar holds the factor and four icons before the system
-    /// starts hiding the trailing ones, Save first. There the queue's
-    /// actions fold into one menu, so the result's stay in view.
+    /// An iPhone's bar, laid out in a row, holds the factor and four icons
+    /// before the system starts hiding the trailing ones, Save first. There
+    /// the queue's actions fold into one menu, so the result's stay in view.
     let folded: Bool
 
     /// The narrowest bar that holds every item side by side.
