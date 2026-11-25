@@ -41,7 +41,10 @@ platform :ios do
       overwrite_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
-      force: true
+      force: true,
+      # Precheck cannot read in-app purchases with an API key, and stops the
+      # lane with an error after the upload has already succeeded.
+      precheck_include_in_app_purchases: false
     )
   end
 end
