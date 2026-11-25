@@ -34,15 +34,26 @@ enum BarEdge {
 struct BottomBarItems: ToolbarContent {
     let model: AppModel
     let panelShown: Bool
+    /// An iPhone's bar holds the factor and four icons before the system
+    /// starts hiding the trailing ones, Save first. There the queue's
+    /// actions fold into one menu, so the result's stay in view.
+    let folded: Bool
+
+    /// The narrowest bar that holds every item side by side.
+    static let fullWidth: CGFloat = 560
 
     var body: some ToolbarContent {
         // Grouped by what they act on: the queue, the correction, the result.
         // Icon items share a background; the factor is text, so it sits alone.
-        ToolbarItemGroup(placement: .bottomBar) {
-            PhotosButton(model: model)
-            if model.hasContent { ClearButton(model: model) }
-            if model.findsSqueezed { RescanButton(model: model) }
-            SettingsButton(model: model)
+        if folded {
+            ToolbarItem(placement: .bottomBar) { QueueMenu(model: model) }
+        } else {
+            ToolbarItemGroup(placement: .bottomBar) {
+                PhotosButton(model: model)
+                if model.hasContent { ClearButton(model: model) }
+                if model.findsSqueezed { RescanButton(model: model) }
+                SettingsButton(model: model)
+            }
         }
         ToolbarSpacer(.flexible, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
@@ -271,6 +282,63 @@ private struct PhotosButton: View {
                 await model.take(items)
                 picked = []
             }
+        }
+    }
+}
+
+/// The queue's actions in one menu, for a bar too narrow to show them apart.
+private struct QueueMenu: View {
+    let model: AppModel
+    @State private var isPicking = false
+    @State private var picked: [PhotosPickerItem] = []
+
+    var body: some View {
+        Menu {
+            Button { isPicking = true } label: {
+                Label("Choose photos", systemImage: "photo.on.rectangle.angled")
+            }
+            if model.hasContent {
+                Button { model.reset() } label: { Label("Clear", systemImage: "xmark.circle") }
+            }
+            if model.findsSqueezed {
+                Button { Task { await model.rescan() } } label: {
+                    Label("Check recent photos", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .disabled(model.isScanning)
+                Button { Task { await model.rescan(everything: true) } } label: {
+                    Label("Recheck every recent photo", systemImage: "arrow.clockwise.circle")
+                }
+                .disabled(model.isScanning)
+            }
+            Button { model.isShowingSettings = true } label: { Label("Settings", systemImage: "gearshape") }
+        } label: {
+            Label("Photos and settings", systemImage: "ellipsis").labelStyle(.iconOnly)
+        }
+        .disabled(model.isWorking)
+        .modifier(LibraryPicker(isPresented: $isPicking, selection: $picked, usesLibrary: model.findsSqueezed))
+        .onChange(of: picked) { _, items in
+            guard !items.isEmpty else { return }
+            Task {
+                await model.take(items)
+                picked = []
+            }
+        }
+    }
+}
+
+/// `LibraryPhotosPicker`, presented from somewhere other than its own button.
+private struct LibraryPicker: ViewModifier {
+    @Binding var isPresented: Bool
+    @Binding var selection: [PhotosPickerItem]
+    let usesLibrary: Bool
+
+    func body(content: Content) -> some View {
+        if usesLibrary {
+            content.photosPicker(isPresented: $isPresented, selection: $selection, maxSelectionCount: nil,
+                                 matching: .images, photoLibrary: .shared())
+        } else {
+            content.photosPicker(isPresented: $isPresented, selection: $selection, maxSelectionCount: nil,
+                                 matching: .images)
         }
     }
 }

@@ -73,7 +73,10 @@ struct RootView: View {
                         if sideways { LandscapeBar(model: model, open: model.isFactorPanelOpen) }
                     }
                     .toolbar {
-                        if edge == .bottom && !sideways { BottomBarItems(model: model, panelShown: panelPopped) }
+                        if edge == .bottom && !sideways {
+                            BottomBarItems(model: model, panelShown: panelPopped,
+                                           folded: proxy.size.width < BottomBarItems.fullWidth)
+                        }
                     }
                     .toolbar(.hidden, for: .navigationBar)
                     .animation(.smooth(duration: 0.3), value: edge)
